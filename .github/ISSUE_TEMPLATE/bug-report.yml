@@ -141,11 +141,11 @@ body:
         请确认您已经遵守所有必选项
         Please ensure you have obtained all needed options
       options:
-      - label: 您已搜索过 [Issue Tracker](https://github.com/FooIbar/EhViewer/issues)，没有找到类似内容 / I have searched on [Issue Tracker](https://github.com/FooIbar/EhViewer/issues), No duplicate or related open issue has been found
+      - label: 您已搜索过 [Issue Tracker](https://github.com/Hycnyl/EhViewer-Revived/issues)，没有找到类似内容 / I have searched on [Issue Tracker](https://github.com/Hycnyl/EhViewer-Revived/issues), No duplicate or related open issue has been found
         required: true
 
       - label: 您确保这个 Issue 只提及一个问题。如果您有多个问题报告，烦请发起多个 Issue / Ensure there is only one bug report in this issue. Please make mutiply issue for mutiply bugs
         required: true
 
-      - label: 您确保已使用最新 [CI 版本](https://github.com/FooIbar/EhViewer/actions)测试，并且该问题在最新 CI 版本中并未解决 / This bug have not solved in latest [CI version](https://github.com/FooIbar/EhViewer/actions)
+      - label: 您确保已使用最新[正式版本](https://github.com/Hycnyl/EhViewer-Revived/releases/latest)测试，该问题仍未解决 / This bug has not been solved in the latest [release](https://github.com/Hycnyl/EhViewer-Revived/releases/latest)
         required: true

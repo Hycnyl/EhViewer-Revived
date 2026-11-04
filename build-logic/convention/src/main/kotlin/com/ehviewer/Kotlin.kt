@@ -22,6 +22,9 @@ internal fun KotlinCommonCompilerOptions.configureKotlin() {
 }
 
 internal fun KotlinCommonCompilerOptions.configureKotlinCompose() {
+    // Preview UI dependencies may deprecate supported compatibility APIs. Keep
+    // those diagnostics visible; all other warnings still fail compilation.
+    freeCompilerArgs.add("-Xwarning-level=DEPRECATION:warning")
     optIn.addAll(
         "androidx.compose.animation.ExperimentalAnimationApi",
         "androidx.compose.animation.ExperimentalSharedTransitionApi",

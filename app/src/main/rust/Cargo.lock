@@ -876,7 +876,7 @@ dependencies = [
 [[package]]
 name = "tl"
 version = "0.7.8"
-source = "git+https://github.com/FooIbar/tl.git#13ed128e35ce04c4f16c41cb1e38347da3da0b46"
+source = "git+https://github.com/FooIbar/tl.git?rev=051705e41fcc140bcb6affcca687589333976296#051705e41fcc140bcb6affcca687589333976296"
 
 [[package]]
 name = "toml_datetime"

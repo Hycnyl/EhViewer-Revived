@@ -124,7 +124,11 @@ class EhApplication : Application(), SingletonImageLoader.Factory {
         }
         launchIO {
             EhTagDatabase.launchUpdate()
-            launch { EhDB }
+            launch {
+                // Touch the singleton to initialize the database on the IO dispatcher.
+                @Suppress("UNUSED_EXPRESSION")
+                EhDB
+            }
             launch { dataStateFlow.value }
             launch { OSUtils.totalMemory }
             launch {

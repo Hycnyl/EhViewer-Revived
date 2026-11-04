@@ -35,7 +35,7 @@ object AppUpdater {
             val releases = ghStatement("$API_URL/releases?per_page=30").executeAndParseAs<List<GithubRelease>>().filterNot { it.draft }
             val release = if (Settings.useCIUpdateChannel.value) {
                 val branch = ghStatement(API_URL).executeAndParseAs<GithubRepo>().defaultBranch
-                val workflowUrl = "$API_URL/actions/workflows/cache-rescue.yml/runs?branch=$branch&event=push&status=success&per_page=1"
+                val workflowUrl = "$API_URL/actions/workflows/build.yml/runs?branch=$branch&event=push&status=success&per_page=1"
                 val run = ghStatement(workflowUrl).executeAndParseAs<GithubWorkflowRuns>().workflowRuns.firstOrNull() ?: return null
                 releases.firstOrNull { it.targetCommitish == run.headSha } ?: return null
             } else {

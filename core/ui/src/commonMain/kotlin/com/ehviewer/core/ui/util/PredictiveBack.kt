@@ -38,8 +38,6 @@ val PredictiveBackEasing = CubicBezierEasing(0.1f, 0.1f, 0f, 1f)
  *         SDK >= 34 by userGesture progress
  *         else by animationSpec when finished
  */
-// Preserve the existing Flow cancellation semantics until gesture behavior is migrated.
-@Suppress("DEPRECATION")
 @Stable
 @Composable
 fun animateFloatMergePredictiveBackAsState(
@@ -84,7 +82,6 @@ fun animateFloatMergePredictiveBackAsState(
     return animatable.asState()
 }
 
-@Suppress("DEPRECATION")
 @Composable
 fun animateFloatMergeOneWayPredictiveBackAsState(
     enable: Boolean,
