@@ -84,6 +84,10 @@ jobs:
     needs: prepare
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    permissions:
+      # GitHub exposes draft releases only to identities with push access.
+      contents: write
+      actions: read
     strategy:
       fail-fast: false
       matrix:
