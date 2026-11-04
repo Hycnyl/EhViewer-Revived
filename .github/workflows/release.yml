@@ -11,6 +11,14 @@ on:
         description: 'Full source commit SHA used by Build APKs'
         required: true
         type: string
+      signed_blob:
+        description: 'Git blob SHA of the locally signed public release ZIP'
+        required: true
+        type: string
+      bundle_sha256:
+        description: 'SHA-256 of the signed public release ZIP'
+        required: true
+        type: string
 
 permissions:
   contents: read
@@ -26,7 +34,54 @@ env:
   SOURCE_COMMIT: ${{ inputs.source_commit }}
 
 jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          ref: ${{ inputs.source_commit }}
+      - uses: actions/setup-java@v6.1.0
+        with:
+          distribution: temurin
+          java-version: '21'
+      - uses: android-actions/setup-android@v4.0.4
+        with:
+          packages: 'platform-tools build-tools;37.0.0'
+      - name: Receive signed public APKs and populate draft
+        env:
+          SIGNED_BLOB: ${{ inputs.signed_blob }}
+          BUNDLE_SHA256: ${{ inputs.bundle_sha256 }}
+        run: |
+          python3 - <<'PY'
+          import base64, hashlib, io, json, os, re, subprocess, zipfile
+          from pathlib import Path
+          from tools.release import ABIS, version
+          sha, digest = os.environ['SIGNED_BLOB'], os.environ['BUNDLE_SHA256']
+          assert re.fullmatch(r'[0-9a-f]{40}', sha)
+          assert re.fullmatch(r'[0-9a-f]{64}', digest)
+          release = json.loads(subprocess.check_output(['gh', 'release', 'view', os.environ['TAG'], '--json', 'isDraft,targetCommitish']))
+          assert release['isDraft'] and release['targetCommitish'] == os.environ['SOURCE_COMMIT']
+          blob = json.loads(subprocess.check_output(['gh', 'api', f"repos/{os.environ['GITHUB_REPOSITORY']}/git/blobs/{sha}"]))
+          assert blob['encoding'] == 'base64'
+          data = base64.b64decode(blob['content'])
+          assert hashlib.sha256(data).hexdigest() == digest
+          assert hashlib.sha1(b'blob ' + str(len(data)).encode() + b'\0' + data).hexdigest() == sha
+          expected = {f'EhViewer-{version()[0]}-{abi}.apk' for abi in ABIS} | {'release-info.json', 'SHA256SUMS.txt'}
+          output = Path('delivery')
+          output.mkdir()
+          with zipfile.ZipFile(io.BytesIO(data)) as bundle:
+              assert set(bundle.namelist()) == expected and len(bundle.infolist()) == len(expected)
+              assert sum(item.file_size for item in bundle.infolist()) < 300_000_000
+              for name in expected:
+                  (output / name).write_bytes(bundle.read(name))
+          PY
+          python3 tools/release.py verify --input delivery
+          gh release upload "$TAG" delivery/* --clobber
+
   verify:
+    needs: prepare
     runs-on: ubuntu-latest
     timeout-minutes: 30
     strategy:
