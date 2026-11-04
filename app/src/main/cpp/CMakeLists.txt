@@ -58,6 +58,7 @@ ExternalProject_Add(
         nettle
         URL https://ftpmirror.gnu.org/nettle/nettle-3.10.2.tar.gz
         URL_MD5 b28bcbf6f045ff007940a9401673600d
+        DOWNLOAD_EXTRACT_TIMESTAMP FALSE
         CONFIGURE_COMMAND ${WSL} ${CONFIGURE_COMMAND}
         BUILD_COMMAND ${WSL} make -j4 libnettle.a
         INSTALL_COMMAND ""
