@@ -16,7 +16,11 @@ ACTIVITY = PACKAGE + "/com.hippo.ehviewer.ui.MainActivity"
 
 
 def adb(*args):
-    return subprocess.check_output(["adb", *args], stderr=subprocess.STDOUT)
+    result = subprocess.run(["adb", *args], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    if result.returncode:
+        print(result.stdout.decode(errors="replace"), flush=True)
+        result.check_returncode()
+    return result.stdout
 
 
 def hierarchy():
@@ -125,7 +129,7 @@ def exercise(args):
         if page_size != 16384:
             raise RuntimeError("API 36 verification must use the 16 KiB page-size image")
         print("PASS: Android 16 emulator uses 16 KiB pages")
-    adb("logcat", "-c")
+    adb("logcat", "-b", "main", "-b", "system", "-b", "crash", "-c")
     baseline = sorted(Path("baseline").glob("*universal.apk"))
     if api == 33:
         if [p.name for p in baseline] != ["EhViewer-1.17.8-universal.apk", "EhViewer-1.17.9-universal.apk"]:
