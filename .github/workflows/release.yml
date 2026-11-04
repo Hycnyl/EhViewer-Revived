@@ -150,9 +150,14 @@ jobs:
           api-level: ${{ matrix.api }}
           arch: x86_64
           target: ${{ matrix.api == 26 && 'default' || matrix.api == 36 && 'google_apis_ps16k' || 'google_apis' }}
+          ram-size: 4096M
+          heap-size: 512M
           disable-animations: true
-          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
-          script: python3 tools/smoke.py --apks delivery --output smoke
+          emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim -camera-back none
+          script: |
+            test '${{ matrix.api }}' != 26 || adb root
+            adb wait-for-device
+            python3 tools/smoke.py --apks delivery --output smoke
       - uses: actions/upload-artifact@v7.0.2
         if: always()
         with:

@@ -76,11 +76,12 @@ UI 模块保留 `allWarningsAsErrors`，仅用 `-Xwarning-level=DEPRECATION:warn
 
 ## 临时进度：Revived 初始化与 1.17.10 发布
 
-更新时间：2026-11-04 23:51 UTC。任务未完成，账号限额中断后恢复。
+更新时间：2026-11-04 23:54 UTC。任务未完成，账号限额中断后已恢复。
 
 - 已完成：从 1.17.8 独立建仓、继承用户文档/素材与许可、清除全部旧测试和开发杂项；14 个具体问题已获得维护者答复，规则与组件取舍见上文。
 - 已完成：工具链及组件升级；Telephoto 按维护者答复使用最高兼容的 0.19.0，不重构阅读器。Min 26、Target 36，版本 1.17.10 / 180085，包名与应用名保持不变。
 - 已完成：实际 APK 源码提交 `fccf9474b61d193f6916f3b891cf8af09008445d`，构建 [41860024403](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/41860024403) 的全部 17 个步骤成功结束，五种 APK 已本地 V2+V3 签名并通过静态校验。
 - 当前：`v1.17.10` Release 草稿已接收五个签名 APK、SHA256SUMS.txt、release-info.json。验证 [41864047560](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/41864047560) 的 API 33 完整迁移链、离线 CBZ 阅读与冷启动/恢复已通过；API 26 在关闭 Wi-Fi 的测试命令处以 137 中断，API 36 在读取 UI 层级文件时失败，实际 16 KiB 页大小检查通过。正在核查这两处环境/测试问题，尚未正式发布。
 - 当前：主分支已修正草稿读取权限、仅公开签名产物的 Git blob 交接，以及 GitHub 汇总状态滞后的来源校验。交接 blob `026d656805a1d8b70566856aef84f650de925054`，ZIP SHA-256 `97fe51e2eac8b943df58576f2e9f16794cc279db376bf1838602377f9aeb0b6a`，仅含公开发布文件；私钥仍在上文 0700 本地目录，未上传。
-- 下一步：核查三组模拟器日志并修复实际失败；通过后由 Actions 公开 Release，核对线上七个附件及迁移说明。清理 `/workspace/.ehviewer-revived-work` 中临时包、日志、脚本摘录和测试材料，保留私钥及开发工具；最后删除本临时章节。
+- 已定位并修正：API 26 的失败是系统 shell 缺少 CHANGE_WIFI_STATE 权限，测试设置先以 adb root 执行；API 36 的日志显示 lowmemorykiller 连续杀死系统、应用及 UI 自动化进程，模拟器显式配置 4096M RAM / 512M heap，并关闭快照。APK 和应用源码未改变。
+- 下一步：重跑三组模拟器验证；通过后由 Actions 公开 Release，核对线上七个附件及迁移说明。清理 `/workspace/.ehviewer-revived-work` 中临时包、日志、脚本摘录和测试材料，保留私钥及开发工具；最后删除本临时章节。
