@@ -118,7 +118,11 @@ def verify(directory, manifest, signed):
         run(str(sdk_tools / "zipalign"), "-c", "-P", "16", "4", str(apk))
         if signed:
             result = run(str(sdk_tools / "apksigner"), "verify", "--verbose", "--print-certs", str(apk)).decode()
-            for value in (f"Signer #1 certificate SHA-256 digest: {CERTIFICATE}", "Verified using v2 scheme (APK Signature Scheme v2): true", "Verified using v3 scheme (APK Signature Scheme v3): true"):
+            # Build Tools 37 labels this signer "V3.0 Signer" instead of "Signer #1".
+            certificates = re.findall(r"certificate SHA-256 digest: ([0-9a-f]{64})", result)
+            if certificates != [CERTIFICATE] or "Number of signers: 1" not in result:
+                raise RuntimeError(f"Release certificate verification failed: {filename}")
+            for value in ("Verified using v2 scheme (APK Signature Scheme v2): true", "Verified using v3 scheme (APK Signature Scheme v3): true"):
                 if value not in result:
                     raise RuntimeError(f"Release signing verification failed: {filename}")
             # Exercise verification at the minimum supported Android version too.
