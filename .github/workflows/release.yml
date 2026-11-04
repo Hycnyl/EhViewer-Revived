@@ -119,9 +119,20 @@ jobs:
           import json, subprocess, os
           from pathlib import Path
           info = json.loads(Path('delivery/release-info.json').read_text())
-          run = json.loads(subprocess.check_output(['gh', 'api', f"repos/{os.environ['GITHUB_REPOSITORY']}/actions/runs/{info['buildRunId']}"]))
-          assert run['head_sha'] == os.environ['SOURCE_COMMIT'] and run['conclusion'] == 'success'
+          endpoint = f"repos/{os.environ['GITHUB_REPOSITORY']}/actions/runs/{int(info['buildRunId'])}"
+          run = json.loads(subprocess.check_output(['gh', 'api', endpoint]))
+          assert run['head_sha'] == os.environ['SOURCE_COMMIT']
           assert run['path'] == '.github/workflows/build.yml'
+          assert run['conclusion'] in (None, 'success')
+          # The run/job summary can lag behind the completed step records.
+          jobs = json.loads(subprocess.check_output(['gh', 'api', endpoint + '/jobs?filter=latest']))['jobs']
+          assert len(jobs) == 1 and jobs[0]['name'] == 'build'
+          assert jobs[0]['head_sha'] == os.environ['SOURCE_COMMIT']
+          steps = jobs[0]['steps']
+          required = {'Check release metadata, Kotlin and formatting', 'Build all release architectures', 'Package unsigned APKs', 'Complete job'}
+          assert required <= {step['name'] for step in steps}
+          assert all(step['status'] == 'completed' and step['conclusion'] == 'success' for step in steps)
+          print('Verified source commit and every completed build step, including job finalization')
           PY
       - name: Download migration baseline
         if: matrix.api == 33
