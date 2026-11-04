@@ -36,7 +36,9 @@ def tap_text(text):
 
 def prepare_guest():
     # Dismiss the normal first-run download-location warning, then use guest mode.
-    if tap_text("Open settings"):
+    for _ in range(3):
+        if not tap_text("Open settings"):
+            break
         adb("shell", "input", "keyevent", "KEYCODE_BACK")
         time.sleep(2)
     tap_text("Guest mode")
@@ -46,7 +48,7 @@ def offline_reader(output):
     def chunk(kind, data):
         return struct.pack(">I", len(data)) + kind + data + struct.pack(">I", zlib.crc32(kind + data) & 0xFFFFFFFF)
 
-    color = bytes((34, 197, 160))
+    color = bytes((0, 255, 0))
     png = b"\x89PNG\r\n\x1a\n" + chunk(b"IHDR", struct.pack(">IIBBBBB", 320, 480, 8, 2, 0, 0, 0))
     png += chunk(b"IDAT", zlib.compress((b"\0" + color * 320) * 480)) + chunk(b"IEND", b"")
     archive = output / "reader-smoke.cbz"
@@ -129,7 +131,7 @@ def exercise(args):
         if [p.name for p in baseline] != ["EhViewer-1.17.8-universal.apk", "EhViewer-1.17.9-universal.apk"]:
             raise RuntimeError("Both migration baselines are required on API 33")
         for old in baseline:
-            adb("install", "-r", str(old))
+            adb("install", "-r", "-g", str(old))
             launch(args.output, old.stem)
             prepare_guest()
     apk = list(args.apks.glob("*universal.apk"))

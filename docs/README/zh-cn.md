@@ -149,7 +149,7 @@
 
 EhViewer Revived 的软件名仍为 **EhViewer**，包名仍为 `moe.hycnyl.ehviewer`。最低 Android 8.0（Min SDK 26），Target SDK 36，使用新密钥的 V2/V3 签名。提供 universal 和四种 ABI 安装包。
 
-**迁移：** Hycnyl EhViewer 1.17.9 可直接覆盖安装。1.17.8 及更早版本的 Android 13+ 用户，请先升级到[旧仓库的 1.17.9](https://github.com/Hycnyl/EhViewer/releases/tag/v1.17.9)，再安装 Revived。Android 8–12 用户需先导出备份，再卸载旧版、安装 Revived 并导入。卸载会清除私有阅读缓存，需要保留的缓存页面请先导出；确认备份可用后再卸载。
+**迁移：** Hycnyl EhViewer 1.17.9 可直接覆盖安装。1.17.8 及更早版本的 Android 13+ 用户，请先升级到[旧仓库的 1.17.9](https://github.com/Hycnyl/EhViewer/releases/tag/v1.17.9)，再安装 Revived。Android 8–12 用户需先导出备份，再卸载旧版、安装 Revived 并导入。卸载前，请将备份、下载和缓存导出文件复制到应用私有目录（如 Android/data/moe.hycnyl.ehviewer）之外，例如公共文件夹或电脑。卸载会删除私有文件；确认备份可用后再卸载，安装后重新授权下载目录并导入备份。
 
 <a href="https://github.com/Hycnyl/EhViewer-Revived/releases">
 <img alt="Get it on GitHub" src="https://github.com/Hycnyl/EhViewer-Art/blob/main/get-it-on-github.svg?raw=true" width="200px"/>

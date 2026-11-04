@@ -149,7 +149,7 @@
 
 EhViewer Revived のアプリ名は **EhViewer**、パッケージ名は `moe.hycnyl.ehviewer` のままです。Android 8.0 以降（Min SDK 26）、Target SDK 36、新しい鍵による V2/V3 署名を使用します。universal と4種類の ABI 別 APK を提供します。
 
-**移行：** Hycnyl EhViewer 1.17.9 は直接更新できます。1.17.8 以前を Android 13 以降で使っている場合は、まず[旧リポジトリの 1.17.9](https://github.com/Hycnyl/EhViewer/releases/tag/v1.17.9) に更新してから Revived をインストールしてください。Android 8–12 では、データをエクスポートし、旧版をアンインストールしてから Revived をインストールし、バックアップをインポートしてください。アンインストールすると非公開の閲覧キャッシュが削除されます。必要なキャッシュページを先に書き出し、バックアップを確認してからアンインストールしてください。
+**移行：** Hycnyl EhViewer 1.17.9 は直接更新できます。1.17.8 以前を Android 13 以降で使っている場合は、まず[旧リポジトリの 1.17.9](https://github.com/Hycnyl/EhViewer/releases/tag/v1.17.9) に更新してから Revived をインストールしてください。Android 8–12 では、データをエクスポートし、旧版をアンインストールしてから Revived をインストールし、バックアップをインポートしてください。アンインストール前に、バックアップ、ダウンロード済みファイル、書き出したキャッシュページをアプリ専用ディレクトリ（Android/data/moe.hycnyl.ehviewer を含む）の外側、例えば共有フォルダや PC にコピーしてください。専用ファイルはアンインストール時に削除されます。バックアップを確認し、インストール後にダウンロード先のアクセス権を再設定してインポートしてください。
 
 <a href="https://github.com/Hycnyl/EhViewer-Revived/releases">
 <img alt="Get it on GitHub" src="https://github.com/Hycnyl/EhViewer-Art/blob/main/get-it-on-github.svg?raw=true" width="200px"/>

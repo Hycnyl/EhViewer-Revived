@@ -56,8 +56,9 @@ set(CONFIGURE_COMMAND ./configure --disable-public-key --disable-dependency-trac
 )
 ExternalProject_Add(
         nettle
-        URL https://ftpmirror.gnu.org/nettle/nettle-3.10.2.tar.gz
-        URL_MD5 b28bcbf6f045ff007940a9401673600d
+        URL https://ftp.gnu.org/gnu/nettle/nettle-3.10.2.tar.gz
+            https://ftpmirror.gnu.org/nettle/nettle-3.10.2.tar.gz
+        URL_HASH SHA256=fe9ff51cb1f2abb5e65a6b8c10a92da0ab5ab6eaf26e7fc2b675c45f1fb519b5
         # Nettle ships pregenerated headers whose timestamp order must be preserved.
         DOWNLOAD_EXTRACT_TIMESTAMP TRUE
         CONFIGURE_COMMAND ${WSL} ${CONFIGURE_COMMAND}
