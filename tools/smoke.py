@@ -64,8 +64,7 @@ def offline_reader(output):
         width, height, pixel_format = struct.unpack_from("<III", raw)
         channels = 3 if pixel_format == 3 else 4
         pixels = raw[-width * height * channels:]
-        pattern = color if channels == 3 else color + (b"\xff" if pixel_format == 1 else b"\0")
-        if pixels.count(pattern) > width * height // 20:
+        if pixels.count(color) + pixels.count(color[::-1]) > width * height // 20:
             (output / "offline-reader.png").write_bytes(adb("exec-out", "screencap", "-p"))
             (output / "offline-reader.xml").write_bytes(hierarchy())
             adb("shell", "input", "keyevent", "KEYCODE_BACK")
@@ -119,6 +118,11 @@ def exercise(args):
     api = int(adb("shell", "getprop", "ro.build.version.sdk").strip())
     adb("shell", "svc", "wifi", "disable")
     adb("shell", "svc", "data", "disable")
+    if api == 36:
+        page_size = int(adb("shell", "getconf", "PAGE_SIZE").strip())
+        if page_size != 16384:
+            raise RuntimeError("API 36 verification must use the 16 KiB page-size image")
+        print("PASS: Android 16 emulator uses 16 KiB pages")
     adb("logcat", "-c")
     baseline = sorted(Path("baseline").glob("*universal.apk"))
     if api == 33:

@@ -12,7 +12,7 @@ diff --git a/libarchive/archive_time.c b/libarchive/archive_time.c
 index 3352c809..9289bf1e 100644
 --- a/libarchive/archive_time.c
 +++ b/libarchive/archive_time.c
-@@ -64,6 +64,7 @@ __archive_FILETIME_to_ntfs(const FILETIME* filetime)
+@@ -62,6 +62,7 @@ __archive_FILETIME_to_ntfs(const FILETIME* filetime)
  int64_t
  __archive_dos_to_unix(uint32_t dos_time)
  {
