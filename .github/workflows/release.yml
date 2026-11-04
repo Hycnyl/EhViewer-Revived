@@ -1,0 +1,113 @@
+name: Verify and publish release
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Signed draft release tag (v1.17.10)'
+        required: true
+        type: string
+      source_commit:
+        description: 'Full source commit SHA used by Build APKs'
+        required: true
+        type: string
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: release-${{ inputs.tag }}
+  cancel-in-progress: false
+
+env:
+  GH_TOKEN: ${{ github.token }}
+  TAG: ${{ inputs.tag }}
+  SOURCE_COMMIT: ${{ inputs.source_commit }}
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        api: [26, 33, 36]
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          ref: ${{ inputs.source_commit }}
+      - uses: actions/setup-java@v6.1.0
+        with:
+          distribution: temurin
+          java-version: '21'
+      - uses: android-actions/setup-android@v4.0.4
+        with:
+          packages: 'platform-tools build-tools;37.0.0'
+      - name: Download and verify signed draft
+        run: |
+          python3 - <<'PY'
+          import json, os, re, subprocess
+          tag, sha = os.environ['TAG'], os.environ['SOURCE_COMMIT']
+          assert re.fullmatch(r'v\d+\.\d+\.\d+', tag)
+          assert re.fullmatch(r'[0-9a-f]{40}', sha)
+          release = json.loads(subprocess.check_output(['gh', 'release', 'view', tag, '--json', 'isDraft,targetCommitish']))
+          assert release['isDraft'] and release['targetCommitish'] == sha
+          PY
+          gh release download "$TAG" --dir delivery
+          python3 tools/release.py verify --input delivery
+          python3 - <<'PY'
+          import json, subprocess, os
+          from pathlib import Path
+          info = json.loads(Path('delivery/release-info.json').read_text())
+          run = json.loads(subprocess.check_output(['gh', 'api', f"repos/{os.environ['GITHUB_REPOSITORY']}/actions/runs/{info['buildRunId']}"]))
+          assert run['head_sha'] == os.environ['SOURCE_COMMIT'] and run['conclusion'] == 'success'
+          assert run['path'] == '.github/workflows/build.yml'
+          PY
+      - name: Download migration baseline
+        if: matrix.api == 33
+        run: |
+          for version in v1.17.8 v1.17.9; do
+            gh release download "$version" --repo Hycnyl/EhViewer --pattern '*universal.apk' --dir baseline
+          done
+      - name: Enable emulator acceleration
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+      - uses: ReactiveCircus/android-emulator-runner@v2.38.0
+        with:
+          api-level: ${{ matrix.api }}
+          arch: x86_64
+          target: ${{ matrix.api == 26 && 'default' || 'google_apis' }}
+          disable-animations: true
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+          script: python3 tools/smoke.py --apks delivery --output smoke
+      - uses: actions/upload-artifact@v7.0.2
+        if: always()
+        with:
+          name: smoke-api-${{ matrix.api }}
+          path: smoke/
+          retention-days: 7
+
+  publish:
+    needs: verify
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          ref: ${{ inputs.source_commit }}
+      - uses: actions/setup-java@v6.1.0
+        with:
+          distribution: temurin
+          java-version: '21'
+      - uses: android-actions/setup-android@v4.0.4
+        with:
+          packages: 'platform-tools build-tools;37.0.0'
+      - name: Reverify and publish
+        run: |
+          gh release download "$TAG" --dir delivery
+          python3 tools/release.py verify --input delivery
+          gh release edit "$TAG" --draft=false --latest

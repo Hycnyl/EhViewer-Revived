@@ -1,0 +1,49 @@
+pluginManagement {
+    includeBuild("build-logic")
+    repositories {
+        google {
+            content {
+                includeGroupAndSubgroups("androidx")
+                includeGroupAndSubgroups("com.android")
+                includeGroupAndSubgroups("com.google")
+            }
+        }
+        mavenCentral()
+        gradlePluginPortal()
+    }
+}
+
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+        google {
+            content {
+                includeGroupAndSubgroups("androidx")
+                includeGroupAndSubgroups("com.android")
+                includeGroupAndSubgroups("com.google")
+            }
+        }
+        mavenCentral()
+    }
+}
+
+plugins {
+    id("com.android.settings") version "9.5.0"
+}
+
+android {
+    compileSdk = 37
+    minSdk = 26
+    targetSdk = 36
+    ndkVersion = "30.0.16248370"
+    buildToolsVersion = "37.0.0"
+}
+
+enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
+enableFeaturePreview("STABLE_CONFIGURATION_CACHE")
+rootProject.name = "EhViewer-Revived"
+include(":app")
+include(":core:common")
+include(":core:data")
+include(":core:i18n")
+include(":core:ui")

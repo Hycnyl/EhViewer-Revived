@@ -1,0 +1,10 @@
+pub mod api;
+pub mod archive;
+pub mod config;
+pub mod detail;
+pub mod fav;
+pub mod home;
+pub mod list;
+pub mod profile;
+pub mod torrent;
+mod utils;

@@ -1,0 +1,27 @@
+.gradle
+/local.properties
+.DS_Store
+build
+.cxx
+.kotlin
+*.iml
+.idea
+.vscode
+/captures
+
+# Local signing material and generated delivery files never belong in source.
+*.p12
+*.pfx
+*.jks
+*.keystore
+*.pk8
+*.key
+*.lineage
+credentials.json
+*.apk
+*.idsig
+__pycache__/
+*.pyc
+/delivery/
+
+/app/src/main/rust/target/
