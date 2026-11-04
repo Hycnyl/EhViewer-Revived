@@ -2,6 +2,8 @@
 
 本文件集中维护开发规则、经维护者确认的经验及构建入口。不要散建交付记录、验证报告或临时开发文档。测试结果放在 Actions 日志、Artifact 和 Release 说明中。每轮结束清理本轮生成的临时文件、过期安装包及临时测试材料。
 
+长程任务或包含大量子任务时，每完成一个阶段或关键节点，都须在本文件的临时进度章节记录已完成事项、当前状态、关键提交/Actions 链接和下一步，便于中断后恢复。任务全部完成后删除整个临时进度章节，仅保留本条持久规则；记录不得包含密钥或密码。
+
 ## 基线与发布
 
 - 功能源自 `Hycnyl/EhViewer` 的 `v1.17.8`，对应清理后的提交 `92923877ef671e33aa56f69688daa46af6e59ec6`；新仓库独立起始，不继承旧 Git 历史。四种语言 README 继承旧仓库最新的用户文档与完整素材引用，保留 LICENSE、NOTICE 和源码版权说明。
@@ -71,3 +73,14 @@ UI 模块保留 `allWarningsAsErrors`，仅用 `-Xwarning-level=DEPRECATION:warn
 发布验证使用 API 26、33、36 模拟器；API 33 执行 1.17.8 → 1.17.9 → Revived 的覆盖安装链，API 36 使用 google_apis_ps16k 镜像并核对实际页大小 16384。每台模拟器还打开临时生成的离线 CBZ，通过已知页面像素确认原生解包与图片显示；临时材料不进入源码或 Release。
 
 本托管环境先执行 `source /workspace/.ehviewer-env/activate.sh`，其中设置已固定的 JDK、SDK、Gradle/Cargo 缓存与本地 GNU m4 1.4.20。m4 是 Nettle 汇编的构建依赖；CI 检查并安装它。本地无 sudo，m4 安装于私有工具目录。Nettle 的源码包含预生成文件，CMake 必须保留其解包时间戳（DOWNLOAD_EXTRACT_TIMESTAMP TRUE）。
+
+## 临时进度：Revived 初始化与 1.17.10 发布
+
+更新时间：2026-11-04 23:51 UTC。任务未完成，账号限额中断后恢复。
+
+- 已完成：从 1.17.8 独立建仓、继承用户文档/素材与许可、清除全部旧测试和开发杂项；14 个具体问题已获得维护者答复，规则与组件取舍见上文。
+- 已完成：工具链及组件升级；Telephoto 按维护者答复使用最高兼容的 0.19.0，不重构阅读器。Min 26、Target 36，版本 1.17.10 / 180085，包名与应用名保持不变。
+- 已完成：实际 APK 源码提交 `fccf9474b61d193f6916f3b891cf8af09008445d`，构建 [41860024403](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/41860024403) 的全部 17 个步骤成功结束，五种 APK 已本地 V2+V3 签名并通过静态校验。
+- 当前：`v1.17.10` Release 草稿已接收五个签名 APK、SHA256SUMS.txt、release-info.json。验证 [41864047560](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/41864047560) 的 API 33 完整迁移链、离线 CBZ 阅读与冷启动/恢复已通过；API 26 在关闭 Wi-Fi 的测试命令处以 137 中断，API 36 在读取 UI 层级文件时失败，实际 16 KiB 页大小检查通过。正在核查这两处环境/测试问题，尚未正式发布。
+- 当前：主分支已修正草稿读取权限、仅公开签名产物的 Git blob 交接，以及 GitHub 汇总状态滞后的来源校验。交接 blob `026d656805a1d8b70566856aef84f650de925054`，ZIP SHA-256 `97fe51e2eac8b943df58576f2e9f16794cc279db376bf1838602377f9aeb0b6a`，仅含公开发布文件；私钥仍在上文 0700 本地目录，未上传。
+- 下一步：核查三组模拟器日志并修复实际失败；通过后由 Actions 公开 Release，核对线上七个附件及迁移说明。清理 `/workspace/.ehviewer-revived-work` 中临时包、日志、脚本摘录和测试材料，保留私钥及开发工具；最后删除本临时章节。
