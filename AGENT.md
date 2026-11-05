@@ -73,21 +73,19 @@
 
 UI 模块保留 `allWarningsAsErrors`，仅用 `-Xwarning-level=DEPRECATION:warning` 将仍受支持的旧 API 弃用提示保留为日志警告，不隐藏它们；类型、ABI、其他编译警告仍阻止构建。预测返回、搜索和输入等兼容层保留现有交互语义，后续迁移新 API 时独立验证手势与输入行为。
 
-发布验证使用 API 26、33、36 模拟器；API 26/33 采用包含 WebView 的 google_apis 镜像，模拟器分配 4096M RAM / 512M heap 并每次新建 AVD。API 33 执行 1.17.8 → 1.17.9 → 上个正式 Revived 版本 → 本版的覆盖安装链，并检查访客模式设置保留；API 36 使用 google_apis_ps16k 镜像并核对实际页大小 16384。每台模拟器还打开临时生成的离线 CBZ，通过已知页面像素确认原生解包与图片显示，再执行带已有设置的强制停止后冷启动；临时材料不进入源码或 Release。
+发布验证按本轮改动选择场景。UI、签名、构建和 Target 迁移默认使用 API 26、33、37.2：包含 WebView 的 google_apis 镜像，Android 17 使用 google_apis_ps16k 并检查真实页大小；每次新建 AVD，分配 4096M RAM / 512M heap。验证设备端 APK SHA-256、文件式 universal/匹配 ABI 安装、上个正式版本覆盖安装和启动。UI 使用独立的 archive-ui 工作流渲染实际组件，支持指定 APK 源码与更新验证夹具，避免测试修正触发重复原生构建。只有涉及相关业务功能的改动，才增加离线 CBZ、设置迁移等对应检查。临时数据不进入源码或 Release。
 
 本托管环境先执行 `source /workspace/.ehviewer-env/activate.sh`，其中设置已固定的 JDK、SDK、Gradle/Cargo 缓存与本地 GNU m4 1.4.20。m4 是 Nettle 汇编的构建依赖；CI 检查并安装它。本地无 sudo，m4 安装于私有工具目录。Nettle 的源码包含预生成文件，CMake 必须保留其解包时间戳（DOWNLOAD_EXTRACT_TIMESTAMP TRUE）。
 
 ## 临时进度：压缩包下载 UI、Target 37 与 universal 签名修复
 
-- 起点：正式版 1.17.11 / 180086，主分支 `7d8faae`；维护者要求三项工作完成后合并升版发布，新增 CI 优先和按改动范围验证的长期规则，已写入本文。
-- UI 已实现、待 CI：GP 的 k 后缀统一为金额的 labelLarge；GP/C 改为同一个跨列 FlowRow，以共同的垂直对齐避免独立单元高度差，大字体或窄屏时自动换行，保留 RollingNumber 动画。新增仅覆盖该组件的 CI 布局/截图检查（普通、大字体、窄屏及 RTL），不启动真实应用逻辑。
-- 已对照 Compose FlowRow 测量源码：有权重的子项会读取固有尺寸，而 RollingNumber 内部含 LazyRow，不支持该测量。布局采用 BoxWithConstraints 计算有限单元宽度，避免权重固有测量；当前候选不会引入该兼容问题。
-- 最终 UI 阶段通过：[41972981482](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/41972981482) 的报告为 5 测试、0 跳过/失败/错误；加入数字实际位置顺序断言后全部通过。已目检普通、窄屏大字体和 RTL 截图，确认 GP/C 对齐、数字顺序正确、按钮不再拆字；Artifact `13390931513` 保留为本版界面证据。
-- UI 初轮：[41972213391](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/41972213391) 的五个排版用例通过，JUnit 报告 5 测试、0 跳过/失败/错误。已下载并目检截图，确认 GP/C 对齐；同界面还发现原有 RTL 数字倒排、大字体固定宽按钮拆字问题，现已分别用数值区域 LTR 和按钮最小宽度处理，增加可见数字顺序断言。须重跑修正后的 UI 检查后再发布。
-- 当前 APK 候选源码为 `68034a243e7b9827b22055b66d9d4f5bf517efc7`，构建 [41972981550](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/41972981550)，布局 [41972981482](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/41972981482)。独立源码 worktree 已固定在该提交，位于 `/workspace/.ehviewer-revived-work/source`。旧候选/旧夹具作业已取消以减少重复开销。布局检查首轮仅测试夹具编译失败（Compose 已迁移 v2 createComposeRule、Java File.parentFile 可空），已适配新 API。测试夹具或验证脚本修改不要求无意义地重新构建原生 APK；UI 工作流支持指定实际 APK 源码并使用当前夹具，发布门禁核对该源码的成功布局作业。
-- Target 候选已升至 37，min 26 和 compile 37.2 保留；已核对 Android 17 官方迁移要求，应用没有 MessageQueue 私有字段修改、static final 写入或自建 LAN 服务，原生库来自只读安装目录。SDK 仓库提供 android-37.2/google_apis_ps16k 镜像，可验证真实 Android 17 与 16 KiB 页；尚未宣称实测通过。
-- 签名诊断完成：[41970685302](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/41970685302)。五种官方 APK 的全部 V2/V3 SHA-512 摘要由独立实现重算一致，Build Tools 34/36/37 均验证通过。证书为固定 RSA-4096 身份，不需要更换证书或签名算法。
-- 公开下载链路复核通过：[41973369577](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/41973369577) 直接读取浏览器下载 URL，得到同一正式 SHA-256 f5123388…27356de9，排除了“仅认证 API 返回正确文件”的疑点。
-- 用户设备为 Android 13 / MIUI 14.0.14.0 (TMLCNXM)。其 universal 文件 SHA-256 为 `94ee382144d9097fa541d6ad0974a260898f625c14db805a65c72382ba8c4e22`，与正式附件 `f512338816c3ab254fb20b4701339463b0455c9ddabf30d410f2b38627356de9` 不一致；已解释需重新下载。能确定设备文件字节不同，尚不能判断发生在下载、缓存还是复制环节。
-- 已为签名与发布加入独立内容摘要校验。发布验证改为按本轮范围执行：设备端 SHA-256、文件式 universal/匹配 ABI 安装、Android 13 上个版本覆盖升级、Target 启动；新增公开浏览器下载 URL 的发布后哈希复核。不运行离线阅读、数据库或下载等无关业务回归。
-- 下一步：提交候选并在 Actions 执行正式构建及独立布局截图；通过后本地私钥签名、交给 Actions 做 API 26/33/37.2 安装和 Target 检查，再合并发布 1.17.12。密钥只留在本地私有目录，完成后清除临时章节及文件。
+- 目标：三项任务合并发布 1.17.12 / 180087；新增“CI 优先、按改动选择验证范围”长期规则已写入本文件。上个正式版为 1.17.11 / 180086。
+- 当前 APK 源码 `68034a243e7b9827b22055b66d9d4f5bf517efc7`，独立 worktree `/workspace/.ehviewer-revived-work/source` 已固定于此。构建 [41972981550](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/41972981550) 的编译、AAR 和格式检查成功，正在打包全部原生架构。
+- UI 已完成：GP 的 k 后缀与数值共用 labelLarge，GP/C 使用同一跨列 FlowRow 对齐；BoxWithConstraints 给出有限单元宽度，避免 RollingNumber/LazyRow 不支持的固有尺寸测量；大字体或窄屏可换行。数值区域固定 LTR，按钮由固定宽度改最小宽度，解决截图发现的 RTL 数字倒排与按钮拆字。
+- UI 验证成功：[41972981482](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/41972981482)，5 测试、0 跳过/失败/错误。已目检普通、大字体窄屏、RTL 截图；数字顺序有实际位置断言。Artifact `13390931513` 是本版界面证据。没有启动真实应用业务；只用了实际组件和独立 Application 的 Robolectric 渲染。
+- Target 候选为 37，min 26 / compile 37.2 保留；已核对官方迁移要求，无 MessageQueue 私有字段修改、static final 写入或自建 LAN 服务，原生库来自只读安装目录。SDK 提供 android-37.2/google_apis_ps16k，可验证真实 Android 17。尚未宣称设备实测通过。
+- 签名根因已定位至设备文件不同：用户 Android 13 / MIUI 14.0.14.0 的 universal SHA-256 为 `94ee382144d9097fa541d6ad0974a260898f625c14db805a65c72382ba8c4e22`；正式附件为 `f512338816c3ab254fb20b4701339463b0455c9ddabf30d410f2b38627356de9`。已解释需重新下载；损坏发生在下载、缓存还是复制环节尚不确定。
+- 官方文件复核：[41970685302](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/41970685302) 五种 APK 的所有 V2/V3 SHA-512 摘要经独立实现重算及 Build Tools 34/36/37 全部验证通过。[41973369577](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/41973369577) 直接读取公开浏览器下载 URL，也得到正式 SHA-256。证书/算法无需更换；原固定 RSA-4096 身份继续使用。
+- 发布流程已增加独立摘要校验、设备端 SHA-256、文件式 universal/ABI 安装、上版升级检查、公开下载 URL 的发布后哈希复核；本轮不执行离线阅读、数据库、下载等无关业务测试。UI 门禁核对实际 APK 源码的成功布局作业。
+- 下一步：等待构建完成，下载 unsigned Artifact 并在固定源码 worktree 本地签名；创建 v1.17.12 草稿，将七个公开产物通过 Git blob 交接，启动 Actions 做 API 26/33/37.2 安装/Target 检查并发布。仅本地保管私钥，尚未创建本轮签名交接包或 Release。
+- 完成后：清理旧候选/失败或取消作业的临时 Artifact、本地 worktree、APK、日志与截图，仅保留本版有效 CI 证据；停止本地 Gradle，删除本临时章节。保留工具链缓存与私有签名目录。
