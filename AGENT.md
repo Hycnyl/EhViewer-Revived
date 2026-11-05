@@ -81,6 +81,7 @@ UI 模块保留 `allWarningsAsErrors`，仅用 `-Xwarning-level=DEPRECATION:warn
 
 - 目标：三项任务合并发布 1.17.12 / 180087；新增“CI 优先、按改动选择验证范围”长期规则已写入本文件。上个正式版为 1.17.11 / 180086。
 - 最终候选源码 `f67a3c522a444e920deb17f87cb7d4b9d8b4e543`，Target 36 / Min 26 / Compile 37.2，仍为 1.17.12 / 180087。独立 worktree `/workspace/.ehviewer-revived-work/source` 已切到此提交。构建 [41977119357](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/41977119357) 正在完成全架构打包；精确源码 UI 检查 [41977120870](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/41977120870) 已全部通过。旧 Target 37 候选的本地 APK、交接 ZIP/JSON 已删除以避免混用；v1.17.12 草稿来源已改为最终 f67a3c5，旧实验附件已清空；签署新候选后上传新的七个文件。
+- 最终 Target 36 五包已构建并本地签名，通过来源/版本/SDK、独立 V2/V3 摘要、固定证书、CRC、ELF/ZIP 对齐及最低 API 26 检查。正在交接最终七个公开文件；此前 Target 37 的交接数据全部作废，不复用其安装结果。
 - UI 已完成：GP 的 k 后缀与数值共用 labelLarge，GP/C 使用同一跨列 FlowRow 对齐；BoxWithConstraints 给出有限单元宽度，避免 RollingNumber/LazyRow 不支持的固有尺寸测量；大字体或窄屏可换行。数值区域固定 LTR，按钮由固定宽度改最小宽度，解决截图发现的 RTL 数字倒排与按钮拆字。
 - UI 验证成功：[41972981482](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/41972981482)，5 测试、0 跳过/失败/错误。已目检普通、大字体窄屏、RTL 截图；数字顺序有实际位置断言。Artifact `13390931513` 是本版界面证据。没有启动真实应用业务；只用了实际组件和独立 Application 的 Robolectric 渲染。
 - Target 候选为 37，min 26 / compile 37.2 保留；已核对官方迁移要求，无 MessageQueue 私有字段修改、static final 写入或自建 LAN 服务，原生库来自只读安装目录。SDK 提供 android-37.2/google_apis_ps16k，可验证真实 Android 17。尚未宣称设备实测通过。
