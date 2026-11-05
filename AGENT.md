@@ -80,12 +80,12 @@ UI 模块保留 `allWarningsAsErrors`，仅用 `-Xwarning-level=DEPRECATION:warn
 ## 临时进度：压缩包下载 UI、Target 37 与 universal 签名修复
 
 - 目标：三项任务合并发布 1.17.12 / 180087；新增“CI 优先、按改动选择验证范围”长期规则已写入本文件。上个正式版为 1.17.11 / 180086。
-- 当前 APK 源码 `68034a243e7b9827b22055b66d9d4f5bf517efc7`，独立 worktree `/workspace/.ehviewer-revived-work/source` 已固定于此。构建 [41972981550](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/41972981550) 的编译、AAR 和格式检查成功，正在打包全部原生架构。
+- 当前 APK 源码 `68034a243e7b9827b22055b66d9d4f5bf517efc7`，独立 worktree `/workspace/.ehviewer-revived-work/source` 已固定于此。构建 [41972981550](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/41972981550) 全部 17 个构建步骤成功；五种 APK 已完成本地 V2/V3 签名，经过来源、版本、SDK、CRC、ELF/ZIP 对齐、固定证书及独立内容摘要检查。
 - UI 已完成：GP 的 k 后缀与数值共用 labelLarge，GP/C 使用同一跨列 FlowRow 对齐；BoxWithConstraints 给出有限单元宽度，避免 RollingNumber/LazyRow 不支持的固有尺寸测量；大字体或窄屏可换行。数值区域固定 LTR，按钮由固定宽度改最小宽度，解决截图发现的 RTL 数字倒排与按钮拆字。
 - UI 验证成功：[41972981482](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/41972981482)，5 测试、0 跳过/失败/错误。已目检普通、大字体窄屏、RTL 截图；数字顺序有实际位置断言。Artifact `13390931513` 是本版界面证据。没有启动真实应用业务；只用了实际组件和独立 Application 的 Robolectric 渲染。
 - Target 候选为 37，min 26 / compile 37.2 保留；已核对官方迁移要求，无 MessageQueue 私有字段修改、static final 写入或自建 LAN 服务，原生库来自只读安装目录。SDK 提供 android-37.2/google_apis_ps16k，可验证真实 Android 17。尚未宣称设备实测通过。
 - 签名根因已定位至设备文件不同：用户 Android 13 / MIUI 14.0.14.0 的 universal SHA-256 为 `94ee382144d9097fa541d6ad0974a260898f625c14db805a65c72382ba8c4e22`；正式附件为 `f512338816c3ab254fb20b4701339463b0455c9ddabf30d410f2b38627356de9`。已解释需重新下载；损坏发生在下载、缓存还是复制环节尚不确定。
 - 官方文件复核：[41970685302](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/41970685302) 五种 APK 的所有 V2/V3 SHA-512 摘要经独立实现重算及 Build Tools 34/36/37 全部验证通过。[41973369577](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/41973369577) 直接读取公开浏览器下载 URL，也得到正式 SHA-256。证书/算法无需更换；原固定 RSA-4096 身份继续使用。
 - 发布流程已增加独立摘要校验、设备端 SHA-256、文件式 universal/ABI 安装、上版升级检查、公开下载 URL 的发布后哈希复核；本轮不执行离线阅读、数据库、下载等无关业务测试。UI 门禁核对实际 APK 源码的成功布局作业。
-- 下一步：等待构建完成，下载 unsigned Artifact 并在固定源码 worktree 本地签名；创建 v1.17.12 草稿，将七个公开产物通过 Git blob 交接，启动 Actions 做 API 26/33/37.2 安装/Target 检查并发布。仅本地保管私钥，尚未创建本轮签名交接包或 Release。
+- 下一步：等待构建完成，下载 unsigned Artifact 并在固定源码 worktree 本地签名；创建 v1.17.12 草稿，将七个公开产物通过 Git blob 交接，启动 Actions 做 API 26/33/37.2 安装/Target 检查并发布。仅本地保管私钥，已生成签名交接包，接下来创建本轮草稿并交给 CI。
 - 完成后：清理旧候选/失败或取消作业的临时 Artifact、本地 worktree、APK、日志与截图，仅保留本版有效 CI 证据；停止本地 Gradle，删除本临时章节。保留工具链缓存与私有签名目录。
