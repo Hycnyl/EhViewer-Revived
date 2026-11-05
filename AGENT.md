@@ -88,4 +88,5 @@ UI 模块保留 `allWarningsAsErrors`，仅用 `-Xwarning-level=DEPRECATION:warn
 - 第二轮 [41949718714](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/41949718714)：API 26 再次通过；API 36 在界面层级尚未生成时中断，等待循环未能继续。现在将未就绪层级纳入有限轮询，且每次删除旧 XML，避免误用旧帧；失败时保存截图、窗口/Activity 状态和 SIGQUIT 线程栈，API 36 开启 adb root 仅用于诊断。
 - 诊断验证 [41950499857](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/41950499857)：API 26/33 再次通过，API 36 在有限轮询后仍停在启动页。截图与反混淆 SIGQUIT 栈确认主线程及五个 IO 线程都在 PrefDelegate.getValue 的 runBlocking 中等待 DataStore 首次快照，无应用崩溃；不能将其视为单纯首帧延迟。
 - 当前局部兼容尝试：DataStore 从 1.3.0 回退至相邻最高稳定维护版 1.2.1（原版为 1.2.0）。不改变任何设置键、文件位置或 protobuf 格式；API 33 增加已有访客模式设置不丢失的升级断言。此回退仅为有针对性的诊断候选，须实测后才认定有效。
+- 已确认全部 DataStore 模块实际解析为 1.2.1，无 1.3.0 传递依赖强制提升；候选源码 `8a11e1a64a3aef4f3731bf85c8528afb5875dc64`，Actions 构建 [41953512288](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/41953512288) 运行中。版本仍为尚未公开的 1.17.11 / 180086，上一候选草稿不会发布。
 - 下一步：确认依赖实际解析为 1.2.1，再构建新版候选并签名；替换草稿产物后重跑 API 26/33/36、设置保留与离线阅读。若验证通过才正式发布；最后清理临时产物并删除本章节。
