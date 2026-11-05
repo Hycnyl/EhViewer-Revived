@@ -83,5 +83,5 @@ UI 模块保留 `allWarningsAsErrors`，仅用 `-Xwarning-level=DEPRECATION:warn
 - 已增加产物校验：打包和签名复核时检查元数据存在、版本匹配且五种 ABI 内容一致；API 33 在原迁移链中追加上一个正式 Revived 版本（本轮为 1.17.10），验证用户当前版本的覆盖升级。
 - 构建已完成：[41946491046](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/41946491046)，源码 `bdc1985c17832ab6196a28e866d0ac58aa17236b`，版本 1.17.11 / 180086。五种 APK 已生成；实际 APK 内元数据为 Kotlin 2.4.21 / Gradle 9.8.2 / Java source/target 21，文件结构与 LibChecker 读取路径匹配。
 - 已完成签名：五种 APK 均通过元数据一致性、来源/包信息、ABI、CRC、16 KiB 对齐、V2/V3 及最低 API 26 签名验证。固定源码 worktree 位于 `/workspace/.ehviewer-revived-work/source`，私钥仍在上文私有目录。
-- 已交接：v1.17.11 草稿已创建，七个公开产物 ZIP 的 blob 为 `615905a6745efe94d12ad1d6487fa8973ee12063`，SHA-256 为 `5d8de503ea5f0657157e7e35d085fbe274d06d4b82af123c11a67ee2723b60e7`。准备运行 API 26/33/36 验证，API 33 包含 1.17.10 覆盖升级。
+- 已交接：v1.17.11 草稿已创建，七个公开产物 ZIP 的 blob 为 `615905a6745efe94d12ad1d6487fa8973ee12063`，SHA-256 为 `5d8de503ea5f0657157e7e35d085fbe274d06d4b82af123c11a67ee2723b60e7`。正在运行 [41948793067](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/41948793067)，工作流提交 `1b36ade26353ba69c8f1f2eef332ffe0dd7e22af`；API 26/33/36 验证中，API 33 包含 1.17.10 覆盖升级。
 - 下一步：核对 Actions 五种 APK 的实际打包结果，使用固定源码的独立 worktree 本地签名（进度文档提交可继续更新）；V2+V3 复核后交给 Actions 做 API 26/33/36 和上版覆盖升级验证、正式发布。最后清理临时产物并删除本章节。
