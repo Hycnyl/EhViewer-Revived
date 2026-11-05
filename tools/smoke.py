@@ -15,6 +15,10 @@ PACKAGE = "moe.hycnyl.ehviewer"
 ACTIVITY = PACKAGE + "/com.hippo.ehviewer.ui.MainActivity"
 
 
+class HierarchyNotReady(RuntimeError):
+    pass
+
+
 def adb(*args):
     result = subprocess.run(["adb", *args], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     if result.returncode:
@@ -24,7 +28,10 @@ def adb(*args):
 
 
 def hierarchy():
-    adb("shell", "uiautomator", "dump", "/sdcard/window.xml")
+    adb("shell", "rm", "-f", "/sdcard/window.xml")
+    result = adb("shell", "uiautomator", "dump", "/sdcard/window.xml")
+    if b"dumped to:" not in result:
+        raise HierarchyNotReady(result.decode(errors="replace"))
     return adb("shell", "cat", "/sdcard/window.xml")
 
 
@@ -92,7 +99,11 @@ def launch(output, label):
         time.sleep(2)
         if not adb("shell", "pidof", PACKAGE).strip():
             raise RuntimeError("App process exited during startup")
-        view = hierarchy()
+        try:
+            view = hierarchy()
+        except HierarchyNotReady as error:
+            print(f"Waiting for visible UI: {error}", flush=True)
+            continue
         texts = [n.get("text") for n in ET.fromstring(view).iter("node") if n.get("package") == PACKAGE and n.get("text", "").strip()]
         if len(texts) >= 2:
             (output / f"{label}.xml").write_bytes(view)
@@ -117,6 +128,25 @@ def main():
     args.output.mkdir(parents=True, exist_ok=True)
     try:
         exercise(args)
+    except Exception:
+        # Preserve evidence if a cold emulator never produces a usable app UI.
+        for name, command in (
+            ("failure.png", ("exec-out", "screencap", "-p")),
+            ("activity.txt", ("shell", "dumpsys", "activity", "activities")),
+            ("window.txt", ("shell", "dumpsys", "window", "windows")),
+        ):
+            try:
+                (args.output / name).write_bytes(adb(*command))
+            except subprocess.CalledProcessError:
+                pass
+        try:
+            pid = adb("shell", "pidof", PACKAGE).decode().strip().split()[0]
+            adb("shell", "kill", "-3", pid)
+            time.sleep(2)
+            adb("pull", "/data/anr", str(args.output / "anr"))
+        except (subprocess.CalledProcessError, IndexError):
+            pass
+        raise
     finally:
         (args.output / "logcat.txt").write_bytes(adb("logcat", "-d"))
         (args.output / "crashes.txt").write_bytes(adb("logcat", "-d", "-b", "crash"))

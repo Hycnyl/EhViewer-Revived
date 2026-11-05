@@ -164,7 +164,7 @@ jobs:
           disable-animations: true
           emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim -camera-back none
           script: |
-            test '${{ matrix.api }}' != 26 || adb root
+            test '${{ matrix.api }}' = 33 || adb root
             adb wait-for-device
             adb shell dumpsys webviewupdate
             python3 "$RUNNER_TEMP/ehviewer-smoke.py" --apks delivery --output smoke
