@@ -89,5 +89,6 @@ UI 模块保留 `allWarningsAsErrors`，仅用 `-Xwarning-level=DEPRECATION:warn
 - 发布流程已增加独立摘要校验、设备端 SHA-256、文件式 universal/ABI 安装、上版升级检查、公开下载 URL 的发布后哈希复核；本轮不执行离线阅读、数据库、下载等无关业务测试。UI 门禁核对实际 APK 源码的成功布局作业。
 - 签名与交接完成：v1.17.12 草稿来源固定 68034a2；七个公开文件 ZIP SHA-256 为 `5dab52ddf5443d2cd05c8439d78bd927ba92fdd61a7fe698147106b7ca27ba36`，Git blob 为 `6ba7f26ea2a690d863bd39a1edcb7d134f08997e`。新版 universal SHA-256 为 `90f385c82dafe10d8169371094df2e0f89cd11f680dcabe0ded1e1f571b8c289`。私钥未上传。
 - 最终验证/发布 [41974998089](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/41974998089) 已启动，工作流版本 4dba0d1，验证 API 26/33/37.2 安装、升级与 Target 启动；先核对精确源码的 UI 成功作业，全部通过才公开发布。若验证失败，草稿保留，修复验证流程时沿用固定 APK 源码。
-- 下一步：查看三台设备与公开下载复核结果；确认发布后更新长期 Target 兼容基准，核对标签及附件，再清理临时产物。
+- 首轮安装阶段：API 26 与 API 33 全部通过；API 33 确认 1.17.11 ABI、1.17.11 universal 和 1.17.12 universal 均能文件式安装，升级保留标记数据。API 37.2 的设备页大小为 16384，但 pm install 在系统 package 服务调用处返回 Broken pipe(32)，退出码 224；尚未进入应用启动，不能直接视为 Target 兼容失败。草稿未发布，系统日志 Artifact 为 `13392205148`，正在读取原因。
+- 下一步：分析 API 37.2 系统日志，若是服务就绪/模拟器问题则只修正 CI 等待或镜像，不重建 APK；若 Target 本身有难以兼容的阻碍，按维护者授权回退 Target 36 后再构建。通过后复核发布并清理。
 - 完成后：清理旧候选/失败或取消作业的临时 Artifact、本地 worktree、APK、日志与截图，仅保留本版有效 CI 证据；停止本地 Gradle，删除本临时章节。保留工具链缓存与私有签名目录。
