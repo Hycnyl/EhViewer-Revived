@@ -143,6 +143,8 @@
 
 - Restore Kotlin build metadata recognition in LibChecker.
 - Improve Android 16 startup compatibility.
+- Align archive download balances and adapt large-text layouts.
+- Target Android 17 and strengthen APK delivery integrity checks.
 
 - Package name: Changed to `moe.hycnyl.ehviewer`;
 
@@ -150,7 +152,9 @@
 
 # Download
 
-EhViewer Revived keeps the app name **EhViewer** and package `moe.hycnyl.ehviewer`, with Min SDK 26 (Android 8.0), Target SDK 36, and a new V2/V3 signing identity. Releases include universal and four ABI-specific APKs.
+EhViewer Revived keeps the app name **EhViewer** and package `moe.hycnyl.ehviewer`, with Min SDK 26 (Android 8.0), Target SDK 37, and a new V2/V3 signing identity. Releases include universal and four ABI-specific APKs.
+
+If signature verification fails, compare the APK file’s SHA-256 with `SHA256SUMS.txt` in the Release; download the APK again if they differ.
 
 **Migrating:** Hycnyl EhViewer 1.17.9 can be updated directly. For 1.17.8 or earlier on Android 13+, first update to [1.17.9 in the old repository](https://github.com/Hycnyl/EhViewer/releases/tag/v1.17.9), then install Revived. On Android 8–12, export your data first, uninstall the old app, then install Revived and import your backup. Before uninstalling, copy your backup, downloads and exported cached pages outside the app’s private directories (including Android/data/moe.hycnyl.ehviewer), such as to a public folder or computer. Uninstalling deletes private files. Check the backup first; after installing, reauthorize your download folder and import the backup.
 
