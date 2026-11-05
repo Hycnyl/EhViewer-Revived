@@ -76,13 +76,14 @@ UI 模块保留 `allWarningsAsErrors`，仅用 `-Xwarning-level=DEPRECATION:warn
 
 ## 临时进度：Revived 初始化与 1.17.10 发布
 
-更新时间：2026-11-05 00:03 UTC。任务未完成，账号限额中断后已恢复。
+更新时间：2026-11-05 00:09 UTC。任务未完成，账号限额中断后已恢复。
 
 - 已完成：从 1.17.8 独立建仓，继承用户文档、素材与许可，清除全部旧测试和开发杂项；14 个具体问题已获维护者答复，规则与组件取舍见上文。持久进度规则已写入本文件开头。
 - 已完成：新版工具链及组件适配；Telephoto 使用确认的最高兼容版 0.19.0。版本 1.17.10 / 180085，Min 26 / Target 36，包名和应用名保持不变。
 - 已完成：APK 源码提交 `fccf9474b61d193f6916f3b891cf8af09008445d`，构建 [41860024403](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/41860024403) 全部 17 个步骤成功。五种 APK 已本地 V2+V3 签名并通过来源、包信息、ABI、CRC、16 KiB 对齐、证书与最低 API 校验。
 - 已完成：验证 [41937348426](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/41937348426) 中，API 33 的完整迁移链及本地阅读通过；API 36 在实际 16 KiB 页大小下的安装、离线 CBZ 解包/显示、冷启动与恢复通过。API 26 的 Wi-Fi shell 权限问题已解决；root 默认清理日志命令仍失败，发生在安装应用之前。
-- 当前：验证 [41937957837](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/41937957837) 中，API 26 仍在清理 main 日志缓冲区时返回失败，尚未安装应用。改为保留全新 AVD 的完整启动日志，继续保留全部安装、进程存活、崩溃和已知页面像素检查；不再把可选的日志清理作为验收前提。发布工作流明确每次创建新 AVD。
-- 正在执行：保留完整日志后的验证 [41938431100](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/41938431100)，工作流提交 `a5585c88847d8379f6ef3ba4c42132b397497e98`。上一轮因 API 26 失败已无法发布，停止剩余重复任务以释放发布队列。验证脚本来自工作流固定提交，APK 和来源校验仍固定 fccf947；纯 smoke 脚本改动不再自动触发重复应用编译。
+- 当前：保留完整日志后，API 26 已完成 APK 安装并进入启动；[41938431100](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/41938431100) 的崩溃日志明确为 WebViewFactory$MissingWebViewPackageException（AOSP default 镜像没有 WebView），不是新组件接口错误。改用官方 `system-images;android-26;google_apis;x86_64`，已核对 SDK 元数据存在该镜像；测试输出 WebView provider 状态。
+- 待启动：带 WebView 镜像的三组最终验证。验证脚本使用工作流固定提交，APK 和来源校验仍为 fccf947；其他应用源码未改变。
 - 当前：`v1.17.10` 仍为草稿，已含五 APK、SHA256SUMS.txt 和 release-info.json。公开产物交接 blob 为 `026d656805a1d8b70566856aef84f650de925054`，ZIP SHA-256 为 `97fe51e2eac8b943df58576f2e9f16794cc279db376bf1838602377f9aeb0b6a`；仅含七个公开文件。私钥仍在上文 0700 本地目录，未上传。
+- 已复核：当前应用源码与签名候选的 fccf947 一致，后续差异仅在 CI、验证脚本及 AGENT.md；已跟踪文件和全部可达文件历史未发现私钥文件或 PEM 私钥，私钥目录及文件权限继续符合要求。
 - 下一步：核查本轮 API 26/33/36 结果；通过后由 Actions 公开 Release，复核线上七个附件与迁移说明。清理 `/workspace/.ehviewer-revived-work` 中全部临时材料及无用构建输出，保留私钥和开发工具；最后删除整个临时章节。

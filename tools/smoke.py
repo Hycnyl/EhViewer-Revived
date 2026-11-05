@@ -85,7 +85,7 @@ def launch(output, label):
     adb("shell", "am", "force-stop", PACKAGE)
     result = adb("shell", "am", "start", "-W", "-n", ACTIVITY).decode()
     if "Status: ok" not in result:
-        raise RuntimeError("Activity launch failed")
+        raise RuntimeError(f"Activity launch failed:\n{result}")
     for _ in range(15):
         time.sleep(2)
         if not adb("shell", "pidof", PACKAGE).strip():

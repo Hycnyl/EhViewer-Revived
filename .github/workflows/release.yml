@@ -153,7 +153,7 @@ jobs:
         with:
           api-level: ${{ matrix.api }}
           arch: x86_64
-          target: ${{ matrix.api == 26 && 'default' || matrix.api == 36 && 'google_apis_ps16k' || 'google_apis' }}
+          target: ${{ matrix.api == 36 && 'google_apis_ps16k' || 'google_apis' }}
           ram-size: 4096M
           heap-size: 512M
           force-avd-creation: true
@@ -162,6 +162,7 @@ jobs:
           script: |
             test '${{ matrix.api }}' != 26 || adb root
             adb wait-for-device
+            adb shell dumpsys webviewupdate
             python3 "$RUNNER_TEMP/ehviewer-smoke.py" --apks delivery --output smoke
       - uses: actions/upload-artifact@v7.0.2
         if: always()
