@@ -9,7 +9,7 @@
 ## 基线与发布
 
 - 功能源自 `Hycnyl/EhViewer` 的 `v1.17.8`，对应清理后的提交 `92923877ef671e33aa56f69688daa46af6e59ec6`；新仓库独立起始，不继承旧 Git 历史。四种语言 README 继承旧仓库最新的用户文档与完整素材引用，保留 LICENSE、NOTICE 和源码版权说明。
-- 应用名保持 `EhViewer`，正式包名保持 `moe.hycnyl.ehviewer`。当前开发版本为 `1.17.12` / `180087`，上个正式版为 `1.17.11` / `180086`，接续旧版 `1.17.8` / `180083` 和 `1.17.9` / `180084`。后续沿用版本体系，版本码递增。
+- 应用名保持 `EhViewer`，正式包名保持 `moe.hycnyl.ehviewer`。当前正式版本为 `1.17.12` / `180087`，上个正式版为 `1.17.11` / `180086`，接续旧版 `1.17.8` / `180083` 和 `1.17.9` / `180084`。后续沿用版本体系，版本码递增。
 - 任何实际影响用户的改动完成后，除非维护者明确禁止，都须提升 versionName/versionCode，使用 GitHub Actions 发布正式 Release；提供 universal、arm64-v8a、armeabi-v7a、x86_64、x86 五种 APK，并附简短变更说明与 SHA-256 校验和。不得使用 `[skip ci]` 绕过这条规则。
 - README 保持简洁，变更通常只在“变更”章节简要记录；允许修正仓库链接、安装要求和迁移说明。不得随意重写其余内容或丢失截图、素材和致谢。
 - 单轮只改一个目标不是硬性限制。缓存导出、下载恢复和归档格式继承 1.17.8 的当前行为，维护者没有将其固化为不可修改的长期规则。
@@ -85,5 +85,5 @@ UI 模块保留 `allWarningsAsErrors`，仅用 `-Xwarning-level=DEPRECATION:warn
 - 签名根因：设备上的旧 universal SHA-256 `94ee382144d9097fa541d6ad0974a260898f625c14db805a65c72382ba8c4e22` 与官方 `f512338816c3ab254fb20b4701339463b0455c9ddabf30d410f2b38627356de9` 不同。官方五包 V2/V3 独立摘要重算及 Build Tools 34/36/37 通过 [41970685302](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/41970685302)，公开浏览器下载也通过 [41973369577](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/41973369577)。已说明需重新下载；不能定位损坏发生在下载、缓存还是复制环节，不能归咎于证书。
 - Target 37 实验：68034a2 构建及 API 26/33 安装/启动通过，但 API 37.2 安装前 SurfaceFlinger/mapper.ranchu 的 ReadColorBufferDma 断言使系统服务崩溃；改用受支持 software 模式仍在应用安装前 Broken pipe。记录 [41974998089](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/41974998089)、[41976390520](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/41976390520)。已停止该方向，旧本地实验 APK/交接包和草稿附件已移除，未发布它们。
 - 最终 Target 36 五包已本地签名并通过所有来源/版本/SDK/ABI/CRC/对齐、证书、V2/V3 与独立内容摘要复核。草稿 v1.17.12 来源固定为 f67a3c5，新七文件交接 blob `438fc9673c31089b8afb3efb045b69da985270f2`，ZIP SHA-256 `2d7047a8528f447964252984ac6e02474f461dd81d15b87bedc4efe884f33cdd`。最终 universal SHA-256 `1780037c920dc5e20ac7827867af16bb23d1d65684542a880d2cb13b8d8511d9`；私钥仅在本地私有目录。
-- 最终验证/发布正在运行：[41979029977](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/41979029977)，工作流 8b56e80。这是新字节的 API 26/33/36 全新检查，不复用 Target 37 包的结果；prepare 从签名元数据确定正确矩阵。设备检查只涵盖文件哈希、universal/匹配 ABI 文件式安装、上版升级数据保留、启动；不运行无关业务功能。发布后还核对公开下载 URL 的字节。
-- 下一步：确认三台设备、publish 和公开下载均通过；核对 latest、实际源码标签及全部七附件摘要，更新当前正式版规则。再删除临时旧候选 Artifact（清单在私有 scratch）、worktree、APK/ZIP/日志/截图和本章节，停止 Gradle，保留本版有效 CI 证据及私有签名目录。
+- 最终验证/发布 [41979029977](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/41979029977) 全部成功，2026-11-05 06:17 UTC 发布 [1.17.12](https://github.com/Hycnyl/EhViewer-Revived/releases/tag/v1.17.12)，已核对 latest、标签源码 f67a3c5 与七个公开附件的完整摘要。API 26/33/36 均通过设备端文件哈希、universal/匹配 ABI 文件式安装及启动；API 33 通过官方 1.17.11 两种包与新版 universal 覆盖升级、数据保留；API 36 实际页大小 16 KiB。发布后五种 APK 的普通浏览器下载字节全部匹配。不声称 MIUI 真机或无关业务功能已测。
+- 下一步：更新 Release 已通过结果，删除临时旧候选 Artifact（清单在私有 scratch）、worktree、APK/ZIP/日志/截图和本章节，停止 Gradle，保留本版有效 CI 证据及私有签名目录。
