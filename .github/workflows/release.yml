@@ -156,6 +156,7 @@ jobs:
           target: ${{ matrix.api == 26 && 'default' || matrix.api == 36 && 'google_apis_ps16k' || 'google_apis' }}
           ram-size: 4096M
           heap-size: 512M
+          force-avd-creation: true
           disable-animations: true
           emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim -camera-back none
           script: |

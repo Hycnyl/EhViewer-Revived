@@ -3,7 +3,7 @@ name: Build APKs
 on:
   push:
     branches: [main]
-    paths: ['app/**', 'core/**', 'gradle/**', 'build-logic/**', 'tools/**', 'rust-toolchain.toml', '*.gradle.kts', 'gradle.properties', '.github/workflows/build.yml']
+    paths: ['app/**', 'core/**', 'gradle/**', 'build-logic/**', 'tools/**', 'rust-toolchain.toml', '*.gradle.kts', 'gradle.properties', '.github/workflows/build.yml', '!tools/smoke.py']
   workflow_dispatch:
 
 permissions:
