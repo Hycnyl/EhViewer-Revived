@@ -85,5 +85,5 @@ UI 模块保留 `allWarningsAsErrors`，仅用 `-Xwarning-level=DEPRECATION:warn
 - 已完成签名：五种 APK 均通过元数据一致性、来源/包信息、ABI、CRC、16 KiB 对齐、V2/V3 及最低 API 26 签名验证。固定源码 worktree 位于 `/workspace/.ehviewer-revived-work/source`，私钥仍在上文私有目录。
 - 已交接：v1.17.11 草稿已创建，七个公开产物 ZIP 的 blob 为 `615905a6745efe94d12ad1d6487fa8973ee12063`，SHA-256 为 `5d8de503ea5f0657157e7e35d085fbe274d06d4b82af123c11a67ee2723b60e7`。
 - 首轮验证 [41948793067](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/41948793067)：API 26 和 API 33 全部通过，后者已包含 1.17.10 覆盖升级；API 36 实际页大小正确，平台首帧等待约 10 秒后超时，日志无应用崩溃。脚本此前在自己的界面轮询开始前就终止，现允许该等待超时作为暂态，仍严格检查进程、实际可见界面、崩溃日志及离线阅读。
-- 待启动：修正等待判断后的完整设备验证；APK、签名及构建源 bdc1985 均不变，无需重新编译。
+- 正在验证：修正等待判断后的 [41949718714](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/41949718714)，工作流提交 `e1d3f8010a07e6f70cf80af7d7938e2732b087ca`。APK、签名及构建源 bdc1985 均不变，无需重新编译。
 - 下一步：核对 Actions 五种 APK 的实际打包结果，使用固定源码的独立 worktree 本地签名（进度文档提交可继续更新）；V2+V3 复核后交给 Actions 做 API 26/33/36 和上版覆盖升级验证、正式发布。最后清理临时产物并删除本章节。
