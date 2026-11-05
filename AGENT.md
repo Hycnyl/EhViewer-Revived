@@ -81,6 +81,7 @@ UI 模块保留 `allWarningsAsErrors`，仅用 `-Xwarning-level=DEPRECATION:warn
 
 - 起点：正式版 1.17.11 / 180086，主分支 `7d8faae`；维护者要求三项工作完成后合并升版发布，新增 CI 优先和按改动范围验证的长期规则，已写入本文。
 - UI 已实现、待 CI：GP 的 k 后缀统一为金额的 labelLarge；GP/C 改为同一个跨列 FlowRow，以共同的垂直对齐避免独立单元高度差，大字体或窄屏时自动换行，保留 RollingNumber 动画。新增仅覆盖该组件的 CI 布局/截图检查（普通、大字体、窄屏及 RTL），不启动真实应用逻辑。
+- 已对照 Compose FlowRow 测量源码：有权重的子项会读取固有尺寸，而 RollingNumber 内部含 LazyRow，不支持该测量。布局采用 BoxWithConstraints 计算有限单元宽度，避免权重固有测量；当前候选不会引入该兼容问题。
 - Target 候选已升至 37，min 26 和 compile 37.2 保留；已核对 Android 17 官方迁移要求，应用没有 MessageQueue 私有字段修改、static final 写入或自建 LAN 服务，原生库来自只读安装目录。SDK 仓库提供 android-37.2/google_apis_ps16k 镜像，可验证真实 Android 17 与 16 KiB 页；尚未宣称实测通过。
 - 签名诊断完成：[41970685302](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/41970685302)。五种官方 APK 的全部 V2/V3 SHA-512 摘要由独立实现重算一致，Build Tools 34/36/37 均验证通过。证书为固定 RSA-4096 身份，不需要更换证书或签名算法。
 - 用户设备为 Android 13 / MIUI 14.0.14.0 (TMLCNXM)。其 universal 文件 SHA-256 为 `94ee382144d9097fa541d6ad0974a260898f625c14db805a65c72382ba8c4e22`，与正式附件 `f512338816c3ab254fb20b4701339463b0455c9ddabf30d410f2b38627356de9` 不一致；已解释需重新下载。能确定设备文件字节不同，尚不能判断发生在下载、缓存还是复制环节。

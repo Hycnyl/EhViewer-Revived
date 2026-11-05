@@ -1,13 +1,13 @@
 package com.hippo.ehviewer.ui.main
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -53,25 +53,31 @@ fun ArchiveList(
             Text(text = currentFunds, textAlign = TextAlign.Center)
         }
         item(span = { GridItemSpan(maxLineSpan) }) {
-            FlowRow(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-                itemVerticalAlignment = Alignment.CenterVertically,
-                maxItemsInEachRow = 2,
-            ) {
-                FundsItem(
-                    type = "GP",
-                    amount = funds.gp,
-                    modifier = Modifier.weight(1f).widthIn(min = minimumFundsWidth),
-                    textStyle = fundsStyle,
-                )
-                FundsItem(
-                    type = "C",
-                    amount = funds.credit,
-                    modifier = Modifier.weight(1f).widthIn(min = minimumFundsWidth),
-                    textStyle = fundsStyle,
-                )
+            BoxWithConstraints(Modifier.fillMaxWidth()) {
+                val spacing = 8.dp
+                val fundsWidth = if (maxWidth >= minimumFundsWidth * 2 + spacing) (maxWidth - spacing) / 2 else maxWidth
+                // Weighted FlowRow children require intrinsic measurements;
+                // RollingNumber contains a LazyRow, so use finite cell widths.
+                FlowRow(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(spacing),
+                    verticalArrangement = Arrangement.spacedBy(spacing),
+                    itemVerticalAlignment = Alignment.CenterVertically,
+                    maxItemsInEachRow = 2,
+                ) {
+                    FundsItem(
+                        type = "GP",
+                        amount = funds.gp,
+                        modifier = Modifier.width(fundsWidth),
+                        textStyle = fundsStyle,
+                    )
+                    FundsItem(
+                        type = "C",
+                        amount = funds.credit,
+                        modifier = Modifier.width(fundsWidth),
+                        textStyle = fundsStyle,
+                    )
+                }
             }
         }
         items(nonHath) {
