@@ -46,7 +46,8 @@ def summarize_traces(directory, processor, output):
     FROM slice s JOIN thread_track tt ON s.track_id=tt.id
     JOIN thread t ON tt.utid=t.utid JOIN process p ON t.upid=p.upid
     WHERE p.name GLOB 'moe.hycnyl.ehviewer*' AND s.dur>0 AND
-      (LOWER(s.name) LIKE '%compos%' OR LOWER(s.name) LIKE '%decode%' OR
+      (LOWER(s.name) LIKE '%compos%' OR s.name LIKE '%com.hippo.ehviewer%' OR
+       s.name LIKE '%com.ehviewer.core%' OR LOWER(s.name) LIKE '%decode%' OR
        LOWER(s.name) LIKE '%bitmap%' OR LOWER(s.name) LIKE '%upload%' OR
        LOWER(s.name) LIKE '%blur%' OR s.name GLOB 'Choreographer*' OR
        s.name GLOB '*DrawFrame*' OR s.name GLOB '*traversal*')

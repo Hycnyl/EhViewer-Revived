@@ -98,3 +98,8 @@ UI 模块保留 `allWarningsAsErrors`，仅用 `-Xwarning-level=DEPRECATION:warn
 
 - 6b24b49 Profile 实测：startup、pagerReader、webtoonReader 全部通过；galleryAndNavigation 失败日志精确显示选中了仅在屏幕顶端露出 31 px 的 Offline gallery 070，实际点击落在状态栏，且滚动后未回到缓存的首屏。已修正为滚动后重新进入首屏、选择完整可见标题并点击其 clickable card，导航返回后等待动画空闲。不改任何正式画廊点击行为。
 - 接下来重跑完整自动采集/合并以完成发布；三个已通过的阅读/启动路径是实际采集成功，八个 Frame/Startup 类在 Profile 任务中为预期 skipped，不计作通过。交互 UI 四项源代码没有改变；Release 选择对应 UI workflow，并允许通过受控 git diff 证明 UI/资源/构建配置/测试未变的情况下复用已有通过结果，避免仅夹具修正重复跑无关 UI。
+
+- 新版 runtime-tracing 1.13 源码与 POM 已确认迁移 AndroidX Tracing 2.0/tracing-wire 2.0.1，不包含旧 tracing-perfetto receiver。旧 perfettoSdkTracing.enable 开关导致全部帧场景在记录前失败，已撤销，帧时间恢复正常系统 Perfetto 采集；Composer 详细追踪将使用新版 connected-profiler 协议。依赖诊断确认 runtime-tracing 确实只存在 benchmarkReleaseRuntimeClasspath，非依赖漏打包。
+- Frame 场景 setup 现在显式结束上一进程后再准备内容、等待图片显示，避免失败/前场景的原生归档状态干扰后场景；测量仍从准备后的交互开始。66543ba 主构建仅被错误提示字符串冗余大括号的格式检查挡住，已按 ktlint 修正，不涉及产品代码。
+
+- 已进一步核对 Macrobenchmark 1.5 的 PerfettoCaptureWrapper：默认启动 ConnectedProfilerTracing（Tracing 2.0）并合并进程内 traces；旧 enablePerfettoSdk 仅是额外兼容通路。无需额外开启旧 SDK。报告 SQL 也纳入具体 com.hippo.ehviewer/com.ehviewer.core 组件段。可选 startup 模式先生成新 profile 再比较，避免误测旧静态 profile；本轮未据此宣称启动耗时收益。

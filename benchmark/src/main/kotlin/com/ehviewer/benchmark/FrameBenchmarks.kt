@@ -33,6 +33,7 @@ class FrameBenchmarks {
         startupMode = StartupMode.WARM,
         iterations = 3,
         setupBlock = {
+            killProcess()
             pressHome()
             prepare(scene)
         },

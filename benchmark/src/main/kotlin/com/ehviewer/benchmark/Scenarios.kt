@@ -71,7 +71,7 @@ internal fun MacrobenchmarkScope.navigateGallery() {
         var card = title
         while (!card.isClickable) card = checkNotNull(card.parent) { "Gallery title has no clickable card" }
         card.click()
-        check(device.wait(Until.hasObject(By.text("Read")), 10_000)) { "Cached gallery detail did not open: ${titleLabel}" }
+        check(device.wait(Until.hasObject(By.text("Read")), 10_000)) { "Cached gallery detail did not open: $titleLabel" }
         device.pressBack()
         check(device.wait(Until.hasObject(By.textStartsWith("Offline gallery")), 10_000))
         device.waitForIdle()
