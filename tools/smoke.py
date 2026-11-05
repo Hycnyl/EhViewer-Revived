@@ -180,6 +180,13 @@ def exercise(args):
         raise RuntimeError("One universal release APK is required")
     adb("install", "-r", "-g", str(apk[0]))
     launch(args.output, f"revived-api-{api}")
+    if api == 33:
+        # Guest mode writes need_sign_in=false in the previous releases. Check
+        # it before dismissing anything, so an upgrade cannot hide a reset.
+        view = ET.fromstring(hierarchy())
+        if any(n.get("package") == PACKAGE and n.get("text") == "Guest mode" for n in view.iter("node")):
+            raise RuntimeError("Upgrade lost the existing guest-mode preference")
+        print("PASS: existing guest-mode preference survives the upgrade")
     prepare_guest()
     offline_reader(args.output)
     # Test a normal background/foreground cycle with the same installed data.
