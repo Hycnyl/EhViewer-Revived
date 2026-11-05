@@ -1,0 +1,54 @@
+name: Diagnose published APK signatures
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Public release to diagnose'
+        required: true
+        default: v1.17.11
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  signatures:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      GH_TOKEN: ${{ github.token }}
+      TAG: ${{ inputs.tag }}
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - uses: actions/setup-java@v6.1.0
+        with:
+          distribution: temurin
+          java-version: '21'
+      - uses: android-actions/setup-android@v4.0.4
+        with:
+          packages: 'platform-tools build-tools;34.0.0 build-tools;36.0.0 build-tools;37.0.0'
+      - name: Download original published bytes and check manifest hashes
+        run: |
+          gh release download "$TAG" --dir published
+          python3 - <<'PY'
+          from pathlib import Path
+          import hashlib, json
+          root = Path('published')
+          info = json.loads((root / 'release-info.json').read_text())
+          for name, digest in info['files'].items():
+              assert hashlib.sha256((root / name).read_bytes()).hexdigest() == digest, name
+              print(name, digest)
+          PY
+      - name: Recompute every V2 and V3 digest independently
+        run: python3 tools/apk_signature.py published/*.apk
+      - name: Cross-check with three Android signing tool versions
+        run: |
+          for version in 34.0.0 36.0.0 37.0.0; do
+            for apk in published/*.apk; do
+              echo "Build Tools $version: $apk"
+              "$ANDROID_HOME/build-tools/$version/apksigner" verify --verbose --print-certs "$apk"
+            done
+          done
+      - name: List available Android 17 emulator images
+        run: sdkmanager --list | sed -n '/system-images;android-37;/p'
