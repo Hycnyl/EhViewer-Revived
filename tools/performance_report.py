@@ -41,7 +41,10 @@ def measurements(directory):
 
 def summarize_traces(directory, processor, output):
     query = """
-    SELECT t.name AS thread, s.name AS section, COUNT(*) AS count,
+    SELECT t.name AS thread,
+           CASE WHEN s.name GLOB 'Choreographer#doFrame*' THEN 'Choreographer#doFrame'
+                WHEN s.name GLOB '*DrawFrame*' THEN 'DrawFrame(s)'
+                ELSE s.name END AS section, COUNT(*) AS count,
            ROUND(SUM(s.dur)/1e6,3) AS total_ms, ROUND(MAX(s.dur)/1e6,3) AS max_ms
     FROM slice s JOIN thread_track tt ON s.track_id=tt.id
     JOIN thread t ON tt.utid=t.utid JOIN process p ON t.upid=p.upid
@@ -49,9 +52,10 @@ def summarize_traces(directory, processor, output):
       (LOWER(s.name) LIKE '%compos%' OR s.name LIKE '%com.hippo.ehviewer%' OR
        s.name LIKE '%com.ehviewer.core%' OR LOWER(s.name) LIKE '%decode%' OR
        LOWER(s.name) LIKE '%bitmap%' OR LOWER(s.name) LIKE '%upload%' OR
-       LOWER(s.name) LIKE '%blur%' OR s.name GLOB 'Choreographer*' OR
+       LOWER(s.name) LIKE '%blur%' OR LOWER(s.name) LIKE '%shader%' OR
+       s.name='postAndWait' OR s.name GLOB 'Choreographer*' OR
        s.name GLOB '*DrawFrame*' OR s.name GLOB '*traversal*')
-    GROUP BY t.utid,s.name ORDER BY max_ms DESC LIMIT 60;
+    GROUP BY t.utid,section ORDER BY max_ms DESC LIMIT 60;
     SELECT t.name AS thread, state, COUNT(*) AS count, ROUND(SUM(dur)/1e6,3) AS total_ms,
            ROUND(MAX(dur)/1e6,3) AS max_ms
     FROM thread_state JOIN thread t USING(utid) JOIN process p USING(upid)

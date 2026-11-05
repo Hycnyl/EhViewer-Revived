@@ -14,6 +14,8 @@ import org.junit.runner.RunWith
 class FrameBenchmarks {
     @get:Rule val rule = MacrobenchmarkRule()
 
+    @get:Rule val diagnostics = UiFailureDiagnostics()
+
     @Test fun galleryList() = measure("list") { scrollGallery() }
 
     @Test fun galleryGrid() = measure("grid") { scrollGallery() }

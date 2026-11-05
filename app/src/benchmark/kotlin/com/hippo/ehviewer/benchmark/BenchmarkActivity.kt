@@ -14,6 +14,7 @@ import coil3.request.ImageResult
 import com.ehviewer.core.model.BaseGalleryInfo
 import com.ehviewer.core.model.GalleryCommentList
 import com.ehviewer.core.model.GalleryDetail
+import com.ehviewer.core.model.V1GalleryPreview
 import com.hippo.ehviewer.EhDB
 import com.hippo.ehviewer.Settings
 import com.hippo.ehviewer.ui.MainActivity
@@ -67,13 +68,16 @@ class BenchmarkActivity : ComponentActivity() {
         }
         // Keep every synthetic detail offline, including viewports reached after scrolling.
         detailCache.resize(160)
+        val previews = List(24) { page ->
+            V1GalleryPreview("https://offline.ehviewer.invalid/thumb/$page.jpg", page, "0123456789")
+        }
         for (index in 0 until 120) {
             val info = gallery(index)
             detailCache[info.gid] = GalleryDetail(
                 galleryInfo = info,
                 tagGroups = emptyList(),
                 comments = GalleryCommentList(emptyList(), false),
-                previewList = emptyList(),
+                previewList = previews,
                 language = "English",
                 size = "24 pages, local fixture",
             )

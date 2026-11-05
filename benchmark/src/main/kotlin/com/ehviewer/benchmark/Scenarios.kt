@@ -7,7 +7,6 @@ import android.os.SystemClock
 import androidx.benchmark.macro.MacrobenchmarkScope
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.uiautomator.By
-import androidx.test.uiautomator.Direction
 import androidx.test.uiautomator.Until
 import java.io.File
 
@@ -30,10 +29,11 @@ internal fun MacrobenchmarkScope.prepare(scene: String) {
 }
 
 internal fun MacrobenchmarkScope.scrollGallery() {
-    val content = checkNotNull(device.findObject(By.scrollable(true)))
-    content.setGestureMargin(device.displayWidth / 8)
-    repeat(5) { content.fling(Direction.DOWN) }
-    repeat(5) { content.fling(Direction.UP) }
+    // Stay below the app/status bars. Cached UiObject2 bounds can span those bars or go stale.
+    val x = device.displayWidth / 2
+    val h = device.displayHeight
+    repeat(5) { device.swipe(x, h * 4 / 5, x, h / 3, 12) }
+    repeat(5) { device.swipe(x, h / 3, x, h * 4 / 5, 12) }
     device.waitForIdle()
 }
 

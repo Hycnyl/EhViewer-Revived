@@ -15,13 +15,18 @@ import org.junit.runner.RunWith
 class BaselineProfileGenerator {
     @get:Rule val rule = BaselineProfileRule()
 
+    @get:Rule val diagnostics = UiFailureDiagnostics()
+
     @Before
     fun seedOfflineContent() {
         val instrumentation = InstrumentationRegistry.getInstrumentation()
-        UiDevice.getInstance(instrumentation).executeShellCommand(
+        val device = UiDevice.getInstance(instrumentation)
+        device.pressHome()
+        device.executeShellCommand("am force-stop $targetAppId")
+        device.executeShellCommand(
             "am start -W -a com.hippo.ehviewer.BENCHMARK -p $targetAppId --es scene list -f 0x10008000",
         )
-        check(UiDevice.getInstance(instrumentation).wait(Until.hasObject(By.textStartsWith("Offline gallery")), 30_000))
+        check(device.wait(Until.hasObject(By.textStartsWith("Offline gallery")), 30_000))
     }
 
     @Test
