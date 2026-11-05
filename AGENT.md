@@ -82,7 +82,7 @@ UI 模块保留 `allWarningsAsErrors`，仅用 `-Xwarning-level=DEPRECATION:warn
 - 首个候选的三轮设备验证 API 26/33 均通过，API 33 包含 1.17.8 → 1.17.9 → 1.17.10 → 1.17.11。API 36 仍停在启动页；[41950499857](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/41950499857) 的截图及反混淆 SIGQUIT 栈确认，主线程和五个 IO 线程在 PrefDelegate.getValue 的 runBlocking 中等待 DataStore 首次快照，无应用崩溃。禁止把该等待当作通过。
 - 当前局部兼容候选：DataStore 1.3.0 → 1.2.1（原版为 1.2.0）。全部 DataStore 模块已确认解析为 1.2.1；两版原有八类 protobuf 字段编号一致，不改变设置键、文件位置或应用存储格式。此回退须设备实测才认定有效。
 - 本地 JVM 格式检查通过：使用两版官方二进制库和隔离类加载器，验证全部八类设置值经 1.3.0 → 1.2.1 → 1.3.0 的 protobuf 往返，值、类型及中文/集合/字节数组不丢失。结果将写入 Release；一次性检查材料留在私有临时目录，完成后删除。
-- 当前候选源码 `8a11e1a64a3aef4f3731bf85c8528afb5875dc64`，构建 [41953512288](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/41953512288) 已通过 Kotlin 编译、AAR 元数据与格式检查，正在构建全部原生架构。版本仍为未公开的 1.17.11 / 180086。
-- 当前本地独立源码 worktree：`/workspace/.ehviewer-revived-work/source`，HEAD 固定为 8a11e1a。签名私钥仍在上文私有目录。v1.17.11 草稿仍保存旧候选 bdc1985；在新候选验证前不得发布它。
+- 当前候选源码 `8a11e1a64a3aef4f3731bf85c8528afb5875dc64`，构建 [41953512288](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/41953512288) 已通过 Kotlin 编译、AAR 元数据与格式检查，全部 17 个构建步骤成功。五种 APK 已完成本地签名，并通过真实 Kotlin 元数据一致性、来源、包信息、ABI、CRC、16 KiB 对齐、固定证书、V2/V3 和最低 API 26 验证。版本仍为未公开的 1.17.11 / 180086。
+- 当前本地独立源码 worktree：`/workspace/.ehviewer-revived-work/source`，HEAD 固定为 8a11e1a。签名私钥仍在上文私有目录。v1.17.11 草稿即将更新为当前候选；设备矩阵全部通过前不得发布。
 - 设备脚本保留有限界面等待和失败诊断；API 33 新增访客模式设置保留断言，先处理下载路径提示但不重新进入访客模式掩盖重置。三台设备均新增一次带已有设置的强制停止后冷启动，并保留离线 CBZ 解包/渲染、恢复前台和崩溃检查。
 - 下一步：下载新构建产物、固定源码本地签名并核验，更新草稿来源与七个公开附件，再跑 API 26/33/36。只有全部通过才正式发布；最后清理临时产物并删除本章节。
