@@ -85,4 +85,5 @@ UI 模块保留 `allWarningsAsErrors`，仅用 `-Xwarning-level=DEPRECATION:warn
 - 当前候选源码 `8a11e1a64a3aef4f3731bf85c8528afb5875dc64`，构建 [41953512288](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/41953512288) 已通过 Kotlin 编译、AAR 元数据与格式检查，全部 17 个构建步骤成功。五种 APK 已完成本地签名，并通过真实 Kotlin 元数据一致性、来源、包信息、ABI、CRC、16 KiB 对齐、固定证书、V2/V3 和最低 API 26 验证。版本仍为未公开的 1.17.11 / 180086。
 - 当前本地独立源码 worktree：`/workspace/.ehviewer-revived-work/source`，HEAD 固定为 8a11e1a。签名私钥仍在上文私有目录。v1.17.11 草稿即将更新为当前候选；设备矩阵全部通过前不得发布。
 - 设备脚本保留有限界面等待和失败诊断；API 33 新增访客模式设置保留断言，先处理下载路径提示但不重新进入访客模式掩盖重置。三台设备均新增一次带已有设置的强制停止后冷启动，并保留离线 CBZ 解包/渲染、恢复前台和崩溃检查。
-- 下一步：下载新构建产物、固定源码本地签名并核验，更新草稿来源与七个公开附件，再跑 API 26/33/36。只有全部通过才正式发布；最后清理临时产物并删除本章节。
+- 已交接新的七个公开文件：blob `2102ad267b65b0cf97d51f5c24ac6589b1eac79a`，ZIP SHA-256 `b831a4551ef50a417d4e88f87fa7e9869b4c74a081e6d189ec07023cf83e0919`。草稿来源已改为 8a11e1a，验证/发布 [41955422603](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/41955422603) 正在运行，工作流版本 47efe02。
+- 下一步：确认 API 26/33/36 启动、已有设置、覆盖升级、离线阅读全部通过并正式发布；如 API 36 仍等待则继续局部诊断，不发布。完成后清理临时产物并删除本章节。
