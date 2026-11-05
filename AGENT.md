@@ -83,15 +83,15 @@ UI 模块保留 `allWarningsAsErrors`，仅用 `-Xwarning-level=DEPRECATION:warn
 
 ## 临时进度：Profile、性能追踪与交互动画
 
-- 目标 1.17.13 / 180088，当前正式版 1.17.12。候选实际源码 `af83923dc06aafeac52fb0171aa3ed2d19f12388` 已在 main；包名、Min 26 / Target 36 / Compile 37.2、V2+V3 证书保持。
+- 目标 1.17.13 / 180088，当前正式版 1.17.12。候选实际源码 `8f37bc504b04023afbfc34df8a6cbca528617e79` 已在 main；包名、Min 26 / Target 36 / Compile 37.2、V2+V3 证书保持。
 - 已完成：恢复 Benchmark（Macrobenchmark / Baseline Profile 1.5.0、UI Automator 2.4.1），四个 Profile 场景、六个独立 FrameTimingMetric 场景、可选冷启动 None/Partial 对照；Release CI 自动采集并合并、开发构建默认不采集。离线夹具只有独立 .benchmark 变体包含，24 页 CBZ、120 本地收藏及全部缓存详情，实际图库/详情/阅读器并检查图片像素。
 - 已完成产品改动：移除主抽屉和右侧栏逐帧动态模糊；GalleryList 两种布局/Webtoon 单层 48 dp 限幅、绘制阶段读取状态的边界反馈；临界阻尼回位与拖动中断连续；Pager 拖动/点击/滑块共用单一吸附弹簧；修正 Material 空间位移误用 effects 参数。解码质量、检测、缓存和预取策略未改。
 - 交互 CI [42067072084](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/42067072084) / job 127384046956 实际四项全通过，Artifact 13434453077。通过源码 6b24b49806dc13bfb13bb78c72b65dd4d918a69a 与当前候选的产品、资源、构建、定向测试输入 git diff 为空，可复用；后续变化仅修正 benchmark 夹具/CI。
 - Profile 在 6b24b49、10fcb18 两次真实通过启动、Pager、Webtoon；galleryAndNavigation 曾选中状态栏遮挡标题，随后过严的宽度条件排除窄标题，已修正，显式 Pixel 6、全离线详情缓存、复位列表并点击可点击祖先。八个 Frame/Startup 在 Profile 任务中为预期 skipped，不能计作通过。
-- 当前运行：[完整 Profile 与五种 APK 构建 42081421778](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/42081421778)（job 127435154407）；[优化帧 42081429473](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/42081429473)（job 127435181623）；[原行为帧 42081434401](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/42081434401)（job 127435198615）。原行为分支 7a6ccafc16897fe6a17cbed513b1f77e6c2024c8，只恢复九个 UI 文件，依赖/版本/夹具/设备配置一致。尚无完整的六场景对比结果。
+- 当前运行：[完整 Profile 与五种 APK 构建 42084560170](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/42084560170)；[优化帧 42084564021](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/42084564021)；[原行为帧 42084590850](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/42084590850)。原行为分支 11d62550a8f15b1bc346cac32df104fa5cf8d0de，只恢复九个 UI 文件，依赖/版本/夹具/设备配置一致。尚无完整的六场景对比结果。
 - 已取得旧夹具原行为帧 42077106272 的五个有效场景（导航选择器失败），Artifact 13439914592 SHA-256 fd5ba556521c63e2add3e2e2cf5fc2a083c38fbd31b00787eebe2a7ff43d993a。实际 Perfetto：Pager ImageDecoder 在 DefaultDispatcher；侧栏 1118 ms 帧主线程 postAndWait，伴随渲染着色器编译，不能将模拟器等待直接归因于业务 CPU 或等同真机 GPU。旧设备配置仅用于诊断，不与新 Pixel 6 结果混算。
 - runtime-tracing 1.13 使用 Tracing 2.0；Macrobenchmark 1.5 默认连接 ConnectedProfilerTracing 并合并进程内追踪。旧 perfettoSdkTracing 开关只适用于旧 tracing-perfetto，已撤销。官方 Perfetto 59.1 Trace Processor 已校验，报告附原始 JSON/追踪；软件渲染 CI 不代表真机 FPS。
-- 下一步：检查当前完整 Profile/帧结果；通过后从实际成功构建提交取未签名产物、本地签名，通过 Release CI 验证 API 26/33/36 安装、覆盖升级、16 KiB 与真实 Profile 安装，发布并复核五个公开下载。签名 release-source worktree 仍在 10fcb18，签名前须切到实际成功构建 SHA。根据真实追踪决定是否有其他必要改动；不要猜测性修改图片处理。
+- 下一步：检查当前完整 Profile/帧结果；通过后从实际成功构建提交取未签名产物、本地签名，通过 Release CI 验证 API 26/33/36 安装、覆盖升级、16 KiB 与真实 Profile 安装，发布并复核五个公开下载。签名 release-source worktree 尚未同步新候选，签名前须切到实际成功构建 SHA。根据真实追踪决定是否有其他必要改动；不要猜测性修改图片处理。
 - GitHub dispatch 间歇 500/502，已用受控 performance-baseline/performance-optimized push 采集；发版 dispatch 失败后先检查是否实际创建运行，避免重复。私有 scratch `/workspace/.ehviewer-revived-work`，vault `/workspace/.ehviewer-revived-signing` 保持 0700/0600。最终保留有效 CI 证据，删除本轮无效/过期 Artifact、临时分支与工作树、缓存文件以及整个临时进度章节。
 
 - af83923 的新 CI 失败已精确诊断：离线 GalleryDetail.previewList 为空，打开详情触发 PagingConfig.jumpThreshold=0 校验；列表 UiObject2.fling 的 bounds 把手势起点带到顶部 UI，反向滑动后节点失效、遮挡后续采集。正式网络画廊不使用这些空夹具数据。现补齐 24 个本地预览页、滚动限制在屏幕中部、每场景先 Home/force-stop；失败自动保存 PNG/XML 界面树并写入 logcat。优化帧此轮 drawer/Pager/Webtoon 三项已真实通过，仍不把部分结果计作完整通过。Frame 报告按规范化帧名聚合，并纳入 shader_compile/postAndWait，避免不同帧 ID 淹没 Compose/解码数据。下一步用同一新夹具重新执行完整 Profile/对照 Frame，产品 UI 与已有四项检查输入未变。
