@@ -77,17 +77,11 @@ UI 模块保留 `allWarningsAsErrors`，仅用 `-Xwarning-level=DEPRECATION:warn
 
 ## 临时进度：LibChecker Kotlin 构建信息与 1.17.11
 
-- 已确认：LibChecker 通过 APK 根目录的 `kotlin-tooling-metadata.json` 等静态标记显示 Kotlin 徽标、Gradle 和 Java 信息；其源码自身提供了将 Kotlin 官方生成元数据追加到 APK 的构建处理。徽标缺失不能作为应用不再使用 Kotlin 的判断。
-- 已定位：1.17.8 正式 APK 有根目录元数据（Kotlin 2.3.0 / Gradle 9.2.1 / Java 源码兼容级别 21），1.17.10 中该文件及其他静态 Kotlin 标记均缺失。AGP 内建 Kotlin 没有注册旧 KGP 的 buildKotlinToolingMetadata 任务；原有 META-INF/kotlin 精简规则没有变化。
-- 已实现并验证生成任务：使用 Kotlin 官方元数据模型，实际输出 Kotlin 2.4.21 / Gradle 9.8.2 / Java source/target 21，记录真实 KotlinBaseApiPlugin 与 KotlinAndroidTarget。任务编译、生成与格式检查通过；通过公开 JAVA_RES Artifact API 加入 APK 根目录，不调整 R8 精简策略。
-- 已增加产物校验：打包和签名复核时检查元数据存在、版本匹配且五种 ABI 内容一致；API 33 在原迁移链中追加上一个正式 Revived 版本（本轮为 1.17.10），验证用户当前版本的覆盖升级。
-- 构建已完成：[41946491046](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/41946491046)，源码 `bdc1985c17832ab6196a28e866d0ac58aa17236b`，版本 1.17.11 / 180086。五种 APK 已生成；实际 APK 内元数据为 Kotlin 2.4.21 / Gradle 9.8.2 / Java source/target 21，文件结构与 LibChecker 读取路径匹配。
-- 已完成签名：五种 APK 均通过元数据一致性、来源/包信息、ABI、CRC、16 KiB 对齐、V2/V3 及最低 API 26 签名验证。固定源码 worktree 位于 `/workspace/.ehviewer-revived-work/source`，私钥仍在上文私有目录。
-- 已交接：v1.17.11 草稿已创建，七个公开产物 ZIP 的 blob 为 `615905a6745efe94d12ad1d6487fa8973ee12063`，SHA-256 为 `5d8de503ea5f0657157e7e35d085fbe274d06d4b82af123c11a67ee2723b60e7`。
-- 首轮验证 [41948793067](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/41948793067)：API 26 和 API 33 全部通过，后者已包含 1.17.10 覆盖升级；API 36 实际页大小正确，平台首帧等待约 10 秒后超时，日志无应用崩溃。脚本此前在自己的界面轮询开始前就终止，现允许该等待超时作为暂态，仍严格检查进程、实际可见界面、崩溃日志及离线阅读。
-- 第二轮 [41949718714](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/41949718714)：API 26 再次通过；API 36 在界面层级尚未生成时中断，等待循环未能继续。现在将未就绪层级纳入有限轮询，且每次删除旧 XML，避免误用旧帧；失败时保存截图、窗口/Activity 状态和 SIGQUIT 线程栈，API 36 开启 adb root 仅用于诊断。
-- 诊断验证 [41950499857](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/41950499857)：API 26/33 再次通过，API 36 在有限轮询后仍停在启动页。截图与反混淆 SIGQUIT 栈确认主线程及五个 IO 线程都在 PrefDelegate.getValue 的 runBlocking 中等待 DataStore 首次快照，无应用崩溃；不能将其视为单纯首帧延迟。
-- 当前局部兼容尝试：DataStore 从 1.3.0 回退至相邻最高稳定维护版 1.2.1（原版为 1.2.0）。不改变任何设置键、文件位置或 protobuf 格式；API 33 增加已有访客模式设置不丢失的升级断言。此回退仅为有针对性的诊断候选，须实测后才认定有效。
-- 已确认全部 DataStore 模块实际解析为 1.2.1，无 1.3.0 传递依赖强制提升；候选源码 `8a11e1a64a3aef4f3731bf85c8528afb5875dc64`，Actions 构建 [41953512288](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/41953512288) 运行中。版本仍为尚未公开的 1.17.11 / 180086，上一候选草稿不会发布。
-- 该候选已通过 CI 的 Kotlin 编译、AAR 元数据和格式检查，正在构建全部原生架构。启动验证补充一次带已有设置的强制停止后冷启动；设置保留检查先处理下载路径提示，但不会自动重新进入访客模式掩盖设置丢失。
-- 下一步：确认依赖实际解析为 1.2.1，再构建新版候选并签名；替换草稿产物后重跑 API 26/33/36、设置保留与离线阅读。若验证通过才正式发布；最后清理临时产物并删除本章节。
+- 已定位并修复：1.17.8 的 APK 有根目录 `kotlin-tooling-metadata.json`，1.17.10 缺失；AGP 内建 Kotlin 没有注册旧 KGP 的生成任务，其他 Kotlin 标记被沿用的精简规则排除。现在使用 Kotlin 官方模型与公开 JAVA_RES Artifact API，从真实配置生成 Kotlin 2.4.21 / Gradle 9.8.2 / Java source/target 21；不修改 R8 策略。
+- 元数据生成、五种 ABI 打包与一致性检查已通过首个候选构建 [41946491046](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/41946491046)，旧候选源码 bdc1985。五包已通过 V2/V3、固定证书、最低 API 26、包信息、ABI、CRC 及 16 KiB 对齐验证；LibChecker 字段按其公开源码核对，未实际自动操作 LibChecker 界面。
+- 首个候选的三轮设备验证 API 26/33 均通过，API 33 包含 1.17.8 → 1.17.9 → 1.17.10 → 1.17.11。API 36 仍停在启动页；[41950499857](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/41950499857) 的截图及反混淆 SIGQUIT 栈确认，主线程和五个 IO 线程在 PrefDelegate.getValue 的 runBlocking 中等待 DataStore 首次快照，无应用崩溃。禁止把该等待当作通过。
+- 当前局部兼容候选：DataStore 1.3.0 → 1.2.1（原版为 1.2.0）。全部 DataStore 模块已确认解析为 1.2.1；两版原有八类 protobuf 字段编号一致，不改变设置键、文件位置或应用存储格式。此回退须设备实测才认定有效。
+- 当前候选源码 `8a11e1a64a3aef4f3731bf85c8528afb5875dc64`，构建 [41953512288](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/41953512288) 已通过 Kotlin 编译、AAR 元数据与格式检查，正在构建全部原生架构。版本仍为未公开的 1.17.11 / 180086。
+- 当前本地独立源码 worktree：`/workspace/.ehviewer-revived-work/source`，HEAD 固定为 8a11e1a。签名私钥仍在上文私有目录。v1.17.11 草稿仍保存旧候选 bdc1985；在新候选验证前不得发布它。
+- 设备脚本保留有限界面等待和失败诊断；API 33 新增访客模式设置保留断言，先处理下载路径提示但不重新进入访客模式掩盖重置。三台设备均新增一次带已有设置的强制停止后冷启动，并保留离线 CBZ 解包/渲染、恢复前台和崩溃检查。
+- 下一步：下载新构建产物、固定源码本地签名并核验，更新草稿来源与七个公开附件，再跑 API 26/33/36。只有全部通过才正式发布；最后清理临时产物并删除本章节。
