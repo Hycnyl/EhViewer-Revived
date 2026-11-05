@@ -93,3 +93,5 @@ UI 模块保留 `allWarningsAsErrors`，仅用 `-Xwarning-level=DEPRECATION:warn
 
 - 关键验证已通过：交互 UI 42067072084 / job 127384046956，四项测试全部成功；Artifact 13434453077（SHA-256 76858001a2c1aaf96c024abc6a4b3c9d445a8a87c8ba1168e6ed314a41964d09）。无关 archive UI 42067086752 在取消请求前已完成，本轮不再重跑。正式 Build 42068125640 / job 127388663282 已进入 Profile 采集，继续等待真实结果。
 - GitHub workflow_dispatch 接口间歇性返回 500/502；42067066068 优化帧运行停在 queued，数次原行为 dispatch 未创建运行。已准备受控的 performance-baseline/performance-optimized push 触发作为正常 CI 入口。baseline 私有工作树 /workspace/.ehviewer-revived-work/baseline-source，分支 d073c75；只将九个 UI 文件恢复到 025dac0，版本/依赖/夹具/构建配置与候选相同。待有实际测量和 Perfetto 证据才汇报效果。
+
+- 受控 push 采集已启动：原行为 e6dd496 / 42069601016，优化 2f60a02 / 42069851582，主 build 42068125640 持续运行。官方 Macrobenchmark 1.5 源码确认 perfettoSdkTracing.enable 默认 false；现只对帧场景启用它，确保 runtime-tracing 真正记录 Compose，冷启动对照不加入这项额外初始化。两个受控分支同步同一配置；旧未启用此项的帧运行由新运行替代。
