@@ -142,6 +142,7 @@
 ## Other
 
 - Restore Kotlin build metadata recognition in LibChecker.
+- Improve Android 16 startup compatibility.
 
 - Package name: Changed to `moe.hycnyl.ehviewer`;
 

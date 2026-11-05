@@ -60,7 +60,7 @@
 | Adaptive / Activity / Biometric | 1.2.0 / 1.12.1 / 1.4.0-alpha04 → 1.4.0-alpha01 / 1.14.0-alpha03 / 1.4.0-alpha07 | 按维护者偏好使用 UI 预览能力 |
 | Compose Preference / MaterialKolor / Telephoto | 2.1.0 / 4.0.5 / 0.18.0 → 2.2.0 / 5.0.1 / 0.19.0 | 更新设置、色彩和缩放组件；MaterialKolor 6 改模块与色彩引擎，本轮选兼容旧接口的 5.x；Telephoto Maven 最高版本号不代表当前发布线；上游最新正式 Release 为 0.19.0。1.0 Alpha 接口不匹配，已停止该尝试，经维护者确认采用 0.19.0，不重构阅读器 |
 | AppCompat / Core / Browser / WebKit | 1.7.1 / 1.17.0 / 1.9.0 / 1.14.0 → 1.8.0 / 1.19.1 / 1.10.0 / 1.18.0 | 稳定版 Android 支持组件 |
-| Room / DataStore / Work / Paging / Lifecycle | 2.8.4 / 1.2.0 / 2.11.0 / 3.3.6 / 2.10.0 → 2.8.5 / 1.2.1 / 2.12.0 / 3.5.3 / 2.11.0 | 功能组件采用稳定版，保持应用 schema 与设置键；DataStore 1.3.0 在 Android 16 首次读取设置时出现等待，采用相邻稳定维护版 1.2.1；已通过 API 26/36 首次启动及已有设置的冷启动，覆盖升级待本轮最终矩阵完成 |
+| Room / DataStore / Work / Paging / Lifecycle | 2.8.4 / 1.2.0 / 2.11.0 / 3.3.6 / 2.10.0 → 2.8.5 / 1.2.1 / 2.12.0 / 3.5.3 / 2.11.0 | 功能组件采用稳定版，保持应用 schema 与设置键；DataStore 1.3.0 在 Android 16 首次读取设置时出现等待，回退至相邻稳定维护版 1.2.1，通过 API 26/33/36 启动验证及 API 33 覆盖升级、设置保留检查 |
 | Coil / OkHttp / Okio / Ktor | 3.3.0 / 5.3.2 / 3.16.4 / 3.3.3 → 3.6.3 / 5.5.1 / 3.18.2 / 3.6.1 | 同主版本稳定更新 |
 | Coroutines / Serialization / Datetime / IO | 1.10.2 / 1.9.0 / 0.7.1 / 0.8.2 → 1.11.0 / 1.12.0 / 0.8.0 / 0.9.2 | 固定稳定版本；不采用兼容旧日期类型的特殊分支 |
 | Arrow / moko-resources / AboutLibraries / Spotless | 2.2.1.1 / 0.25.2 / 13.1.0 / 8.1.0 → 2.3.0 / 0.27.1 / 15.3.0 / 8.11.0 | 采用支持新版 Kotlin/AGP 的稳定组件 |
@@ -71,7 +71,7 @@
 
 UI 模块保留 `allWarningsAsErrors`，仅用 `-Xwarning-level=DEPRECATION:warning` 将仍受支持的旧 API 弃用提示保留为日志警告，不隐藏它们；类型、ABI、其他编译警告仍阻止构建。预测返回、搜索和输入等兼容层保留现有交互语义，后续迁移新 API 时独立验证手势与输入行为。
 
-发布验证使用 API 26、33、36 模拟器；API 26/33 采用包含 WebView 的 google_apis 镜像，模拟器分配 4096M RAM / 512M heap 并每次新建 AVD。API 33 执行 1.17.8 → 1.17.9 → Revived 的覆盖安装链，API 36 使用 google_apis_ps16k 镜像并核对实际页大小 16384。每台模拟器还打开临时生成的离线 CBZ，通过已知页面像素确认原生解包与图片显示；临时材料不进入源码或 Release。
+发布验证使用 API 26、33、36 模拟器；API 26/33 采用包含 WebView 的 google_apis 镜像，模拟器分配 4096M RAM / 512M heap 并每次新建 AVD。API 33 执行 1.17.8 → 1.17.9 → 上个正式 Revived 版本 → 本版的覆盖安装链，并检查访客模式设置保留；API 36 使用 google_apis_ps16k 镜像并核对实际页大小 16384。每台模拟器还打开临时生成的离线 CBZ，通过已知页面像素确认原生解包与图片显示，再执行带已有设置的强制停止后冷启动；临时材料不进入源码或 Release。
 
 本托管环境先执行 `source /workspace/.ehviewer-env/activate.sh`，其中设置已固定的 JDK、SDK、Gradle/Cargo 缓存与本地 GNU m4 1.4.20。m4 是 Nettle 汇编的构建依赖；CI 检查并安装它。本地无 sudo，m4 安装于私有工具目录。Nettle 的源码包含预生成文件，CMake 必须保留其解包时间戳（DOWNLOAD_EXTRACT_TIMESTAMP TRUE）。
 
@@ -86,5 +86,6 @@ UI 模块保留 `allWarningsAsErrors`，仅用 `-Xwarning-level=DEPRECATION:warn
 - 当前本地独立源码 worktree：`/workspace/.ehviewer-revived-work/source`，HEAD 固定为 8a11e1a。签名私钥仍在上文私有目录。v1.17.11 草稿即将更新为当前候选；设备矩阵全部通过前不得发布。
 - 设备脚本保留有限界面等待和失败诊断；API 33 新增访客模式设置保留断言，先处理下载路径提示但不重新进入访客模式掩盖重置。三台设备均新增一次带已有设置的强制停止后冷启动，并保留离线 CBZ 解包/渲染、恢复前台和崩溃检查。
 - 已交接新的七个公开文件：blob `2102ad267b65b0cf97d51f5c24ac6589b1eac79a`，ZIP SHA-256 `b831a4551ef50a417d4e88f87fa7e9869b4c74a081e6d189ec07023cf83e0919`。草稿来源已改为 8a11e1a，验证/发布 [41955422603](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/41955422603) 正在运行，工作流版本 47efe02。
-- 当前设备阶段：API 26 和 API 36 两组已完成且全部通过，日志明确确认首次启动、已存设置的再次冷启动、CBZ 原生解包/图片渲染和恢复前台；API 36 实际页大小为 16384。API 33 正在执行四版本覆盖升级链，尚未宣称通过。
-- 下一步：确认 API 33 覆盖升级及设置保留通过、Actions 正式发布，然后复核 Release/标签与附件并清理本轮临时文件，删除本章节。
+- 设备与发布全部完成：[41955422603](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/41955422603) 的 prepare、API 26/33/36、publish 均成功。API 33 的四版本覆盖升级、设置保留，三台设备首次/再次冷启动、CBZ 解包/渲染、恢复前台全部通过；API 36 页大小 16384。
+- 已正式发布 [v1.17.11](https://github.com/Hycnyl/EhViewer-Revived/releases/tag/v1.17.11)，并核对它是 latest、非 draft/preview，标签指向实际构建源码 8a11e1a；GitHub 公布的全部七个附件 SHA-256 与本地复核后的签名文件完全一致。
+- 下一步仅剩收尾：删除旧候选与失败验证的临时 Artifact，保留本版构建/设备证据；删除本地临时 worktree、APK、日志和一次性 JVM 检查材料，停止闲置 Gradle，清理无用输出；最后删除本章节并提交。保留密钥私有目录和工具链缓存。

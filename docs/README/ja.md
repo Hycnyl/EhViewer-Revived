@@ -142,6 +142,7 @@
 ## その他
 
 - LibChecker で Kotlin のビルド情報を識別できるよう修正。
+- Android 16 の起動互換性を改善。
 
 - パッケージ名：`moe.hycnyl.ehviewer` に変更しました。
 

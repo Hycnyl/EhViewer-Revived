@@ -142,6 +142,7 @@
 ## 其它
 
 - 恢復 LibChecker 的 Kotlin 建置資訊識別。
+- 改善 Android 16 啟動相容性。
 
 - 軟體套件名稱：套件名稱變更為`moe.hycnyl.ehviewer`；
 
