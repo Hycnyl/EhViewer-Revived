@@ -14,9 +14,16 @@ on:
         type: choice
         options: [frames, profiles, startup]
         default: frames
+      trace_compose:
+        description: 'Opt into detailed Compose in-process tracing (adds collection overhead)'
+        type: boolean
+        default: false
 
 permissions:
   contents: read
+
+env:
+  ORG_GRADLE_PROJECT_traceCompose: ${{ inputs.trace_compose && 'true' || 'false' }}
 
 jobs:
   measure:

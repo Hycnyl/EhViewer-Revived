@@ -45,7 +45,7 @@
 - 公开产物复核：`python3 tools/release.py verify --input <已签名产物目录>`。来源提交、版本、包名、SDK、原生 ABI、ZIP CRC、16 KiB ZIP 对齐、证书及 V2/V3 均须匹配。
 - Release CI 使用 API 35 离线场景执行 `:app:generateBaselineProfile -PbuildAbis=x86_64`，检查两套阅读器覆盖后再组装全部正式 ABI。生成文本存于 Git 忽略的 `app/src/main/generated/baselineProfiles/`，正式包须包含非空 `assets/dexopt/baseline.prof` 和 `.profm`。开发构建默认不启动模拟器，需要自动采集时显式 `-PgenerateBaselineProfile=true`。
 - Baseline Profile 1.5 会在 finalizeDsl 中复制原 Release manifest；benchmark/nonMinified 变体的专用 overlay 必须在其后配置。测试内容只进入独立 `.benchmark` 包，正式 APK 不含夹具入口。
-- 帧测试按六个独立场景执行，版本/依赖/内容/构建配置一致后再对比。runtime-tracing 1.13 使用 Tracing 2.0/tracing-wire，Macrobenchmark 1.5 默认连接并合并进程内追踪；不要为它启用仅对应旧 tracing-perfetto 的 perfettoSdkTracing 开关。高开销的重组状态读写追踪只用于必要定向诊断。
+- 帧测试按六个独立场景执行，版本/依赖/内容/构建配置一致后再对比。runtime-tracing 1.13 使用 Tracing 2.0/tracing-wire；仅在 benchmarkRelease 显式 -PtraceCompose=true 时引入（performance.yml 的 trace_compose 选项）。Macrobenchmark 1.5 会自动连接此依赖，但其写出在软件模拟器中复现偶发 60 秒超时，默认 Frame 测量仅用标准系统 Perfetto，详细 Compose 追踪按需开启。不要启用仅对应旧 tracing-perfetto 的 perfettoSdkTracing 开关。高开销的重组状态读写追踪只用于必要定向诊断。
 - ProfileInstaller 保持官方最新稳定版 1.4.1（V015_S 向前兼容）；发布设备检查实际调用安装 receiver，并要求成功转码/写入 Profile。帧数据附原始 JSON/Perfetto，软件渲染模拟器不得被描述为真机 FPS 或硬件 GPU 验证。
 - APK 根目录的标准 Kotlin 工具元数据由 `GenerateKotlinToolingMetadataTask` 从实际 KGP、Gradle 和 Java 编译配置生成，通过 `ScopedArtifact.JAVA_RES` 随每个变体打包，供 LibChecker 等工具识别。Java 字段表示 compileOptions 的源码/字节码兼容级别。
 
@@ -95,3 +95,6 @@ UI 模块保留 `allWarningsAsErrors`，仅用 `-Xwarning-level=DEPRECATION:warn
 - GitHub dispatch 间歇 500/502，已用受控 performance-baseline/performance-optimized push 采集；发版 dispatch 失败后先检查是否实际创建运行，避免重复。私有 scratch `/workspace/.ehviewer-revived-work`，vault `/workspace/.ehviewer-revived-signing` 保持 0700/0600。最终保留有效 CI 证据，删除本轮无效/过期 Artifact、临时分支与工作树、缓存文件以及整个临时进度章节。
 
 - af83923 的新 CI 失败已精确诊断：离线 GalleryDetail.previewList 为空，打开详情触发 PagingConfig.jumpThreshold=0 校验；列表 UiObject2.fling 的 bounds 把手势起点带到顶部 UI，反向滑动后节点失效、遮挡后续采集。正式网络画廊不使用这些空夹具数据。现补齐 24 个本地预览页、滚动限制在屏幕中部、每场景先 Home/force-stop；失败自动保存 PNG/XML 界面树并写入 logcat。优化帧此轮 drawer/Pager/Webtoon 三项已真实通过，仍不把部分结果计作完整通过。Frame 报告按规范化帧名聚合，并纳入 shader_compile/postAndWait，避免不同帧 ID 淹没 Compose/解码数据。下一步用同一新夹具重新执行完整 Profile/对照 Frame，产品 UI 与已有四项检查输入未变。
+
+- 8f37bc5 的优化 Frame 已通过图库列表/网格、导航、Pager、Webtoon 五项；原行为 11d6255 通过列表/网格、导航、Pager、侧栏五项。余下各一项均为 Tracing 2.0 的 FLUSH_TRACES_GET_PATH 广播等待 60 秒返回 0，非手势/业务失败。有效 JSON/Perfetto 分别在 42084564021 Artifact 13443377548、42084590850 Artifact 13444440622；夹具问题已解决。由于进程内追踪开销会影响帧数据，不能只将无此开销的单场景重试混入旧组。
+- 新性能工作暂存 performance-collection 分支，main 仍固定 962de2e，避免中断正在采集的 Build 42084560170（实际正式候选 8f37bc5）。改为 traceCompose 显式选项：默认标准系统 Perfetto，详细 runtime-tracing 仅按需；原行为/优化两组使用完全一致配置重新执行。侧栏操作等待打开空闲后再 Back，并按应用包名确认关闭及图库仍前台。产品 UI/图片策略未改；正式 APK 原本就不包含 runtime-tracing。待原构建完成后合并测试配置；发版固定实际成功构建 SHA。

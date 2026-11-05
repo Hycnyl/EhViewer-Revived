@@ -83,8 +83,11 @@ internal fun MacrobenchmarkScope.toggleDrawer() {
     val h = device.displayHeight
     repeat(4) {
         device.swipe(w / 8, h / 2, w * 4 / 5, h / 2, 24)
-        check(device.wait(Until.hasObject(By.text("Settings")), 5_000)) { "Navigation drawer did not open" }
+        check(device.wait(Until.hasObject(By.pkg(packageName).text("Settings")), 5_000)) { "Navigation drawer did not open" }
+        device.waitForIdle()
         device.pressBack()
+        check(device.wait(Until.gone(By.pkg(packageName).text("Settings")), 5_000)) { "Navigation drawer did not close" }
+        check(device.hasObject(By.pkg(packageName).textStartsWith("Offline gallery"))) { "Drawer back exited the gallery" }
         device.waitForIdle()
     }
 }

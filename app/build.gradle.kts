@@ -275,7 +275,7 @@ aboutLibraries {
 
 // Synthetic configurations are registered by the Baseline Profile plugin after DSL finalization.
 configurations.configureEach {
-    if (name == "benchmarkReleaseImplementation") {
+    if (name == "benchmarkReleaseImplementation" && providers.gradleProperty("traceCompose").orNull == "true") {
         dependencies.add(project.dependencies.platform(libs.compose.bom.get()))
         dependencies.add(libs.compose.runtime.tracing.get())
     }
