@@ -1,6 +1,8 @@
 name: Core performance
 
 on:
+  push:
+    branches: [performance-baseline, performance-optimized]
   workflow_dispatch:
     inputs:
       source_commit:
@@ -65,7 +67,7 @@ jobs:
           git rev-parse HEAD
       - name: Compile the selected performance variant
         env:
-          MODE: ${{ inputs.mode }}
+          MODE: ${{ inputs.mode || 'frames' }}
         run: |
           if [ "$MODE" = profiles ]; then
             ./gradlew :benchmark:assembleDefaultNonMinifiedRelease :app:assembleDefaultNonMinifiedRelease --no-configuration-cache --max-workers=2 -PbuildAbis=x86_64 -Pkotlin.compiler.execution.strategy=in-process --stacktrace
@@ -85,7 +87,7 @@ jobs:
           PY_CHECK
       - uses: ReactiveCircus/android-emulator-runner@v2.38.0
         env:
-          MODE: ${{ inputs.mode }}
+          MODE: ${{ inputs.mode || 'frames' }}
         with:
           api-level: 35
           target: google_apis
@@ -109,7 +111,7 @@ jobs:
       - uses: actions/upload-artifact@v7.0.2
         if: always()
         with:
-          name: performance-${{ inputs.mode }}-${{ inputs.source_commit || github.sha }}
+          name: performance-${{ inputs.mode || 'frames' }}-${{ inputs.source_commit || github.sha }}
           path: |
             performance-report.md
             perfetto-sections/

@@ -79,7 +79,7 @@ UI 模块保留 `allWarningsAsErrors`，仅用 `-Xwarning-level=DEPRECATION:warn
 
 ## 临时进度：Profile、性能追踪与交互动画
 
-- 目标候选 1.17.13 / 180088；当前正式版仍为 1.17.12。应用名、包名、Min 26 / Target 36 / Compile 37.2 与正式 V2+V3 证书保持。当前分支 performance-motion，UI 主提交 402f454；下一步快进合并 main 并运行各独立 CI，不等待未成功的原行为 Profile。
+- 目标候选 1.17.13 / 180088；当前正式版仍为 1.17.12。应用名、包名、Min 26 / Target 36 / Compile 37.2 与正式 V2+V3 证书保持。已合并 main，候选实际源码 6b24b49806dc13bfb13bb78c72b65dd4d918a69a。
 - 已恢复 Benchmark：稳定版 Macrobenchmark / Baseline Profile 1.5.0、UI Automator 2.4.1。四个 Profile 场景涵盖启动、本地收藏画廊/详情/导航/侧栏、Pager 翻页+缩放、Webtoon 滚动+缩放；六个 FrameTimingMetric 场景独立、Full 编译、各三次；冷启动独立 None/Partial Require 对照。
 - 夹具只在 synthetic benchmarkRelease/nonMinifiedRelease 中编译，独立 .benchmark 包；生成 24 页 JPEG CBZ 和 120 个本地收藏项，使用实际 GalleryList/详情/阅读器。AndroidX Startup Initializer 注册保持真实 Coil 管道的本地映射，保证进程重启不落到网络。像素检查确认阅读页真正显示。
 - Release CI 显式 generateBaselineProfile 再 assemble，saveInSrc=true 的生成目录被 Git 忽略，覆盖 ReaderScreen/PagerViewer/WebtoonViewer/PageLoader 并检查编译 profile 打包；开发构建不自动启动模拟器，支持 -PgenerateBaselineProfile=true。聚合任务名不带 Release，因此显式 buildAbis 也必须作用于 splits/NDK。
@@ -90,3 +90,6 @@ UI 模块保留 `allWarningsAsErrors`，仅用 `-Xwarning-level=DEPRECATION:warn
 - Perfetto 59.1 官方 Linux binary SHA-256 固定 2434129a3af4dc9e2034a476f7b76447b490975213e301769310d3bd0d5d6458。performance_report.py 输出分位数与 thread/Compose/解码/绘制 SQL 摘要；软件渲染 CI 仅作同场景相对参考，不等同真机 FPS/GPU。source_commit 比较保留 app/src/main 与 core；测试夹具和构建配置跟随 workflow 版本并保留原版本字段。
 - 旧基线运行：42061541200（六个夹具固定类名不存在），42063858765（实际 APK 缺少 action，暴露 manifest 覆盖）；Profile 构建 42063857903 尚在运行，将由新正式候选构建取代。402f454 优化试编译 42064385204 只发现 KMP node 类型问题，已修复。下一轮必须读取最新 CI 结果，不把这些失败当成有效测量。
 - 私有 scratch /workspace/.ehviewer-revived-work，含旧失败报告与官方 Trace Processor；签名 vault /workspace/.ehviewer-revived-signing 保留 0700/0600，禁止上传。下一步推送当前修复、合并 main，执行 Profile/交互/同夹具原行为与优化 Frame CI；获得实际追踪后再决定其他优化，完成正式发布、下载校验与清理本章节及临时产物。
+
+- 关键验证已通过：交互 UI 42067072084 / job 127384046956，四项测试全部成功；Artifact 13434453077（SHA-256 76858001a2c1aaf96c024abc6a4b3c9d445a8a87c8ba1168e6ed314a41964d09）。无关 archive UI 42067086752 在取消请求前已完成，本轮不再重跑。正式 Build 42068125640 / job 127388663282 已进入 Profile 采集，继续等待真实结果。
+- GitHub workflow_dispatch 接口间歇性返回 500/502；42067066068 优化帧运行停在 queued，数次原行为 dispatch 未创建运行。已准备受控的 performance-baseline/performance-optimized push 触发作为正常 CI 入口。baseline 私有工作树 /workspace/.ehviewer-revived-work/baseline-source，分支 d073c75；只将九个 UI 文件恢复到 025dac0，版本/依赖/夹具/构建配置与候选相同。待有实际测量和 Perfetto 证据才汇报效果。
