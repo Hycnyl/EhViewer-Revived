@@ -87,5 +87,7 @@ UI 模块保留 `allWarningsAsErrors`，仅用 `-Xwarning-level=DEPRECATION:warn
 - 签名根因已定位至设备文件不同：用户 Android 13 / MIUI 14.0.14.0 的 universal SHA-256 为 `94ee382144d9097fa541d6ad0974a260898f625c14db805a65c72382ba8c4e22`；正式附件为 `f512338816c3ab254fb20b4701339463b0455c9ddabf30d410f2b38627356de9`。已解释需重新下载；损坏发生在下载、缓存还是复制环节尚不确定。
 - 官方文件复核：[41970685302](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/41970685302) 五种 APK 的所有 V2/V3 SHA-512 摘要经独立实现重算及 Build Tools 34/36/37 全部验证通过。[41973369577](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/41973369577) 直接读取公开浏览器下载 URL，也得到正式 SHA-256。证书/算法无需更换；原固定 RSA-4096 身份继续使用。
 - 发布流程已增加独立摘要校验、设备端 SHA-256、文件式 universal/ABI 安装、上版升级检查、公开下载 URL 的发布后哈希复核；本轮不执行离线阅读、数据库、下载等无关业务测试。UI 门禁核对实际 APK 源码的成功布局作业。
-- 下一步：等待构建完成，下载 unsigned Artifact 并在固定源码 worktree 本地签名；创建 v1.17.12 草稿，将七个公开产物通过 Git blob 交接，启动 Actions 做 API 26/33/37.2 安装/Target 检查并发布。仅本地保管私钥，已生成签名交接包，接下来创建本轮草稿并交给 CI。
+- 签名与交接完成：v1.17.12 草稿来源固定 68034a2；七个公开文件 ZIP SHA-256 为 `5dab52ddf5443d2cd05c8439d78bd927ba92fdd61a7fe698147106b7ca27ba36`，Git blob 为 `6ba7f26ea2a690d863bd39a1edcb7d134f08997e`。新版 universal SHA-256 为 `90f385c82dafe10d8169371094df2e0f89cd11f680dcabe0ded1e1f571b8c289`。私钥未上传。
+- 最终验证/发布 [41974998089](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/41974998089) 已启动，工作流版本 4dba0d1，验证 API 26/33/37.2 安装、升级与 Target 启动；先核对精确源码的 UI 成功作业，全部通过才公开发布。若验证失败，草稿保留，修复验证流程时沿用固定 APK 源码。
+- 下一步：查看三台设备与公开下载复核结果；确认发布后更新长期 Target 兼容基准，核对标签及附件，再清理临时产物。
 - 完成后：清理旧候选/失败或取消作业的临时 Artifact、本地 worktree、APK、日志与截图，仅保留本版有效 CI 证据；停止本地 Gradle，删除本临时章节。保留工具链缓存与私有签名目录。
