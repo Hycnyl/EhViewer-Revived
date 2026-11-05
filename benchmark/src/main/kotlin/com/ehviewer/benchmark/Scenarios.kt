@@ -1,6 +1,5 @@
 package com.ehviewer.benchmark
 
-import android.content.ComponentName
 import android.content.Intent
 import android.graphics.BitmapFactory
 import android.graphics.Color
@@ -17,7 +16,7 @@ internal val targetAppId: String
 
 internal fun MacrobenchmarkScope.prepare(scene: String) {
     startActivityAndWait(
-        Intent().setComponent(ComponentName(packageName, "com.hippo.ehviewer.benchmark.BenchmarkActivity"))
+        Intent("com.hippo.ehviewer.BENCHMARK").setPackage(packageName)
             .putExtra("scene", scene).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK),
     )
     if (scene == "pager" || scene == "webtoon") {

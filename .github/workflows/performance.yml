@@ -44,6 +44,12 @@ jobs:
           echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
           sudo udevadm control --reload-rules
           sudo udevadm trigger --name-match=kvm
+      - name: Load the measurement fixture for this workflow revision
+        run: |
+          git fetch --no-tags --depth=1 origin "$GITHUB_SHA"
+          git archive "$GITHUB_SHA" benchmark app/src/benchmark tools/performance_report.py | tar -x
+          git diff --exit-code -- app/src/main core
+          git rev-parse HEAD
       - name: Compile the selected performance variant
         env:
           MODE: ${{ inputs.mode }}
@@ -53,6 +59,17 @@ jobs:
           else
             ./gradlew :benchmark:assembleDefaultBenchmarkRelease :app:assembleDefaultBenchmarkRelease --no-configuration-cache --max-workers=2 -PbuildAbis=x86_64 -Pkotlin.compiler.execution.strategy=in-process --stacktrace
           fi
+      - name: Check fixture manifest in the actual benchmark APK
+        run: |
+          python3 - <<'PY_CHECK'
+          from pathlib import Path
+          import os, subprocess
+          apks = list(Path('app/build/outputs/apk/default').glob('*Release/*.apk'))
+          assert apks
+          for apk in apks:
+              manifest = subprocess.check_output([os.environ['ANDROID_HOME']+'/build-tools/37.0.0/aapt', 'dump', 'xmltree', str(apk), 'AndroidManifest.xml'], text=True)
+              assert 'com.hippo.ehviewer.BENCHMARK' in manifest, f'Fixture entry missing: {apk}'
+          PY_CHECK
       - uses: ReactiveCircus/android-emulator-runner@v2.38.0
         env:
           MODE: ${{ inputs.mode }}
@@ -71,7 +88,10 @@ jobs:
       - name: Summarize independent frame or startup measurements
         if: inputs.mode != 'profiles'
         run: |
-          python3 tools/performance_report.py benchmark/build/outputs --output performance-report.md
+          curl --fail --location --retry 2 https://commondatastorage.googleapis.com/perfetto-luci-artifacts/v59.1/linux-amd64/trace_processor_shell --output "$RUNNER_TEMP/trace_processor_shell"
+          echo "2434129a3af4dc9e2034a476f7b76447b490975213e301769310d3bd0d5d6458  $RUNNER_TEMP/trace_processor_shell" | sha256sum -c
+          chmod +x "$RUNNER_TEMP/trace_processor_shell"
+          python3 tools/performance_report.py benchmark/build/outputs --output performance-report.md --trace-processor "$RUNNER_TEMP/trace_processor_shell"
           cat performance-report.md >> "$GITHUB_STEP_SUMMARY"
       - uses: actions/upload-artifact@v7.0.2
         if: always()
@@ -79,8 +99,10 @@ jobs:
           name: performance-${{ inputs.mode }}-${{ inputs.source_commit || github.sha }}
           path: |
             performance-report.md
+            perfetto-sections/
             app/src/main/generated/baselineProfiles/
             benchmark/build/outputs/
+            !benchmark/build/outputs/apk/**
             benchmark/build/reports/
             app/build/intermediates/merged_baseline_profile/
             app/build/intermediates/merged_startup_profile/

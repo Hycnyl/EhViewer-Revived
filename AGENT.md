@@ -88,3 +88,5 @@ UI 模块保留 `allWarningsAsErrors`，仅用 `-Xwarning-level=DEPRECATION:warn
 - 下一步：验证离线采集与原行为帧追踪；在工作区准备有限位移、单层 OverscrollEffect 和临界阻尼弹簧，保留 Pager 单一吸附。随后依据追踪选择优化，完成正式升版发布与清理。
 
 - 基线夹具修正：UI Automator 使用默认 pinch 速度；仅 benchmark 的 SingletonImageLoader 替换明确 OptIn DelicateCoilApi，继续保留正式构建 Werror。工作区已准备移除两处动态模糊、修正全局空间 MotionScheme、单层有界回弹及 Pager 吸附参数；这些用户行为改动尚未提交，原行为基线保持独立。
+
+- 原行为帧运行 a1330dc 已完成编译但六个测试均在启动夹具前失败：R8 变体无法按固定类名启动 BenchmarkActivity；正在使用 manifest 中的专用 Intent action 解析入口，并在启动模拟器前检查实际 APK 的 action。Profile 采集运行 42061534423 尚在进行，不能将这些夹具错误解释成应用性能/功能失败。
