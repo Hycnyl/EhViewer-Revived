@@ -127,7 +127,7 @@ def verify(directory, manifest, signed):
                 if profile not in archive.namelist() or archive.getinfo(profile).file_size == 0:
                     raise RuntimeError(f"Missing compiled Baseline Profile: {filename}: {profile}")
             for dex in (p for p in archive.namelist() if re.fullmatch(r"classes\d*\.dex", p)):
-                if b"Lcom/hippo/ehviewer/benchmark/BenchmarkActivity;" in archive.read(dex):
+                if b"Lcom/hippo/ehviewer/benchmark/" in archive.read(dex):
                     raise RuntimeError(f"Benchmark fixture leaked into release: {filename}")
             native_abis = {p.split("/")[1] for p in archive.namelist() if p.startswith("lib/") and p.endswith(".so")}
             for path in archive.namelist():

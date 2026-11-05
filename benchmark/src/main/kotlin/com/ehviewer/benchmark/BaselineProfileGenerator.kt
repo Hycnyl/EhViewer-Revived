@@ -1,5 +1,6 @@
 package com.ehviewer.benchmark
 
+import androidx.benchmark.macro.MacrobenchmarkScope
 import androidx.benchmark.macro.junit4.BaselineProfileRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
@@ -30,13 +31,13 @@ class BaselineProfileGenerator {
     }
 
     @Test
-    fun startup() = rule.collect(targetAppId, includeInStartupProfile = true) {
+    fun startup() = collect(includeInStartupProfile = true) {
         pressHome()
         startActivityAndWait()
     }
 
     @Test
-    fun galleryAndNavigation() = rule.collect(targetAppId) {
+    fun galleryAndNavigation() = collect {
         prepare("list")
         scrollGallery()
         // Scrolling can end at any viewport; reset before testing a cached detail.
@@ -48,16 +49,24 @@ class BaselineProfileGenerator {
     }
 
     @Test
-    fun pagerReader() = rule.collect(targetAppId) {
+    fun pagerReader() = collect {
         prepare("pager")
         turnPages()
         zoomPage()
     }
 
     @Test
-    fun webtoonReader() = rule.collect(targetAppId) {
+    fun webtoonReader() = collect {
         prepare("webtoon")
         scrollWebtoon()
         zoomPage()
     }
+
+    // Filter at capture time: consumer merging can reintroduce unfiltered Startup Profile rules.
+    private fun collect(includeInStartupProfile: Boolean = false, profileBlock: MacrobenchmarkScope.() -> Unit) = rule.collect(
+        packageName = targetAppId,
+        includeInStartupProfile = includeInStartupProfile,
+        filterPredicate = { "Lcom/hippo/ehviewer/benchmark/" !in it },
+        profileBlock = profileBlock,
+    )
 }
