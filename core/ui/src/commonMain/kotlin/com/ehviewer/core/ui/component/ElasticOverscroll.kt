@@ -49,7 +49,7 @@ private class ElasticOverscrollEffect(private val scope: CoroutineScope, private
     override val isInProgress: Boolean get() = displacement != 0f
 
     // Read state only while drawing. Neither composition, measurement nor pointer coordinates move.
-    override val node = object : Modifier.Node(), DrawModifierNode, PointerInputModifierNode {
+    override val node: Modifier.Node = object : Modifier.Node(), DrawModifierNode, PointerInputModifierNode {
         override fun ContentDrawScope.draw() {
             clipRect {
                 translate(top = displacement) { this@draw.drawContent() }

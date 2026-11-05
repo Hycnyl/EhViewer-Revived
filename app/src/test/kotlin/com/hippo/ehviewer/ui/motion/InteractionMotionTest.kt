@@ -161,6 +161,7 @@ class InteractionMotionTest {
     }
 
     private fun redBand(): List<Int> {
+        compose.mainClock.advanceTimeByFrame()
         compose.waitForIdle()
         val image = compose.onNodeWithTag("viewport").captureToImage().asAndroidBitmap()
         return (0 until image.height).filter { image.getPixel(image.width / 2, it) == android.graphics.Color.RED }

@@ -22,7 +22,7 @@ android {
         abi {
             isEnable = true
             reset()
-            if (isRelease) {
+            if (isRelease || providers.gradleProperty("buildAbis").isPresent) {
                 include(*buildAbis)
                 isUniversalApk = true
             } else {
@@ -51,7 +51,7 @@ android {
         buildConfigField("long", "COMMIT_TIME", commitTime)
         buildConfigField("String", "REPO_NAME", "\"$repoName\"")
         ndk {
-            if (isRelease) {
+            if (isRelease || providers.gradleProperty("buildAbis").isPresent) {
                 abiFilters.addAll(buildAbis)
             }
             debugSymbolLevel = "FULL"
@@ -134,14 +134,6 @@ android {
         }
     }
 
-    // Only synthetic performance variants contain the offline fixture entry point.
-    sourceSets.configureEach {
-        if (name == "benchmarkRelease" || name == "nonMinifiedRelease") {
-            kotlin.directories.add("src/benchmark/kotlin")
-            manifest.srcFile("src/benchmark/AndroidManifest.xml")
-        }
-    }
-
     buildFeatures {
         buildConfig = true
         compose = true
@@ -150,6 +142,18 @@ android {
     testOptions.unitTests.isIncludeAndroidResources = true
 
     namespace = "com.hippo.ehviewer"
+}
+
+// Baseline Profile 1.5 copies the release manifest while finalizing its synthetic build types.
+// Configure these overlays afterwards so the plugin cannot replace the benchmark-only manifest.
+androidComponents.finalizeDsl { extension ->
+    listOf("benchmarkRelease", "nonMinifiedRelease").forEach { name ->
+        extension.buildTypes.getByName(name).applicationIdSuffix = ".benchmark"
+        extension.sourceSets.getByName(name).apply {
+            kotlin.directories.add("src/benchmark/kotlin")
+            manifest.srcFile("src/benchmark/AndroidManifest.xml")
+        }
+    }
 }
 
 baselineProfile {

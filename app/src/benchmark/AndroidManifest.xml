@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" xmlns:tools="http://schemas.android.com/tools">
     <application>
+        <provider android:name="androidx.startup.InitializationProvider" android:authorities="${applicationId}.androidx-startup" android:exported="false" tools:node="merge">
+            <meta-data android:name="com.hippo.ehviewer.benchmark.BenchmarkInitializer" android:value="androidx.startup" />
+        </provider>
         <activity android:name="com.hippo.ehviewer.benchmark.BenchmarkActivity" android:exported="true">
             <intent-filter>
                 <action android:name="com.hippo.ehviewer.BENCHMARK" />

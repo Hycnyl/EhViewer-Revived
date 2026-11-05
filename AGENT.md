@@ -79,16 +79,14 @@ UI 模块保留 `allWarningsAsErrors`，仅用 `-Xwarning-level=DEPRECATION:warn
 
 ## 临时进度：Profile、性能追踪与交互动画
 
-- 基线正式版 1.17.12 / 180087，源码工作区从 main 20bf48f 开始，维护者已完成真实用户场景检查。
-- 本轮目标：恢复 Benchmark 和 Release 的 Baseline Profile 生成/合并，覆盖离线画廊及 Pager/Webtoon/缩放；独立帧时间场景和 Perfetto；依据证据优化重组/图片调度，移除非核心动态模糊，统一克制的弹簧交互。每次正式发布递增补丁版本，保留五种 APK、原包名及 V2+V3。
-- 已完成源码调查：旧采集依赖在线列表和详情，当前仍保留 ProfileInstaller、profileable 和静态 profile；Compose 基线已为 1.13.0-beta02。MainActivity 与 core/ui SideDrawer 均需调查动态模糊；PageLoader 的解码由调用方协程继承上下文，需追踪确认。
-- 当前阶段：已加入 Benchmark 模块、稳定版 Macrobenchmark / Baseline Profile 1.5.0 和 UI Automator 2.4.1、benchmark-only 自生成 CBZ 与本地收藏画廊、四个 Profile 采集场景、六个独立帧测量场景和冷启动对照；图片像素就绪检查避免空白采集。Release CI 已配置采集、覆盖率检查再正式组装，普通开发不启动模拟器。当前完成 Gradle DSL 与格式配置检查后推送；尚未宣称设备采集通过。
-- 采集基础提交 `5486bf756c6ac9bf4f048c68792a2c8127c5681f` 已推送：Release/Profile 构建 [42059394893](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/42059394893)，原行为帧测量 [42059397267](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/42059397267)。本地仅完成 Gradle 配置与格式整理；设备检查正在 CI 运行，未宣称通过。
-- 首次帧构建的 pinch 参数已按 UI Automator 2.4.1 的 0..1 Float API 修复，基线重跑 [42060074518](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/42060074518)。Profile 构建 [42060071637](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/42060071637) 确认 mergeIntoMain=true 只注册聚合生成入口，已将 CI 改为 :app:generateBaselineProfile；没有应用运行失败结论。
-- 本轮首个候选为 1.17.13 / 180088。动画/动态模糊改动在 performance-motion 分支提交并定向验证，main 暂保留原行为采集基础，避免新提交取消仍在运行的基线 Profile 与帧测量。原行为与优化场景使用同套夹具；待基线和优化检查通过后快进合并 main，正式构建/采集/签名发布。
-
-- 基线夹具修正：UI Automator 使用默认 pinch 速度；仅 benchmark 的 SingletonImageLoader 替换明确 OptIn DelicateCoilApi，继续保留正式构建 Werror。工作区已准备移除两处动态模糊、修正全局空间 MotionScheme、单层有界回弹及 Pager 吸附参数；这些用户行为改动尚未提交，原行为基线保持独立。
-
-- 原行为帧运行 a1330dc 已完成编译但六个测试均在启动夹具前失败：R8 变体无法按固定类名启动 BenchmarkActivity；正在使用 manifest 中的专用 Intent action 解析入口，并在启动模拟器前检查实际 APK 的 action。Profile 采集运行 42061534423 尚在进行，不能将这些夹具错误解释成应用性能/功能失败。
-
-- 新版采集入口改为专用 Intent action，测量工作流启动模拟器前检查实际 APK manifest。Performance 工作流已增加固定 Perfetto 59.1（校验 SHA-256）SQL 摘要，保留原始 traces 和分位数，未将模拟器时间解释为真机 FPS。
+- 目标候选 1.17.13 / 180088；当前正式版仍为 1.17.12。应用名、包名、Min 26 / Target 36 / Compile 37.2 与正式 V2+V3 证书保持。当前分支 performance-motion，UI 主提交 402f454；下一步快进合并 main 并运行各独立 CI，不等待未成功的原行为 Profile。
+- 已恢复 Benchmark：稳定版 Macrobenchmark / Baseline Profile 1.5.0、UI Automator 2.4.1。四个 Profile 场景涵盖启动、本地收藏画廊/详情/导航/侧栏、Pager 翻页+缩放、Webtoon 滚动+缩放；六个 FrameTimingMetric 场景独立、Full 编译、各三次；冷启动独立 None/Partial Require 对照。
+- 夹具只在 synthetic benchmarkRelease/nonMinifiedRelease 中编译，独立 .benchmark 包；生成 24 页 JPEG CBZ 和 120 个本地收藏项，使用实际 GalleryList/详情/阅读器。AndroidX Startup Initializer 注册保持真实 Coil 管道的本地映射，保证进程重启不落到网络。像素检查确认阅读页真正显示。
+- Release CI 显式 generateBaselineProfile 再 assemble，saveInSrc=true 的生成目录被 Git 忽略，覆盖 ReaderScreen/PagerViewer/WebtoonViewer/PageLoader 并检查编译 profile 打包；开发构建不自动启动模拟器，支持 -PgenerateBaselineProfile=true。聚合任务名不带 Release，因此显式 buildAbis 也必须作用于 splits/NDK。
+- 已准确诊断并修复：Baseline Profile 1.5 finalizeDsl 会覆盖先前 synthetic sourceSet manifest；已把 overlay 设置放到插件后的 finalizeDsl。本地仅做必要 manifest 生成，已确认入口 action 与冷启动 Initializer 都存在。早期失败不是应用兼容/性能结论。其他修复含新 pinch Float API、正常默认 pinch 速度、显式 KMP Modifier.Node 类型。
+- UI 改动已准备并提交/待提交：移除 MainActivity 和右侧 SideDrawer 的逐帧模糊，保留原有遮罩与滑动；修正 CustomMotionScheme 空间位移被 effects 参数替代的问题；有界 48 dp、仅绘制阶段读取状态的单层 OverscrollEffect（GalleryList 两种布局/Webtoon），临界阻尼与手势中断保持位置；Pager 拖动/点击/滑块复用同一吸附弹簧，不叠第二层。
+- 保留解码分辨率、检测、缓存和预取策略。静态确认 Coil 拦截器在 Default、归档加载来自 IO，但尚无有效 Perfetto 数据，不声称所有图片功能均已验证或性能已提升。
+- 交互 UI 工作流和四个定向 Robolectric 检查已写（边界限幅/几何、回位中断、正常滚动、侧栏锚点），尚待 CI。Release UI gate 允许对应的 interaction-ui；archive-ui 不再因纯构建配置变化重跑无关资金布局。
+- Perfetto 59.1 官方 Linux binary SHA-256 固定 2434129a3af4dc9e2034a476f7b76447b490975213e301769310d3bd0d5d6458。performance_report.py 输出分位数与 thread/Compose/解码/绘制 SQL 摘要；软件渲染 CI 仅作同场景相对参考，不等同真机 FPS/GPU。source_commit 比较保留 app/src/main 与 core；测试夹具和构建配置跟随 workflow 版本并保留原版本字段。
+- 旧基线运行：42061541200（六个夹具固定类名不存在），42063858765（实际 APK 缺少 action，暴露 manifest 覆盖）；Profile 构建 42063857903 尚在运行，将由新正式候选构建取代。402f454 优化试编译 42064385204 只发现 KMP node 类型问题，已修复。下一轮必须读取最新 CI 结果，不把这些失败当成有效测量。
+- 私有 scratch /workspace/.ehviewer-revived-work，含旧失败报告与官方 Trace Processor；签名 vault /workspace/.ehviewer-revived-signing 保留 0700/0600，禁止上传。下一步推送当前修复、合并 main，执行 Profile/交互/同夹具原行为与优化 Frame CI；获得实际追踪后再决定其他优化，完成正式发布、下载校验与清理本章节及临时产物。

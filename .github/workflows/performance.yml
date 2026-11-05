@@ -18,6 +18,7 @@ permissions:
 
 jobs:
   measure:
+    name: measure-${{ inputs.source_commit || github.sha }}
     runs-on: ubuntu-latest
     timeout-minutes: 65
     steps:
@@ -48,6 +49,18 @@ jobs:
         run: |
           git fetch --no-tags --depth=1 origin "$GITHUB_SHA"
           git archive "$GITHUB_SHA" benchmark app/src/benchmark tools/performance_report.py | tar -x
+          python3 - <<'PY_FIXTURE'
+          from pathlib import Path
+          import os, re, subprocess
+          path = Path('app/build.gradle.kts')
+          original = path.read_text()
+          current = subprocess.check_output(['git', 'show', os.environ['GITHUB_SHA']+':app/build.gradle.kts'], text=True)
+          for key in ('versionCode', 'versionName'):
+              value = re.search(r'^\s*'+key+r' = (.+)$', original, re.M).group(1)
+              current = re.sub(r'(?m)^(\s*'+key+r' = ).+$', lambda m: m.group(1)+value, current)
+          path.write_text(current)
+          print('Selected app/main and core source retained; benchmark build configuration follows this workflow revision')
+          PY_FIXTURE
           git diff --exit-code -- app/src/main core
           git rev-parse HEAD
       - name: Compile the selected performance variant

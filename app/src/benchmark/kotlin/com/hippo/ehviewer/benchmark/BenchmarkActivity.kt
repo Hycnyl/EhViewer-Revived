@@ -9,8 +9,6 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.core.content.FileProvider
 import androidx.lifecycle.lifecycleScope
-import coil3.SingletonImageLoader
-import coil3.imageLoader
 import coil3.intercept.Interceptor
 import coil3.request.ImageResult
 import com.ehviewer.core.model.BaseGalleryInfo
@@ -52,7 +50,6 @@ class BenchmarkActivity : ComponentActivity() {
         }
     }
 
-    @OptIn(coil3.annotation.DelicateCoilApi::class)
     private suspend fun prepare(scene: String) {
         Settings.needSignIn.value = false
         Settings.launchPage.value = 4 // Actual local Favourites screen and its GalleryList.
@@ -79,10 +76,6 @@ class BenchmarkActivity : ComponentActivity() {
                 language = "English",
                 size = "24 pages, local fixture",
             )
-        }
-        if (!loaderInstalled) {
-            SingletonImageLoader.setUnsafe(imageLoader.newBuilder().components { add(OfflineThumbs(cacheDir)) }.build())
-            loaderInstalled = true
         }
     }
 
@@ -128,13 +121,9 @@ class BenchmarkActivity : ComponentActivity() {
             }
         }
     }
-
-    private companion object {
-        var loaderInstalled = false
-    }
 }
 
-private class OfflineThumbs(private val directory: File) : Interceptor {
+internal class OfflineThumbs(private val directory: File) : Interceptor {
     override suspend fun intercept(chain: Interceptor.Chain): ImageResult {
         val data = chain.request.data.toString()
         if (data.startsWith("https://offline.ehviewer.invalid/thumb/")) {

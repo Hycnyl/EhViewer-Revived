@@ -1,6 +1,5 @@
 package com.ehviewer.benchmark
 
-import android.content.Intent
 import androidx.benchmark.macro.junit4.BaselineProfileRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
@@ -19,9 +18,8 @@ class BaselineProfileGenerator {
     @Before
     fun seedOfflineContent() {
         val instrumentation = InstrumentationRegistry.getInstrumentation()
-        instrumentation.context.startActivity(
-            Intent("com.hippo.ehviewer.BENCHMARK").setPackage(targetAppId)
-                .putExtra("scene", "list").addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK),
+        UiDevice.getInstance(instrumentation).executeShellCommand(
+            "am start -W -a com.hippo.ehviewer.BENCHMARK -p $targetAppId --es scene list -f 0x10008000",
         )
         check(UiDevice.getInstance(instrumentation).wait(Until.hasObject(By.textStartsWith("Offline gallery")), 30_000))
     }
