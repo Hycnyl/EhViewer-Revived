@@ -52,6 +52,7 @@ class BenchmarkActivity : ComponentActivity() {
         }
     }
 
+    @OptIn(coil3.annotation.DelicateCoilApi::class)
     private suspend fun prepare(scene: String) {
         Settings.needSignIn.value = false
         Settings.launchPage.value = 4 // Actual local Favourites screen and its GalleryList.

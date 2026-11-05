@@ -86,3 +86,5 @@ UI 模块保留 `allWarningsAsErrors`，仅用 `-Xwarning-level=DEPRECATION:warn
 - 采集基础提交 `5486bf756c6ac9bf4f048c68792a2c8127c5681f` 已推送：Release/Profile 构建 [42059394893](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/42059394893)，原行为帧测量 [42059397267](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/42059397267)。本地仅完成 Gradle 配置与格式整理；设备检查正在 CI 运行，未宣称通过。
 - 首次帧构建的 pinch 参数已按 UI Automator 2.4.1 的 0..1 Float API 修复，基线重跑 [42060074518](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/42060074518)。Profile 构建 [42060071637](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/42060071637) 确认 mergeIntoMain=true 只注册聚合生成入口，已将 CI 改为 :app:generateBaselineProfile；没有应用运行失败结论。
 - 下一步：验证离线采集与原行为帧追踪；在工作区准备有限位移、单层 OverscrollEffect 和临界阻尼弹簧，保留 Pager 单一吸附。随后依据追踪选择优化，完成正式升版发布与清理。
+
+- 基线夹具修正：UI Automator 使用默认 pinch 速度；仅 benchmark 的 SingletonImageLoader 替换明确 OptIn DelicateCoilApi，继续保留正式构建 Werror。工作区已准备移除两处动态模糊、修正全局空间 MotionScheme、单层有界回弹及 Pager 吸附参数；这些用户行为改动尚未提交，原行为基线保持独立。

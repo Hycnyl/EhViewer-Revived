@@ -54,8 +54,8 @@ internal fun MacrobenchmarkScope.scrollWebtoon() {
 
 internal fun MacrobenchmarkScope.zoomPage() {
     val content = checkNotNull(device.findObject(By.pkg(packageName).depth(0)))
-    content.pinchOpen(0.65f, 24)
-    content.pinchClose(0.65f, 24)
+    content.pinchOpen(0.65f)
+    content.pinchClose(0.65f)
     device.waitForIdle()
 }
 
