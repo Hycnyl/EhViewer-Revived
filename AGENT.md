@@ -83,4 +83,6 @@ UI 模块保留 `allWarningsAsErrors`，仅用 `-Xwarning-level=DEPRECATION:warn
 - 本轮目标：恢复 Benchmark 和 Release 的 Baseline Profile 生成/合并，覆盖离线画廊及 Pager/Webtoon/缩放；独立帧时间场景和 Perfetto；依据证据优化重组/图片调度，移除非核心动态模糊，统一克制的弹簧交互。每次正式发布递增补丁版本，保留五种 APK、原包名及 V2+V3。
 - 已完成源码调查：旧采集依赖在线列表和详情，当前仍保留 ProfileInstaller、profileable 和静态 profile；Compose 基线已为 1.13.0-beta02。MainActivity 与 core/ui SideDrawer 均需调查动态模糊；PageLoader 的解码由调用方协程继承上下文，需追踪确认。
 - 当前阶段：已加入 Benchmark 模块、稳定版 Macrobenchmark / Baseline Profile 1.5.0 和 UI Automator 2.4.1、benchmark-only 自生成 CBZ 与本地收藏画廊、四个 Profile 采集场景、六个独立帧测量场景和冷启动对照；图片像素就绪检查避免空白采集。Release CI 已配置采集、覆盖率检查再正式组装，普通开发不启动模拟器。当前完成 Gradle DSL 与格式配置检查后推送；尚未宣称设备采集通过。
-- 下一步：完成采集模块和 CI 构建配置，运行基线采集/帧追踪，再按结果落地优化与动画验证，发布并清理临时状态。
+- 采集基础提交 `5486bf756c6ac9bf4f048c68792a2c8127c5681f` 已推送：Release/Profile 构建 [42059394893](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/42059394893)，原行为帧测量 [42059397267](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/42059397267)。本地仅完成 Gradle 配置与格式整理；设备检查正在 CI 运行，未宣称通过。
+- 首次帧构建在 UI Automator 2.4.1 的 pinch API 编译处发现参数已从百分比 Int 改为 0..1 Float；已按 0.65f 修复，重新推送并采集，尚未进入应用性能结论。
+- 下一步：验证离线采集与原行为帧追踪；在工作区准备有限位移、单层 OverscrollEffect 和临界阻尼弹簧，保留 Pager 单一吸附。随后依据追踪选择优化，完成正式升版发布与清理。
