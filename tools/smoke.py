@@ -84,8 +84,10 @@ def offline_reader(output):
 def launch(output, label):
     adb("shell", "am", "force-stop", PACKAGE)
     result = adb("shell", "am", "start", "-W", "-n", ACTIVITY).decode()
-    if "Status: ok" not in result:
+    if "Status: ok" not in result and "Status: timeout" not in result:
         raise RuntimeError(f"Activity launch failed:\n{result}")
+    if "Status: timeout" in result:
+        print("ActivityManager's first-frame wait timed out; checking process and visible UI", flush=True)
     for _ in range(15):
         time.sleep(2)
         if not adb("shell", "pidof", PACKAGE).strip():
