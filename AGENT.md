@@ -73,7 +73,7 @@
 
 UI 模块保留 `allWarningsAsErrors`，仅用 `-Xwarning-level=DEPRECATION:warning` 将仍受支持的旧 API 弃用提示保留为日志警告，不隐藏它们；类型、ABI、其他编译警告仍阻止构建。预测返回、搜索和输入等兼容层保留现有交互语义，后续迁移新 API 时独立验证手势与输入行为。
 
-发布验证按本轮改动选择场景。UI、签名、构建和 Target 迁移默认使用 API 26、33、37.2：包含 WebView 的 google_apis 镜像，Android 17 使用 google_apis_ps16k 并检查真实页大小；每次新建 AVD，分配 4096M RAM / 512M heap。验证设备端 APK SHA-256、文件式 universal/匹配 ABI 安装、上个正式版本覆盖安装和启动。UI 使用独立的 archive-ui 工作流渲染实际组件，支持指定 APK 源码与更新验证夹具，避免测试修正触发重复原生构建。只有涉及相关业务功能的改动，才增加离线 CBZ、设置迁移等对应检查。临时数据不进入源码或 Release。
+发布验证按本轮改动选择场景。UI、签名和构建默认使用 API 26、33、36；Target 37 的候选将现代设备检查切换至 API 37.2。使用包含 WebView 的 google_apis 镜像，现代设备使用 google_apis_ps16k 并检查真实页大小；每次新建 AVD，分配 4096M RAM / 512M heap。验证设备端 APK SHA-256、文件式 universal/匹配 ABI 安装、上个正式版本覆盖安装和启动。UI 使用独立的 archive-ui 工作流渲染实际组件，支持指定 APK 源码与更新验证夹具，避免测试修正触发重复原生构建。只有涉及相关业务功能的改动，才增加离线 CBZ、设置迁移等对应检查。临时数据不进入源码或 Release。
 
 本托管环境先执行 `source /workspace/.ehviewer-env/activate.sh`，其中设置已固定的 JDK、SDK、Gradle/Cargo 缓存与本地 GNU m4 1.4.20。m4 是 Nettle 汇编的构建依赖；CI 检查并安装它。本地无 sudo，m4 安装于私有工具目录。Nettle 的源码包含预生成文件，CMake 必须保留其解包时间戳（DOWNLOAD_EXTRACT_TIMESTAMP TRUE）。
 
@@ -93,5 +93,6 @@ UI 模块保留 `allWarningsAsErrors`，仅用 `-Xwarning-level=DEPRECATION:warn
 - 已确认 API 37.2 模拟器在安装前发生 SurfaceFlinger/mapper.ranchu 的 ReadColorBufferDma 断言崩溃，带动系统服务重启；与应用进程无关。按官方模拟器文档，将该镜像从已弃用的 swiftshader_indirect 改为受支持的 software 模式，做一次有针对性的兼容尝试。签名包保持不变，复用前轮已通过的 API 26/33；复用门禁核对前轮成功步骤及四个相同输入（Tag、源码、blob、ZIP SHA-256）。
 - 重试 [41976148244](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/41976148244) 在复用门禁处被新版 gh 的 ANSI 日志输出保护中断，模拟器尚未运行；已为只在内存中解析的自有日志加上官方要求的 allow-escape-sequences 标志。该修正不改变 APK、签名或实际验证条件。
 - 当前定向验证：[41976390520](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/41976390520)，工作流版本 92ab532，复用门禁已成功；只重跑 API 37.2/software，APK 仍为 68034a2 的同一签名包。若该图形环境仍无法稳定验证，本轮按维护者授权保留 Target 36，不继续扩展模拟器修复范围。
+- Target 37 本轮暂停：上述 software 重试仍在安装应用前出现 activity/wifi 系统服务 Broken pipe，无法完成可靠验收。按维护者的“有难以解决阻碍则放弃”授权，已将 Target 恢复为 36，min 26 / compile 37.2 保留；UI 与完整性改动全部保留。将重建最终 APK 并验证 API 26/33/36，不再扩展官方 Android 17 模拟器修复。
 - 下一步：分析 API 37.2 系统日志，若是服务就绪/模拟器问题则只修正 CI 等待或镜像，不重建 APK；若 Target 本身有难以兼容的阻碍，按维护者授权回退 Target 36 后再构建。通过后复核发布并清理。
 - 完成后：清理旧候选/失败或取消作业的临时 Artifact、本地 worktree、APK、日志与截图，仅保留本版有效 CI 证据；停止本地 Gradle，删除本临时章节。保留工具链缓存与私有签名目录。

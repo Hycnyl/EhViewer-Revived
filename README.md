@@ -144,7 +144,7 @@
 - Restore Kotlin build metadata recognition in LibChecker.
 - Improve Android 16 startup compatibility.
 - Align archive download balances and adapt large-text layouts.
-- Target Android 17 and strengthen APK delivery integrity checks.
+- Strengthen APK delivery integrity checks.
 
 - Package name: Changed to `moe.hycnyl.ehviewer`;
 
@@ -152,7 +152,7 @@
 
 # Download
 
-EhViewer Revived keeps the app name **EhViewer** and package `moe.hycnyl.ehviewer`, with Min SDK 26 (Android 8.0), Target SDK 37, and a new V2/V3 signing identity. Releases include universal and four ABI-specific APKs.
+EhViewer Revived keeps the app name **EhViewer** and package `moe.hycnyl.ehviewer`, with Min SDK 26 (Android 8.0), Target SDK 36, and a new V2/V3 signing identity. Releases include universal and four ABI-specific APKs.
 
 If signature verification fails, compare the APK file’s SHA-256 with `SHA256SUMS.txt` in the Release; download the APK again if they differ.
 

@@ -43,6 +43,8 @@ jobs:
     permissions:
       contents: write
       actions: read
+    outputs:
+      target_sdk: ${{ steps.receive.outputs.target_sdk }}
     steps:
       - uses: actions/checkout@v7.0.1
         with:
@@ -55,6 +57,7 @@ jobs:
         with:
           packages: 'platform-tools build-tools;36.0.0 build-tools;37.0.0'
       - name: Receive signed public APKs and populate draft
+        id: receive
         env:
           SIGNED_BLOB: ${{ inputs.signed_blob }}
           BUNDLE_SHA256: ${{ inputs.bundle_sha256 }}
@@ -62,7 +65,7 @@ jobs:
           python3 - <<'PY'
           import base64, hashlib, io, json, os, re, subprocess, zipfile
           from pathlib import Path
-          from tools.release import ABIS, version
+          from tools.release import ABIS, target_sdk, version
           sha, digest = os.environ['SIGNED_BLOB'], os.environ['BUNDLE_SHA256']
           assert re.fullmatch(r'[0-9a-f]{40}', sha)
           assert re.fullmatch(r'[0-9a-f]{64}', digest)
@@ -81,6 +84,8 @@ jobs:
               assert sum(item.file_size for item in bundle.infolist()) < 300_000_000
               for name in expected:
                   (output / name).write_bytes(bundle.read(name))
+          with open(os.environ['GITHUB_OUTPUT'], 'a') as result:
+              result.write(f'target_sdk={target_sdk()}\n')
           PY
           python3 tools/release.py verify --input delivery
           for apk in delivery/*.apk; do
@@ -127,7 +132,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        api: ${{ fromJSON(inputs.reuse_validation_run && '["37.2"]' || '[26,33,"37.2"]') }}
+        api: ${{ fromJSON(inputs.reuse_validation_run && '["37.2"]' || (needs.prepare.outputs.target_sdk == '37' && '[26,33,"37.2"]' || '[26,33,36]')) }}
     steps:
       - uses: actions/checkout@v7.0.1
         with:
@@ -204,7 +209,7 @@ jobs:
           api-level: ${{ matrix.api }}
           system-image-api-level: ${{ matrix.api }}
           arch: x86_64
-          target: ${{ matrix.api == '37.2' && 'google_apis_ps16k' || 'google_apis' }}
+          target: ${{ (matrix.api == 36 || matrix.api == '37.2') && 'google_apis_ps16k' || 'google_apis' }}
           ram-size: 4096M
           heap-size: 512M
           force-avd-creation: true

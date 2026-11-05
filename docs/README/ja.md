@@ -144,7 +144,7 @@
 - LibChecker で Kotlin のビルド情報を識別できるよう修正。
 - Android 16 の起動互換性を改善。
 - アーカイブダウンロードの残高表示と大きな文字のレイアウトを改善。
-- Android 17 に対応し、APK 配布時の整合性確認を強化。
+- APK 配布時の整合性確認を強化。
 
 - パッケージ名：`moe.hycnyl.ehviewer` に変更しました。
 
@@ -152,7 +152,7 @@
 
 # ダウンロード
 
-EhViewer Revived のアプリ名は **EhViewer**、パッケージ名は `moe.hycnyl.ehviewer` のままです。Android 8.0 以降（Min SDK 26）、Target SDK 37、新しい鍵による V2/V3 署名を使用します。universal と4種類の ABI 別 APK を提供します。
+EhViewer Revived のアプリ名は **EhViewer**、パッケージ名は `moe.hycnyl.ehviewer` のままです。Android 8.0 以降（Min SDK 26）、Target SDK 36、新しい鍵による V2/V3 署名を使用します。universal と4種類の ABI 別 APK を提供します。
 
 署名検証に失敗する場合は、APK ファイルの SHA-256 を Release の `SHA256SUMS.txt` と比較し、一致しなければ再ダウンロードしてください。
 

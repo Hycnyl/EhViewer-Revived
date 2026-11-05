@@ -144,7 +144,7 @@
 - 恢復 LibChecker 的 Kotlin 建置資訊識別。
 - 改善 Android 16 啟動相容性。
 - 最佳化壓縮檔下載餘額配置與大字型支援。
-- 支援 Android 17，加強安裝套件完整性驗證。
+- 加強安裝套件交付完整性驗證。
 
 - 軟體套件名稱：套件名稱變更為`moe.hycnyl.ehviewer`；
 
@@ -152,7 +152,7 @@
 
 # 下載
 
-EhViewer Revived 的軟體名稱仍為 **EhViewer**，套件名稱仍為 `moe.hycnyl.ehviewer`。最低 Android 8.0（Min SDK 26），Target SDK 37，使用新金鑰的 V2/V3 簽章。提供 universal 與四種 ABI 安裝套件。
+EhViewer Revived 的軟體名稱仍為 **EhViewer**，套件名稱仍為 `moe.hycnyl.ehviewer`。最低 Android 8.0（Min SDK 26），Target SDK 36，使用新金鑰的 V2/V3 簽章。提供 universal 與四種 ABI 安裝套件。
 
 若提示簽章驗證失敗，請對照 Release 附帶的 `SHA256SUMS.txt` 檢查 APK 檔案的 SHA-256；不一致時重新下載該 APK。
 
