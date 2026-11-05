@@ -34,6 +34,8 @@ class BaselineProfileGenerator {
     fun galleryAndNavigation() = rule.collect(targetAppId) {
         prepare("list")
         scrollGallery()
+        // Scrolling can end at any viewport; reset before testing a cached detail.
+        prepare("list")
         navigateGallery()
         toggleDrawer()
         prepare("grid")

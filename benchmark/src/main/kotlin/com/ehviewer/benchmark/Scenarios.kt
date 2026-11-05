@@ -34,6 +34,7 @@ internal fun MacrobenchmarkScope.scrollGallery() {
     content.setGestureMargin(device.displayWidth / 8)
     repeat(5) { content.fling(Direction.DOWN) }
     repeat(5) { content.fling(Direction.UP) }
+    device.waitForIdle()
 }
 
 internal fun MacrobenchmarkScope.turnPages() {
@@ -60,10 +61,20 @@ internal fun MacrobenchmarkScope.zoomPage() {
 
 internal fun MacrobenchmarkScope.navigateGallery() {
     repeat(3) {
-        checkNotNull(device.findObject(By.textStartsWith("Offline gallery"))).click()
-        check(device.wait(Until.hasObject(By.text("Read")), 10_000)) { "Cached gallery detail did not open" }
+        val title = checkNotNull(
+            device.findObjects(By.textStartsWith("Offline gallery")).firstOrNull {
+                val bounds = it.visibleBounds
+                bounds.top >= device.displayHeight / 6 && bounds.bottom < device.displayHeight * 9 / 10 && bounds.width() > 80
+            },
+        ) { "No fully visible offline gallery title" }
+        val titleLabel = title.text
+        var card = title
+        while (!card.isClickable) card = checkNotNull(card.parent) { "Gallery title has no clickable card" }
+        card.click()
+        check(device.wait(Until.hasObject(By.text("Read")), 10_000)) { "Cached gallery detail did not open: ${titleLabel}" }
         device.pressBack()
         check(device.wait(Until.hasObject(By.textStartsWith("Offline gallery")), 10_000))
+        device.waitForIdle()
     }
 }
 

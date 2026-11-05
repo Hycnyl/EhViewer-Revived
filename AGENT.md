@@ -95,3 +95,6 @@ UI 模块保留 `allWarningsAsErrors`，仅用 `-Xwarning-level=DEPRECATION:warn
 - GitHub workflow_dispatch 接口间歇性返回 500/502；42067066068 优化帧运行停在 queued，数次原行为 dispatch 未创建运行。已准备受控的 performance-baseline/performance-optimized push 触发作为正常 CI 入口。baseline 私有工作树 /workspace/.ehviewer-revived-work/baseline-source，分支 d073c75；只将九个 UI 文件恢复到 025dac0，版本/依赖/夹具/构建配置与候选相同。待有实际测量和 Perfetto 证据才汇报效果。
 
 - 受控 push 采集已启动：原行为 e6dd496 / 42069601016，优化 2f60a02 / 42069851582，主 build 42068125640 持续运行。官方 Macrobenchmark 1.5 源码确认 perfettoSdkTracing.enable 默认 false；现只对帧场景启用它，确保 runtime-tracing 真正记录 Compose，冷启动对照不加入这项额外初始化。两个受控分支同步同一配置；旧未启用此项的帧运行由新运行替代。
+
+- 6b24b49 Profile 实测：startup、pagerReader、webtoonReader 全部通过；galleryAndNavigation 失败日志精确显示选中了仅在屏幕顶端露出 31 px 的 Offline gallery 070，实际点击落在状态栏，且滚动后未回到缓存的首屏。已修正为滚动后重新进入首屏、选择完整可见标题并点击其 clickable card，导航返回后等待动画空闲。不改任何正式画廊点击行为。
+- 接下来重跑完整自动采集/合并以完成发布；三个已通过的阅读/启动路径是实际采集成功，八个 Frame/Startup 类在 Profile 任务中为预期 skipped，不计作通过。交互 UI 四项源代码没有改变；Release 选择对应 UI workflow，并允许通过受控 git diff 证明 UI/资源/构建配置/测试未变的情况下复用已有通过结果，避免仅夹具修正重复跑无关 UI。

@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: 'Signed draft release tag (v1.17.12)'
+        description: 'Signed draft release tag (v1.17.13)'
         required: true
         type: string
       source_commit:
@@ -19,6 +19,12 @@ on:
         description: 'SHA-256 of the signed public release ZIP'
         required: true
         type: string
+      focused_ui_workflow:
+        description: 'Focused UI checks appropriate to this release'
+        required: false
+        type: choice
+        options: [interaction-ui.yml, archive-ui.yml]
+        default: interaction-ui.yml
       reuse_validation_run:
         description: 'Optional prior run for identical signed bytes with successful API 26/33 jobs'
         required: false
@@ -36,6 +42,7 @@ env:
   GH_TOKEN: ${{ github.token }}
   TAG: ${{ inputs.tag }}
   SOURCE_COMMIT: ${{ inputs.source_commit }}
+  UI_WORKFLOW: ${{ inputs.focused_ui_workflow }}
 
 jobs:
   prepare:
@@ -177,17 +184,29 @@ jobs:
           ui_runs = json.loads(subprocess.check_output(['gh', 'api', f"repos/{os.environ['GITHUB_REPOSITORY']}/actions/runs?per_page=50"]))['workflow_runs']
           ui_verified = False
           for ui in ui_runs:
-              if ui['path'] not in ('.github/workflows/archive-ui.yml', '.github/workflows/interaction-ui.yml') or ui['conclusion'] != 'success':
+              if ui['path'] != '.github/workflows/' + os.environ['UI_WORKFLOW'] or ui['conclusion'] != 'success':
                   continue
               ui_jobs = json.loads(subprocess.check_output(['gh', 'api', ui['jobs_url']]))['jobs']
               prefix = 'interaction' if ui['path'].endswith('interaction-ui.yml') else 'layout'
-              if len(ui_jobs) != 1 or ui_jobs[0]['name'] != f"{prefix}-{os.environ['SOURCE_COMMIT']}":
+              if len(ui_jobs) != 1 or not ui_jobs[0]['name'].startswith(prefix + '-'):
                   continue
+              ui_source = ui_jobs[0]['name'][len(prefix)+1:]
+              if len(ui_source) != 40 or any(c not in '0123456789abcdef' for c in ui_source):
+                  continue
+              if ui_source != os.environ['SOURCE_COMMIT']:
+                  subprocess.check_call(['git', 'fetch', '--no-tags', '--depth=1', 'origin', ui_source])
+                  # A benchmark-only fixture fix does not change the UI previously rendered.
+                  relevant = ['app/src/main', 'app/src/test', 'core', 'app/build.gradle.kts', 'app/proguard-rules.pro', 'build.gradle.kts', 'settings.gradle.kts', 'build-logic', 'gradle', 'gradle.properties', '.github/workflows/' + os.environ['UI_WORKFLOW']]
+                  difference = subprocess.run(['git', 'diff', '--quiet', ui_source, os.environ['SOURCE_COMMIT'], '--', *relevant])
+                  if difference.returncode == 1:
+                      continue
+                  difference.check_returncode()
+                  print(f'UI source and build configuration unchanged since validated {ui_source}')
               assert all(s['status'] == 'completed' and s['conclusion'] == 'success' for s in ui_jobs[0]['steps'])
               ui_verified = True
               print(f"Verified focused UI checks for the APK source in run {ui['id']}")
               break
-          assert ui_verified, 'Relevant focused UI checks must pass for the exact APK source before release'
+          assert ui_verified, 'Relevant focused UI checks must pass for the APK source or identical UI/build inputs before release'
           PY
       - name: Download migration baseline
         if: matrix.api == 33
