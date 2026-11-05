@@ -109,3 +109,5 @@ UI 模块保留 `allWarningsAsErrors`，仅用 `-Xwarning-level=DEPRECATION:warn
 - 已进一步核对 Macrobenchmark 1.5 的 PerfettoCaptureWrapper：默认启动 ConnectedProfilerTracing（Tracing 2.0）并合并进程内 traces；旧 enablePerfettoSdk 仅是额外兼容通路。无需额外开启旧 SDK。报告 SQL 也纳入具体 com.hippo.ehviewer/com.ehviewer.core 组件段。可选 startup 模式先生成新 profile 再比较，避免误测旧静态 profile；本轮未据此宣称启动耗时收益。
 
 - 新一轮实际候选源码 10fcb18dd79e1dc604997b0ab9848a1a1959ee7d，Build 42077096993 / job 127420096920 正在 Profile；优化帧 42077099315 / job 127420106574，原行为 58b503a 的帧 42077106272 / job 127420130769。签名 worktree 已切到 10fcb18。已确认 ProfileInstaller 1.4.1 仍为最新稳定版且 >=S 使用前向兼容 V015，不作无谓升级；install_check 新增三平台真实 Profile 安装结果验证（非业务检查，脚本按 workflow revision 加载）。
+
+- 10fcb18 再次真实通过启动/Pager/Webtoon Profile，仅导航标题选择失败。旧日志显示窄窗口标题本身只有 43 px，上一版 width>80 的测试假设过严；现允许非零宽度、保留屏内位置限制，并让 benchmark-only detailCache 容纳全部 120 个固定条目，确保滚动到任意条目也不发网络请求。CI 显式使用官方 pixel_6 设备定义，基线/优化一致；失败信息保留候选 bounds。不改正式缓存容量或画廊点击逻辑。

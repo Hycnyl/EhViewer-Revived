@@ -65,8 +65,9 @@ class BenchmarkActivity : ComponentActivity() {
             for (index in 119 downTo 0) EhDB.putLocalFavorites(gallery(index))
             check(prefs.edit().putBoolean("seeded-v1", true).commit())
         }
-        // Rebuild the small in-memory detail cache after every process restart.
-        for (index in 0 until 24) {
+        // Keep every synthetic detail offline, including viewports reached after scrolling.
+        detailCache.resize(160)
+        for (index in 0 until 120) {
             val info = gallery(index)
             detailCache[info.gid] = GalleryDetail(
                 galleryInfo = info,

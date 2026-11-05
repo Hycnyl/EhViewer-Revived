@@ -64,7 +64,7 @@ internal fun MacrobenchmarkScope.navigateGallery() {
         val title = checkNotNull(
             device.findObjects(By.textStartsWith("Offline gallery")).firstOrNull {
                 val bounds = it.visibleBounds
-                bounds.top >= device.displayHeight / 6 && bounds.bottom < device.displayHeight * 9 / 10 && bounds.width() > 80
+                bounds.top >= device.displayHeight / 6 && bounds.bottom < device.displayHeight * 9 / 10 && bounds.width() > 0 && bounds.height() > 0
             },
         ) { "No fully visible offline gallery title" }
         val titleLabel = title.text
@@ -82,7 +82,7 @@ internal fun MacrobenchmarkScope.toggleDrawer() {
     val w = device.displayWidth
     val h = device.displayHeight
     repeat(4) {
-        device.swipe(2, h / 2, w * 4 / 5, h / 2, 24)
+        device.swipe(w / 8, h / 2, w * 4 / 5, h / 2, 24)
         check(device.wait(Until.hasObject(By.text("Settings")), 5_000)) { "Navigation drawer did not open" }
         device.pressBack()
         device.waitForIdle()
