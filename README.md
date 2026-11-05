@@ -141,6 +141,8 @@
 
 ## Other
 
+- Restore Kotlin build metadata recognition in LibChecker.
+
 - Package name: Changed to `moe.hycnyl.ehviewer`;
 
 - About page: Relevant links now point to this repository.

@@ -141,6 +141,8 @@
 
 ## 其它
 
+- 恢复 LibChecker 的 Kotlin 构建信息识别。
+
 - 软件包名：包名变更为`moe.hycnyl.ehviewer`；
 
 - 关于页面：相关链接更改，指向当前仓库。

@@ -10,6 +10,7 @@ import re
 import shutil
 import struct
 import subprocess
+import tomllib
 import zipfile
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -43,6 +44,22 @@ def tools():
     return sdk / "build-tools/37.0.0"
 
 
+def kotlin_tooling_metadata(archive):
+    info = json.loads(archive.read("kotlin-tooling-metadata.json"))
+    versions = tomllib.loads((ROOT / "gradle/libs.versions.toml").read_text())["versions"]
+    wrapper = (ROOT / "gradle/wrapper/gradle-wrapper.properties").read_text()
+    gradle = re.search(r"/gradle-([0-9.]+)-bin\.zip", wrapper).group(1)
+    if (info["buildSystem"], info["buildSystemVersion"], info["buildPluginVersion"]) != ("Gradle", gradle, versions["kotlin"]):
+        raise RuntimeError("Kotlin tooling metadata does not match the build configuration")
+    target = next((t for t in info["projectTargets"] if t["target"] == "org.jetbrains.kotlin.gradle.plugin.mpp.KotlinAndroidTarget"), None)
+    if target is None or target["platformType"] != "androidJvm":
+        raise RuntimeError("Kotlin Android target metadata is missing")
+    java = target["extras"]["android"]
+    if not all(isinstance(java.get(key), str) and java[key].isdecimal() for key in ("sourceCompatibility", "targetCompatibility")):
+        raise RuntimeError("Java compatibility metadata is missing")
+    return info
+
+
 def metadata(directory, filename, signed):
     name, code = version()
     info = {
@@ -56,6 +73,8 @@ def metadata(directory, filename, signed):
         "targetSdk": 36,
         "files": {p.name: sha256(p) for p in sorted(directory.glob("*.apk"))},
     }
+    with zipfile.ZipFile(next(directory.glob("*.apk"))) as archive:
+        info["kotlinToolingMetadata"] = kotlin_tooling_metadata(archive)
     if signed:
         info.update(certificateSha256=CERTIFICATE, signatureSchemes=["v2", "v3"])
     (directory / filename).write_text(json.dumps(info, indent=2) + "\n")
@@ -90,6 +109,8 @@ def verify(directory, manifest, signed):
         with zipfile.ZipFile(apk) as archive:
             if archive.testzip() is not None:
                 raise RuntimeError(f"Corrupt APK: {filename}")
+            if kotlin_tooling_metadata(archive) != info["kotlinToolingMetadata"]:
+                raise RuntimeError(f"Inconsistent Kotlin tooling metadata: {filename}")
             native_abis = {p.split("/")[1] for p in archive.namelist() if p.startswith("lib/") and p.endswith(".so")}
             for path in archive.namelist():
                 if not path.startswith("lib/") or not path.endswith(".so"):

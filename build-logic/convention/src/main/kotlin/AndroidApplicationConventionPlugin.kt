@@ -2,6 +2,7 @@ import com.android.build.api.dsl.ApplicationExtension
 import com.android.build.api.dsl.Lint
 import com.ehviewer.configureKotlin
 import com.ehviewer.configureKotlinCompose
+import com.ehviewer.configureKotlinToolingMetadata
 import com.ehviewer.configureLint
 import com.ehviewer.configureSpotless
 import com.ehviewer.libs
@@ -32,5 +33,6 @@ class AndroidApplicationConventionPlugin : Plugin<Project> {
             lint(Lint::configureLint)
         }
         configureSpotless()
+        configureKotlinToolingMetadata()
     }
 }

@@ -7,7 +7,7 @@
 ## 基线与发布
 
 - 功能源自 `Hycnyl/EhViewer` 的 `v1.17.8`，对应清理后的提交 `92923877ef671e33aa56f69688daa46af6e59ec6`；新仓库独立起始，不继承旧 Git 历史。四种语言 README 继承旧仓库最新的用户文档与完整素材引用，保留 LICENSE、NOTICE 和源码版权说明。
-- 应用名保持 `EhViewer`，正式包名保持 `moe.hycnyl.ehviewer`。本次版本为 `1.17.10` / `180085`，接续旧版 `1.17.8` / `180083` 和 `1.17.9` / `180084`。后续沿用版本体系，版本码递增。
+- 应用名保持 `EhViewer`，正式包名保持 `moe.hycnyl.ehviewer`。当前版本为 `1.17.11` / `180086`，接续旧版 `1.17.8` / `180083` 和 `1.17.9` / `180084`。后续沿用版本体系，版本码递增。
 - 任何实际影响用户的改动完成后，除非维护者明确禁止，都须提升 versionName/versionCode，使用 GitHub Actions 发布正式 Release；提供 universal、arm64-v8a、armeabi-v7a、x86_64、x86 五种 APK，并附简短变更说明与 SHA-256 校验和。不得使用 `[skip ci]` 绕过这条规则。
 - README 保持简洁，变更通常只在“变更”章节简要记录；允许修正仓库链接、安装要求和迁移说明。不得随意重写其余内容或丢失截图、素材和致谢。
 - 单轮只改一个目标不是硬性限制。缓存导出、下载恢复和归档格式继承 1.17.8 的当前行为，维护者没有将其固化为不可修改的长期规则。
@@ -41,6 +41,7 @@
 - 打包：`python3 tools/release.py package --input app/build/outputs/apk/default/release --output delivery`。
 - 本地签名：`python3 tools/release.py sign --input <Actions未签名产物目录> --output <新输出目录> --vault /workspace/.ehviewer-revived-signing`。设置 ANDROID_HOME；使用已安装的固定版 Build Tools。
 - 公开产物复核：`python3 tools/release.py verify --input <已签名产物目录>`。来源提交、版本、包名、SDK、原生 ABI、ZIP CRC、16 KiB ZIP 对齐、证书及 V2/V3 均须匹配。
+- APK 根目录的标准 Kotlin 工具元数据由 `GenerateKotlinToolingMetadataTask` 从实际 KGP、Gradle 和 Java 编译配置生成，通过 `ScopedArtifact.JAVA_RES` 随每个变体打包，供 LibChecker 等工具识别。Java 字段表示 compileOptions 的源码/字节码兼容级别。
 
 
 ## 当前工具链与升级取舍
@@ -78,5 +79,6 @@ UI 模块保留 `allWarningsAsErrors`，仅用 `-Xwarning-level=DEPRECATION:warn
 
 - 已确认：LibChecker 通过 APK 根目录的 `kotlin-tooling-metadata.json` 等静态标记显示 Kotlin 徽标、Gradle 和 Java 信息；其源码自身提供了将 Kotlin 官方生成元数据追加到 APK 的构建处理。徽标缺失不能作为应用不再使用 Kotlin 的判断。
 - 已定位：1.17.8 正式 APK 有根目录元数据（Kotlin 2.3.0 / Gradle 9.2.1 / Java 源码兼容级别 21），1.17.10 中该文件及其他静态 Kotlin 标记均缺失。AGP 内建 Kotlin 没有注册旧 KGP 的 buildKotlinToolingMetadata 任务；原有 META-INF/kotlin 精简规则没有变化。
-- 正在实现：基于实际 Kotlin 插件版本、Android Kotlin target、Gradle 版本与 Java compileOptions 生成标准元数据，并用公开 JAVA_RES Artifact API 加入 APK 根目录。代码压缩策略保持原有行为。
+- 已实现并验证生成任务：使用 Kotlin 官方元数据模型，实际输出 Kotlin 2.4.21 / Gradle 9.8.2 / Java source/target 21，记录真实 KotlinBaseApiPlugin 与 KotlinAndroidTarget。任务编译、生成与格式检查通过；通过公开 JAVA_RES Artifact API 加入 APK 根目录，不调整 R8 精简策略。
+- 已增加产物校验：打包和签名复核时检查元数据存在、版本匹配且五种 ABI 内容一致；API 33 在原迁移链中追加上一个正式 Revived 版本（本轮为 1.17.10），验证用户当前版本的覆盖升级。
 - 下一步：采用局部构建修复，元数据取自真实工具配置，不伪造版本；提升至 1.17.11 / 180086，Actions 构建五种 APK、本地私钥 V2+V3 签名后验证发布。最后清理临时产物并删除本章节。

@@ -131,11 +131,15 @@ def exercise(args):
         print("PASS: Android 16 emulator uses 16 KiB pages")
     # Each job starts a fresh AVD. Preserve its boot diagnostics too; Android 8
     # can reject clearing logd buffers after adbd switches to root.
-    baseline = sorted(Path("baseline").glob("*universal.apk"))
     if api == 33:
-        if [p.name for p in baseline] != ["EhViewer-1.17.8-universal.apk", "EhViewer-1.17.9-universal.apk"]:
-            raise RuntimeError("Both migration baselines are required on API 33")
-        for old in baseline:
+        baseline = Path("baseline")
+        previous = (baseline / "previous-revived-tag.txt").read_text().strip()
+        if not re.fullmatch(r"v\d+\.\d+\.\d+", previous):
+            raise RuntimeError("A previous stable Revived release is required")
+        names = ["EhViewer-1.17.8-universal.apk", "EhViewer-1.17.9-universal.apk", f"EhViewer-{previous[1:]}-universal.apk"]
+        if {p.name for p in baseline.glob("*universal.apk")} != set(names):
+            raise RuntimeError("Original and previous Revived migration baselines are required on API 33")
+        for old in (baseline / name for name in names):
             adb("install", "-r", "-g", str(old))
             launch(args.output, old.stem)
             prepare_guest()

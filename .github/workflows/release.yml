@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: 'Signed draft release tag (v1.17.10)'
+        description: 'Signed draft release tag (v1.17.11)'
         required: true
         type: string
       source_commit:
@@ -140,6 +140,10 @@ jobs:
           for version in v1.17.8 v1.17.9; do
             gh release download "$version" --repo Hycnyl/EhViewer --pattern '*universal.apk' --dir baseline
           done
+          previous_release_tag="$(gh api "repos/$GITHUB_REPOSITORY/releases/latest" --jq .tag_name)"
+          test "$previous_release_tag" != "$TAG"
+          gh release download "$previous_release_tag" --pattern '*universal.apk' --dir baseline
+          printf '%s\n' "$previous_release_tag" > baseline/previous-revived-tag.txt
       - name: Enable emulator acceleration
         run: |
           echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
