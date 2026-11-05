@@ -19,6 +19,10 @@ on:
         description: 'SHA-256 of the signed public release ZIP'
         required: true
         type: string
+      reuse_validation_run:
+        description: 'Optional prior run for identical signed bytes with successful API 26/33 jobs'
+        required: false
+        type: string
 
 permissions:
   contents: read
@@ -38,6 +42,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+      actions: read
     steps:
       - uses: actions/checkout@v7.0.1
         with:
@@ -82,6 +87,34 @@ jobs:
             "$ANDROID_HOME/build-tools/36.0.0/apksigner" verify --verbose "$apk"
           done
           gh release upload "$TAG" delivery/* --clobber
+      - name: Verify reusable Android 8 and 13 results for the identical signed bundle
+        if: inputs.reuse_validation_run
+        env:
+          REUSE_RUN: ${{ inputs.reuse_validation_run }}
+          SIGNED_BLOB: ${{ inputs.signed_blob }}
+          BUNDLE_SHA256: ${{ inputs.bundle_sha256 }}
+        run: |
+          python3 - <<'PY'
+          import json, os, re, subprocess
+          run_id = os.environ['REUSE_RUN']
+          assert re.fullmatch(r'[0-9]+', run_id)
+          base = f"repos/{os.environ['GITHUB_REPOSITORY']}/actions"
+          run = json.loads(subprocess.check_output(['gh', 'api', f'{base}/runs/{run_id}']))
+          assert run['path'] == '.github/workflows/release.yml'
+          jobs = json.loads(subprocess.check_output(['gh', 'api', f'{base}/runs/{run_id}/jobs']))['jobs']
+          previous = {j['name']: j for j in jobs}
+          assert previous['prepare']['conclusion'] == 'success'
+          logs = subprocess.check_output(['gh', 'api', f"{base}/jobs/{previous['prepare']['id']}/logs"]).decode()
+          for key in ('TAG', 'SOURCE_COMMIT', 'SIGNED_BLOB', 'BUNDLE_SHA256'):
+              assert f"{key}: {os.environ[key]}" in logs, f'Previous bundle/input differs: {key}'
+          for name in ('verify (26)', 'verify (33)'):
+              job = previous[name]
+              assert job['status'] == 'completed' and job['conclusion'] == 'success'
+              required = {'Download and verify signed draft', 'Run ReactiveCircus/android-emulator-runner@v2.38.0', 'Complete job'}
+              passed = {s['name'] for s in job['steps'] if s['status'] == 'completed' and s['conclusion'] == 'success'}
+              assert required <= passed
+              print(f"Reused successful {name} from run {run_id} for the identical signed APK bundle")
+          PY
 
   verify:
     needs: prepare
@@ -94,7 +127,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        api: [26, 33, '37.2']
+        api: ${{ fromJSON(inputs.reuse_validation_run && '["37.2"]' || '[26,33,"37.2"]') }}
     steps:
       - uses: actions/checkout@v7.0.1
         with:
@@ -176,7 +209,7 @@ jobs:
           heap-size: 512M
           force-avd-creation: true
           disable-animations: true
-          emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim -camera-back none
+          emulator-options: -no-window -gpu ${{ matrix.api == '37.2' && 'software' || 'swiftshader_indirect' }} -no-snapshot -noaudio -no-boot-anim -camera-back none
           script: |
             test '${{ matrix.api }}' = 33 || adb root
             adb wait-for-device
