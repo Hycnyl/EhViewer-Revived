@@ -92,5 +92,6 @@ UI 模块保留 `allWarningsAsErrors`，仅用 `-Xwarning-level=DEPRECATION:warn
 - 首轮安装阶段：API 26 与 API 33 全部通过；API 33 确认 1.17.11 ABI、1.17.11 universal 和 1.17.12 universal 均能文件式安装，升级保留标记数据。API 37.2 的设备页大小为 16384，但 pm install 在系统 package 服务调用处返回 Broken pipe(32)，退出码 224；尚未进入应用启动，不能直接视为 Target 兼容失败。草稿未发布，系统日志 Artifact 为 `13392205148`，正在读取原因。
 - 已确认 API 37.2 模拟器在安装前发生 SurfaceFlinger/mapper.ranchu 的 ReadColorBufferDma 断言崩溃，带动系统服务重启；与应用进程无关。按官方模拟器文档，将该镜像从已弃用的 swiftshader_indirect 改为受支持的 software 模式，做一次有针对性的兼容尝试。签名包保持不变，复用前轮已通过的 API 26/33；复用门禁核对前轮成功步骤及四个相同输入（Tag、源码、blob、ZIP SHA-256）。
 - 重试 [41976148244](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/41976148244) 在复用门禁处被新版 gh 的 ANSI 日志输出保护中断，模拟器尚未运行；已为只在内存中解析的自有日志加上官方要求的 allow-escape-sequences 标志。该修正不改变 APK、签名或实际验证条件。
+- 当前定向验证：[41976390520](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/41976390520)，工作流版本 92ab532，复用门禁已成功；只重跑 API 37.2/software，APK 仍为 68034a2 的同一签名包。若该图形环境仍无法稳定验证，本轮按维护者授权保留 Target 36，不继续扩展模拟器修复范围。
 - 下一步：分析 API 37.2 系统日志，若是服务就绪/模拟器问题则只修正 CI 等待或镜像，不重建 APK；若 Target 本身有难以兼容的阻碍，按维护者授权回退 Target 36 后再构建。通过后复核发布并清理。
 - 完成后：清理旧候选/失败或取消作业的临时 Artifact、本地 worktree、APK、日志与截图，仅保留本版有效 CI 证据；停止本地 Gradle，删除本临时章节。保留工具链缓存与私有签名目录。
