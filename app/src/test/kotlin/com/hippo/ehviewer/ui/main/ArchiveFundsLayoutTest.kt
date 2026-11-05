@@ -15,7 +15,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.captureToImage
-import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.unit.Density
@@ -94,7 +94,7 @@ class ArchiveFundsLayoutTest {
         }
         val image = compose.onNodeWithTag("archive").captureToImage().asAndroidBitmap()
         val output = File("build/reports/archive-ui/$name.png")
-        output.parentFile.mkdirs()
+        checkNotNull(output.parentFile).mkdirs()
         output.outputStream().use { image.compress(Bitmap.CompressFormat.PNG, 100, it) }
     }
 }
