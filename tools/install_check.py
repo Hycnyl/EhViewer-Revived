@@ -4,6 +4,7 @@
 import argparse
 import hashlib
 import json
+import re
 from pathlib import Path
 
 from smoke import adb, launch
@@ -23,6 +24,15 @@ def install(apk):
         raise RuntimeError(f"File-based installation failed: {apk.name}: {result}")
     adb("shell", "rm", remote)
     print(f"PASS: device SHA-256 and file-based package install: {apk.name}", flush=True)
+
+
+def verify_profile_install():
+    result = adb("shell", "am", "broadcast", "-a", "androidx.profileinstaller.action.INSTALL_PROFILE",
+                 "-n", PACKAGE + "/androidx.profileinstaller.ProfileInstallReceiver").decode()
+    code = re.search(r"Broadcast completed: result=(-?\d+)", result)
+    if code is None or int(code.group(1)) != 1:
+        raise RuntimeError(f"The packaged Baseline Profile was not installed successfully: {result}")
+    print("PASS: ProfileInstaller transcoded and installed the packaged Baseline Profile", flush=True)
 
 
 def main():
@@ -67,6 +77,7 @@ def main():
                 raise RuntimeError("An upgrade did not preserve the installed app's data")
             adb("shell", "rm", sentinel)
             print("PASS: previous ABI/universal -> new universal upgrade preserves app data", flush=True)
+        verify_profile_install()
         details = adb("shell", "dumpsys", "package", PACKAGE)
         (args.output / "package.txt").write_bytes(details)
         if f"targetSdk={info['targetSdk']}".encode() not in details:

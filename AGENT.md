@@ -43,6 +43,10 @@
 - 打包：`python3 tools/release.py package --input app/build/outputs/apk/default/release --output delivery`。
 - 本地签名：`python3 tools/release.py sign --input <Actions未签名产物目录> --output <新输出目录> --vault /workspace/.ehviewer-revived-signing`。设置 ANDROID_HOME；使用已安装的固定版 Build Tools。
 - 公开产物复核：`python3 tools/release.py verify --input <已签名产物目录>`。来源提交、版本、包名、SDK、原生 ABI、ZIP CRC、16 KiB ZIP 对齐、证书及 V2/V3 均须匹配。
+- Release CI 使用 API 35 离线场景执行 `:app:generateBaselineProfile -PbuildAbis=x86_64`，检查两套阅读器覆盖后再组装全部正式 ABI。生成文本存于 Git 忽略的 `app/src/main/generated/baselineProfiles/`，正式包须包含非空 `assets/dexopt/baseline.prof` 和 `.profm`。开发构建默认不启动模拟器，需要自动采集时显式 `-PgenerateBaselineProfile=true`。
+- Baseline Profile 1.5 会在 finalizeDsl 中复制原 Release manifest；benchmark/nonMinified 变体的专用 overlay 必须在其后配置。测试内容只进入独立 `.benchmark` 包，正式 APK 不含夹具入口。
+- 帧测试按六个独立场景执行，版本/依赖/内容/构建配置一致后再对比。runtime-tracing 1.13 使用 Tracing 2.0/tracing-wire，Macrobenchmark 1.5 默认连接并合并进程内追踪；不要为它启用仅对应旧 tracing-perfetto 的 perfettoSdkTracing 开关。高开销的重组状态读写追踪只用于必要定向诊断。
+- ProfileInstaller 保持官方最新稳定版 1.4.1（V015_S 向前兼容）；发布设备检查实际调用安装 receiver，并要求成功转码/写入 Profile。帧数据附原始 JSON/Perfetto，软件渲染模拟器不得被描述为真机 FPS 或硬件 GPU 验证。
 - APK 根目录的标准 Kotlin 工具元数据由 `GenerateKotlinToolingMetadataTask` 从实际 KGP、Gradle 和 Java 编译配置生成，通过 `ScopedArtifact.JAVA_RES` 随每个变体打包，供 LibChecker 等工具识别。Java 字段表示 compileOptions 的源码/字节码兼容级别。
 
 
@@ -103,3 +107,5 @@ UI 模块保留 `allWarningsAsErrors`，仅用 `-Xwarning-level=DEPRECATION:warn
 - Frame 场景 setup 现在显式结束上一进程后再准备内容、等待图片显示，避免失败/前场景的原生归档状态干扰后场景；测量仍从准备后的交互开始。66543ba 主构建仅被错误提示字符串冗余大括号的格式检查挡住，已按 ktlint 修正，不涉及产品代码。
 
 - 已进一步核对 Macrobenchmark 1.5 的 PerfettoCaptureWrapper：默认启动 ConnectedProfilerTracing（Tracing 2.0）并合并进程内 traces；旧 enablePerfettoSdk 仅是额外兼容通路。无需额外开启旧 SDK。报告 SQL 也纳入具体 com.hippo.ehviewer/com.ehviewer.core 组件段。可选 startup 模式先生成新 profile 再比较，避免误测旧静态 profile；本轮未据此宣称启动耗时收益。
+
+- 新一轮实际候选源码 10fcb18dd79e1dc604997b0ab9848a1a1959ee7d，Build 42077096993 / job 127420096920 正在 Profile；优化帧 42077099315 / job 127420106574，原行为 58b503a 的帧 42077106272 / job 127420130769。签名 worktree 已切到 10fcb18。已确认 ProfileInstaller 1.4.1 仍为最新稳定版且 >=S 使用前向兼容 V015，不作无谓升级；install_check 新增三平台真实 Profile 安装结果验证（非业务检查，脚本按 workflow revision 加载）。
