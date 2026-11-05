@@ -73,3 +73,10 @@ UI 模块保留 `allWarningsAsErrors`，仅用 `-Xwarning-level=DEPRECATION:warn
 发布验证使用 API 26、33、36 模拟器；API 26/33 采用包含 WebView 的 google_apis 镜像，模拟器分配 4096M RAM / 512M heap 并每次新建 AVD。API 33 执行 1.17.8 → 1.17.9 → Revived 的覆盖安装链，API 36 使用 google_apis_ps16k 镜像并核对实际页大小 16384。每台模拟器还打开临时生成的离线 CBZ，通过已知页面像素确认原生解包与图片显示；临时材料不进入源码或 Release。
 
 本托管环境先执行 `source /workspace/.ehviewer-env/activate.sh`，其中设置已固定的 JDK、SDK、Gradle/Cargo 缓存与本地 GNU m4 1.4.20。m4 是 Nettle 汇编的构建依赖；CI 检查并安装它。本地无 sudo，m4 安装于私有工具目录。Nettle 的源码包含预生成文件，CMake 必须保留其解包时间戳（DOWNLOAD_EXTRACT_TIMESTAMP TRUE）。
+
+## 临时进度：LibChecker Kotlin 构建信息与 1.17.11
+
+- 已确认：LibChecker 通过 APK 根目录的 `kotlin-tooling-metadata.json` 等静态标记显示 Kotlin 徽标、Gradle 和 Java 信息；其源码自身提供了将 Kotlin 官方生成元数据追加到 APK 的构建处理。徽标缺失不能作为应用不再使用 Kotlin 的判断。
+- 已定位：1.17.8 正式 APK 有根目录元数据（Kotlin 2.3.0 / Gradle 9.2.1 / Java 源码兼容级别 21），1.17.10 中该文件及其他静态 Kotlin 标记均缺失。AGP 内建 Kotlin 没有注册旧 KGP 的 buildKotlinToolingMetadata 任务；原有 META-INF/kotlin 精简规则没有变化。
+- 正在实现：基于实际 Kotlin 插件版本、Android Kotlin target、Gradle 版本与 Java compileOptions 生成标准元数据，并用公开 JAVA_RES Artifact API 加入 APK 根目录。代码压缩策略保持原有行为。
+- 下一步：采用局部构建修复，元数据取自真实工具配置，不伪造版本；提升至 1.17.11 / 180086，Actions 构建五种 APK、本地私钥 V2+V3 签名后验证发布。最后清理临时产物并删除本章节。
