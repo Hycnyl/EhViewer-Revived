@@ -74,18 +74,3 @@ UI 模块保留 `allWarningsAsErrors`，仅用 `-Xwarning-level=DEPRECATION:warn
 发布验证使用 API 26、33、36 模拟器；API 26/33 采用包含 WebView 的 google_apis 镜像，模拟器分配 4096M RAM / 512M heap 并每次新建 AVD。API 33 执行 1.17.8 → 1.17.9 → 上个正式 Revived 版本 → 本版的覆盖安装链，并检查访客模式设置保留；API 36 使用 google_apis_ps16k 镜像并核对实际页大小 16384。每台模拟器还打开临时生成的离线 CBZ，通过已知页面像素确认原生解包与图片显示，再执行带已有设置的强制停止后冷启动；临时材料不进入源码或 Release。
 
 本托管环境先执行 `source /workspace/.ehviewer-env/activate.sh`，其中设置已固定的 JDK、SDK、Gradle/Cargo 缓存与本地 GNU m4 1.4.20。m4 是 Nettle 汇编的构建依赖；CI 检查并安装它。本地无 sudo，m4 安装于私有工具目录。Nettle 的源码包含预生成文件，CMake 必须保留其解包时间戳（DOWNLOAD_EXTRACT_TIMESTAMP TRUE）。
-
-## 临时进度：LibChecker Kotlin 构建信息与 1.17.11
-
-- 已定位并修复：1.17.8 的 APK 有根目录 `kotlin-tooling-metadata.json`，1.17.10 缺失；AGP 内建 Kotlin 没有注册旧 KGP 的生成任务，其他 Kotlin 标记被沿用的精简规则排除。现在使用 Kotlin 官方模型与公开 JAVA_RES Artifact API，从真实配置生成 Kotlin 2.4.21 / Gradle 9.8.2 / Java source/target 21；不修改 R8 策略。
-- 元数据生成、五种 ABI 打包与一致性检查已通过首个候选构建 [41946491046](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/41946491046)，旧候选源码 bdc1985。五包已通过 V2/V3、固定证书、最低 API 26、包信息、ABI、CRC 及 16 KiB 对齐验证；LibChecker 字段按其公开源码核对，未实际自动操作 LibChecker 界面。
-- 首个候选的三轮设备验证 API 26/33 均通过，API 33 包含 1.17.8 → 1.17.9 → 1.17.10 → 1.17.11。API 36 仍停在启动页；[41950499857](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/41950499857) 的截图及反混淆 SIGQUIT 栈确认，主线程和五个 IO 线程在 PrefDelegate.getValue 的 runBlocking 中等待 DataStore 首次快照，无应用崩溃。禁止把该等待当作通过。
-- 当前局部兼容候选：DataStore 1.3.0 → 1.2.1（原版为 1.2.0）。全部 DataStore 模块已确认解析为 1.2.1；两版原有八类 protobuf 字段编号一致，不改变设置键、文件位置或应用存储格式。此回退须设备实测才认定有效。
-- 本地 JVM 格式检查通过：使用两版官方二进制库和隔离类加载器，验证全部八类设置值经 1.3.0 → 1.2.1 → 1.3.0 的 protobuf 往返，值、类型及中文/集合/字节数组不丢失。结果将写入 Release；一次性检查材料留在私有临时目录，完成后删除。
-- 当前候选源码 `8a11e1a64a3aef4f3731bf85c8528afb5875dc64`，构建 [41953512288](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/41953512288) 已通过 Kotlin 编译、AAR 元数据与格式检查，全部 17 个构建步骤成功。五种 APK 已完成本地签名，并通过真实 Kotlin 元数据一致性、来源、包信息、ABI、CRC、16 KiB 对齐、固定证书、V2/V3 和最低 API 26 验证。版本仍为未公开的 1.17.11 / 180086。
-- 当前本地独立源码 worktree：`/workspace/.ehviewer-revived-work/source`，HEAD 固定为 8a11e1a。签名私钥仍在上文私有目录。v1.17.11 草稿即将更新为当前候选；设备矩阵全部通过前不得发布。
-- 设备脚本保留有限界面等待和失败诊断；API 33 新增访客模式设置保留断言，先处理下载路径提示但不重新进入访客模式掩盖重置。三台设备均新增一次带已有设置的强制停止后冷启动，并保留离线 CBZ 解包/渲染、恢复前台和崩溃检查。
-- 已交接新的七个公开文件：blob `2102ad267b65b0cf97d51f5c24ac6589b1eac79a`，ZIP SHA-256 `b831a4551ef50a417d4e88f87fa7e9869b4c74a081e6d189ec07023cf83e0919`。草稿来源已改为 8a11e1a，验证/发布 [41955422603](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/41955422603) 正在运行，工作流版本 47efe02。
-- 设备与发布全部完成：[41955422603](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/41955422603) 的 prepare、API 26/33/36、publish 均成功。API 33 的四版本覆盖升级、设置保留，三台设备首次/再次冷启动、CBZ 解包/渲染、恢复前台全部通过；API 36 页大小 16384。
-- 已正式发布 [v1.17.11](https://github.com/Hycnyl/EhViewer-Revived/releases/tag/v1.17.11)，并核对它是 latest、非 draft/preview，标签指向实际构建源码 8a11e1a；GitHub 公布的全部七个附件 SHA-256 与本地复核后的签名文件完全一致。
-- 下一步仅剩收尾：删除旧候选与失败验证的临时 Artifact，保留本版构建/设备证据；删除本地临时 worktree、APK、日志和一次性 JVM 检查材料，停止闲置 Gradle，清理无用输出；最后删除本章节并提交。保留密钥私有目录和工具链缓存。
