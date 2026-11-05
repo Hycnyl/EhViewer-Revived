@@ -86,5 +86,5 @@ UI 模块保留 `allWarningsAsErrors`，仅用 `-Xwarning-level=DEPRECATION:warn
 - 已交接：v1.17.11 草稿已创建，七个公开产物 ZIP 的 blob 为 `615905a6745efe94d12ad1d6487fa8973ee12063`，SHA-256 为 `5d8de503ea5f0657157e7e35d085fbe274d06d4b82af123c11a67ee2723b60e7`。
 - 首轮验证 [41948793067](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/41948793067)：API 26 和 API 33 全部通过，后者已包含 1.17.10 覆盖升级；API 36 实际页大小正确，平台首帧等待约 10 秒后超时，日志无应用崩溃。脚本此前在自己的界面轮询开始前就终止，现允许该等待超时作为暂态，仍严格检查进程、实际可见界面、崩溃日志及离线阅读。
 - 第二轮 [41949718714](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/41949718714)：API 26 再次通过；API 36 在界面层级尚未生成时中断，等待循环未能继续。现在将未就绪层级纳入有限轮询，且每次删除旧 XML，避免误用旧帧；失败时保存截图、窗口/Activity 状态和 SIGQUIT 线程栈，API 36 开启 adb root 仅用于诊断。
-- 待启动：完整设备验证及失败诊断；APK、签名及构建源 bdc1985 均不变。
+- 正在诊断验证：[41950499857](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/41950499857)，工作流 `dcc1685ba4798207cbeae7a01513a20bccf685de`；APK、签名及构建源 bdc1985 均不变。若实际界面仍不出现，将读取截图及线程栈判断根因，不将等待超时直接视为通过。
 - 下一步：核对 Actions 五种 APK 的实际打包结果，使用固定源码的独立 worktree 本地签名（进度文档提交可继续更新）；V2+V3 复核后交给 Actions 做 API 26/33/36 和上版覆盖升级验证、正式发布。最后清理临时产物并删除本章节。
