@@ -4,6 +4,8 @@
 
 长程任务或包含大量子任务时，每完成一个阶段或关键节点，都须在本文件的临时进度章节记录已完成事项、当前状态、关键提交/Actions 链接和下一步，便于中断后恢复。任务全部完成后删除整个临时进度章节，仅保留本条持久规则；记录不得包含密钥或密码。
 
+验证优先放到 GitHub Actions 或同类 CI；本地仅执行必要的开发操作、私钥签名和难以交由 CI 的定向诊断。按本轮改动选择检查范围，UI、签名和构建变更优先验证布局、构建、签名及安装，不重复运行无关功能或业务逻辑检查。历史发布验证流程不构成每轮必须重跑全部场景的要求。
+
 ## 基线与发布
 
 - 功能源自 `Hycnyl/EhViewer` 的 `v1.17.8`，对应清理后的提交 `92923877ef671e33aa56f69688daa46af6e59ec6`；新仓库独立起始，不继承旧 Git 历史。四种语言 README 继承旧仓库最新的用户文档与完整素材引用，保留 LICENSE、NOTICE 和源码版权说明。
@@ -74,3 +76,11 @@ UI 模块保留 `allWarningsAsErrors`，仅用 `-Xwarning-level=DEPRECATION:warn
 发布验证使用 API 26、33、36 模拟器；API 26/33 采用包含 WebView 的 google_apis 镜像，模拟器分配 4096M RAM / 512M heap 并每次新建 AVD。API 33 执行 1.17.8 → 1.17.9 → 上个正式 Revived 版本 → 本版的覆盖安装链，并检查访客模式设置保留；API 36 使用 google_apis_ps16k 镜像并核对实际页大小 16384。每台模拟器还打开临时生成的离线 CBZ，通过已知页面像素确认原生解包与图片显示，再执行带已有设置的强制停止后冷启动；临时材料不进入源码或 Release。
 
 本托管环境先执行 `source /workspace/.ehviewer-env/activate.sh`，其中设置已固定的 JDK、SDK、Gradle/Cargo 缓存与本地 GNU m4 1.4.20。m4 是 Nettle 汇编的构建依赖；CI 检查并安装它。本地无 sudo，m4 安装于私有工具目录。Nettle 的源码包含预生成文件，CMake 必须保留其解包时间戳（DOWNLOAD_EXTRACT_TIMESTAMP TRUE）。
+
+## 临时进度：压缩包下载 UI、Target 37 与 universal 签名修复
+
+- 起点：正式版 1.17.11 / 180086，主分支 `7d8faae`；维护者要求三项工作完成后合并升版发布，新增 CI 优先和按改动范围验证的长期规则，已写入本文。
+- UI 初步定位：ArchiveList 把 GP/C 放在两个独立的网格单元中；FundsItem 的 GP 后缀 k 使用默认文字样式，数值使用 labelLarge，C 没有该后缀，两单元高度可能不一致。下一步核对真实排版并以 Compose 对齐及统一样式处理，保留数字动画。
+- Target：现有 compile SDK 37.2、target 36、min 26；将核对 Android 17 的 target 行为与当前代码，再尝试 target 37，难以兼容时放弃该项。
+- 签名：用户报告仅 1.17.11 universal 的 V3 SHA-512 内容摘要无法验证。上一轮 Build Tools 37 校验和 x86_64 模拟器安装均通过，需独立核对已发布文件、算法及 Android 平台验证差异，不能仅重复同一工具的通过结果。
+- 下一步：优先把签名诊断和布局验证放入 Actions；只做与 UI、SDK、签名、安装直接相关的检查，不运行离线阅读、数据库或下载等无关业务回归。密钥继续只在本地私有目录保管。
