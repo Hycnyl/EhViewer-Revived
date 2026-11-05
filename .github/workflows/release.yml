@@ -177,16 +177,17 @@ jobs:
           ui_runs = json.loads(subprocess.check_output(['gh', 'api', f"repos/{os.environ['GITHUB_REPOSITORY']}/actions/runs?per_page=50"]))['workflow_runs']
           ui_verified = False
           for ui in ui_runs:
-              if ui['path'] != '.github/workflows/archive-ui.yml' or ui['conclusion'] != 'success':
+              if ui['path'] not in ('.github/workflows/archive-ui.yml', '.github/workflows/interaction-ui.yml') or ui['conclusion'] != 'success':
                   continue
               ui_jobs = json.loads(subprocess.check_output(['gh', 'api', ui['jobs_url']]))['jobs']
-              if len(ui_jobs) != 1 or ui_jobs[0]['name'] != f"layout-{os.environ['SOURCE_COMMIT']}":
+              prefix = 'interaction' if ui['path'].endswith('interaction-ui.yml') else 'layout'
+              if len(ui_jobs) != 1 or ui_jobs[0]['name'] != f"{prefix}-{os.environ['SOURCE_COMMIT']}":
                   continue
               assert all(s['status'] == 'completed' and s['conclusion'] == 'success' for s in ui_jobs[0]['steps'])
               ui_verified = True
-              print(f"Verified focused archive UI layout for the APK source in run {ui['id']}")
+              print(f"Verified focused UI checks for the APK source in run {ui['id']}")
               break
-          assert ui_verified, 'Archive UI layout checks must pass for the exact APK source before release'
+          assert ui_verified, 'Relevant focused UI checks must pass for the exact APK source before release'
           PY
       - name: Download migration baseline
         if: matrix.api == 33

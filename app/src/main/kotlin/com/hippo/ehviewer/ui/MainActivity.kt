@@ -50,7 +50,6 @@ import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Whatshot
-import androidx.compose.material3.DrawerDefaults
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.Icon
@@ -74,30 +73,22 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.currentCompositeKeyHashCode
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshotFlow
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.BlurEffect
-import androidx.compose.ui.graphics.RectangleShape
-import androidx.compose.ui.graphics.TileMode
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.util.lerp
 import androidx.core.net.toUri
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.compose.LifecycleResumeEffect
@@ -144,7 +135,6 @@ import com.hippo.ehviewer.ui.tools.awaitInputText
 import com.hippo.ehviewer.updater.AppUpdater
 import com.hippo.ehviewer.util.AppConfig
 import com.hippo.ehviewer.util.addTextToClipboard
-import com.hippo.ehviewer.util.calculateFraction
 import com.hippo.ehviewer.util.displayString
 import com.hippo.ehviewer.util.getParcelableExtraCompat
 import com.hippo.ehviewer.util.getUrlFromClipboard
@@ -379,15 +369,11 @@ class MainActivity : EhActivity() {
                         )
                     },
                 ) {
-                    var minOffset by remember {
-                        mutableFloatStateOf(-with(density) { DrawerDefaults.MaximumDrawerWidth.toPx() })
-                    }
                     ModalNavigationDrawer(
                         drawerContent = {
                             ModalDrawerSheet(
                                 drawerState = navDrawerState,
-                                modifier = Modifier.widthIn(max = (configuration.screenWidthDp - 56).dp)
-                                    .onSizeChanged { minOffset = -it.width.toFloat() },
+                                modifier = Modifier.widthIn(max = (configuration.screenWidthDp - 56).dp),
                                 windowInsets = WindowInsets.systemBars.only(WindowInsetsSides.Start),
                             ) {
                                 val scrollState = rememberScrollState()
@@ -423,21 +409,9 @@ class MainActivity : EhActivity() {
                         drawerState = navDrawerState,
                         gesturesEnabled = drawerEnabled && sideSheetState.isClosed || navDrawerState.isOpen,
                     ) {
-                        val radius by remember {
-                            snapshotFlow {
-                                val step = calculateFraction(minOffset, 0f, navDrawerState.currentOffset)
-                                with(density) { lerp(0, 10, step).dp.toPx() }
-                            }
-                        }.collectAsState(0f)
                         MutableSideSheet(
                             drawerState = sideSheetState,
-                            modifier = Modifier.graphicsLayer {
-                                if (radius != 0f) {
-                                    renderEffect = BlurEffect(radius, radius, TileMode.Clamp)
-                                    shape = RectangleShape
-                                    clip = true
-                                }
-                            },
+                            modifier = Modifier,
                             enabled = drawerEnabled,
                         ) {
                             SharedTransitionLayout {

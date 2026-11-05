@@ -54,6 +54,7 @@ import com.ehviewer.core.i18n.R
 import com.ehviewer.core.model.BaseGalleryInfo
 import com.ehviewer.core.ui.component.FastScrollLazyVerticalGrid
 import com.ehviewer.core.ui.component.FastScrollLazyVerticalStaggeredGrid
+import com.ehviewer.core.ui.component.rememberElasticOverscrollEffect
 import com.ehviewer.core.ui.icons.EhIcons
 import com.ehviewer.core.ui.icons.big.SadAndroid
 import com.ehviewer.core.util.launch
@@ -119,6 +120,7 @@ fun GalleryList(
             val columnWidth by collectDetailSizeAsState()
             FastScrollLazyVerticalGrid(
                 columns = GridCells.Adaptive(columnWidth),
+                overscrollEffect = rememberElasticOverscrollEffect(),
                 modifier = contentModifier.fillMaxSize(),
                 state = detailListState,
                 contentPadding = contentPadding + PaddingValues(marginH, marginV),
@@ -149,6 +151,7 @@ fun GalleryList(
             val thumbColumns by Settings.thumbColumns.collectAsState()
             FastScrollLazyVerticalStaggeredGrid(
                 columns = StaggeredGridCells.Fixed(thumbColumns),
+                overscrollEffect = rememberElasticOverscrollEffect(),
                 modifier = contentModifier.fillMaxSize(),
                 state = thumbListState,
                 contentPadding = contentPadding + PaddingValues(marginH, marginV),

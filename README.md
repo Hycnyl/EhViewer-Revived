@@ -141,6 +141,8 @@
 
 ## Other
 
+- Restore automatic Baseline Profiles and improve interaction motion.
+
 - Restore Kotlin build metadata recognition in LibChecker.
 - Improve Android 16 startup compatibility.
 - Align archive download balances and adapt large-text layouts.

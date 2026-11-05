@@ -16,6 +16,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
+import com.ehviewer.core.ui.component.rememberElasticOverscrollEffect
 import com.hippo.ehviewer.Settings
 import com.hippo.ehviewer.collectAsState
 import com.hippo.ehviewer.gallery.Page
@@ -79,6 +80,7 @@ fun WebtoonViewer(
             onDoubleClick = DoubleTapZoom,
         ),
         state = lazyListState,
+        overscrollEffect = rememberElasticOverscrollEffect(),
         contentPadding = PaddingValues(horizontal = sidePadding),
         verticalArrangement = Arrangement.spacedBy(if (withGaps) 15.dp else 0.dp),
     ) {

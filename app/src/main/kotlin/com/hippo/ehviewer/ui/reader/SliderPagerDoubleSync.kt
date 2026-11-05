@@ -72,7 +72,7 @@ class SliderPagerDoubleSync(
                     if (webtoon) {
                         lazyListState.scrollToItem(index)
                     } else {
-                        pagerState.animateScrollToPage(index)
+                        pagerState.animateScrollToPage(index, animationSpec = ReaderSnapAnimation)
                     }
                     pageLoader.startPage = index
                 }

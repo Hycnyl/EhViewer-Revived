@@ -1,5 +1,6 @@
 package com.ehviewer.core.ui.component
 
+import androidx.compose.foundation.OverscrollEffect
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -13,6 +14,7 @@ import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridState
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
+import androidx.compose.foundation.rememberOverscrollEffect
 import androidx.compose.foundation.scrollbar.rememberScrollbarAdapter
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -30,6 +32,7 @@ fun FastScrollLazyVerticalGrid(
     verticalArrangement: Arrangement.Vertical = if (!reverseLayout) Arrangement.Top else Arrangement.Bottom,
     horizontalArrangement: Arrangement.Horizontal = Arrangement.Start,
     userScrollEnabled: Boolean = true,
+    overscrollEffect: OverscrollEffect? = rememberOverscrollEffect(),
     content: LazyGridScope.() -> Unit,
 ) {
     Box {
@@ -42,6 +45,7 @@ fun FastScrollLazyVerticalGrid(
             verticalArrangement = verticalArrangement,
             horizontalArrangement = horizontalArrangement,
             userScrollEnabled = userScrollEnabled,
+            overscrollEffect = overscrollEffect,
             content = content,
         )
         VerticalScrollbar(
@@ -64,6 +68,7 @@ fun FastScrollLazyVerticalStaggeredGrid(
     verticalItemSpacing: Dp = 0.dp,
     horizontalArrangement: Arrangement.Horizontal = Arrangement.Start,
     userScrollEnabled: Boolean = true,
+    overscrollEffect: OverscrollEffect? = rememberOverscrollEffect(),
     content: LazyStaggeredGridScope.() -> Unit,
 ) {
     Box {
@@ -76,6 +81,7 @@ fun FastScrollLazyVerticalStaggeredGrid(
             verticalItemSpacing = verticalItemSpacing,
             horizontalArrangement = horizontalArrangement,
             userScrollEnabled = userScrollEnabled,
+            overscrollEffect = overscrollEffect,
             content = content,
         )
         VerticalScrollbar(

@@ -141,6 +141,8 @@
 
 ## 其它
 
+- 恢复 Baseline Profile 自动生成，优化交互动画。
+
 - 恢复 LibChecker 的 Kotlin 构建信息识别。
 - 改善 Android 16 启动兼容性。
 - 优化压缩包下载余额布局与大字体适配。

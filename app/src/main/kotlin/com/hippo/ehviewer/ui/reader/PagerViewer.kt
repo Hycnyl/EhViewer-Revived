@@ -1,9 +1,11 @@
 package com.hippo.ehviewer.ui.reader
 
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.PagerDefaults
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.VerticalPager
 import androidx.compose.runtime.Composable
@@ -79,6 +81,7 @@ fun PagerViewer(
             state = pagerState,
             modifier = modifier,
             beyondViewportPageCount = 1,
+            flingBehavior = PagerDefaults.flingBehavior(pagerState, snapAnimationSpec = ReaderSnapAnimation),
             key = { it },
         ) { index ->
             val page = items[index]
@@ -103,6 +106,7 @@ fun PagerViewer(
             state = pagerState,
             modifier = modifier,
             beyondViewportPageCount = 1,
+            flingBehavior = PagerDefaults.flingBehavior(pagerState, snapAnimationSpec = ReaderSnapAnimation),
             reverseLayout = isRtl xor isRtlLayout,
             key = { it },
         ) { index ->
@@ -269,3 +273,6 @@ private val PagerZoomSpec = ZoomSpec(
     maximum = ZoomLimit(factor = 5f),
     minimum = ZoomLimit(factor = 1f, overzoomEffect = OverzoomEffect.Disabled),
 )
+
+// One snap spring shared by horizontal and vertical pagers; no page-level translation spring.
+internal val ReaderSnapAnimation = spring<Float>(dampingRatio = 1f, stiffness = 380f, visibilityThreshold = 0.5f)

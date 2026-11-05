@@ -13,8 +13,6 @@ on:
       - 'app/src/main/kotlin/com/hippo/ehviewer/ui/main/ArchiveList.kt'
       - 'app/src/main/kotlin/com/hippo/ehviewer/ui/main/FundsItem.kt'
       - 'app/src/test/kotlin/com/hippo/ehviewer/ui/main/ArchiveFundsLayoutTest.kt'
-      - 'app/build.gradle.kts'
-      - 'gradle/libs.versions.toml'
       - '.github/workflows/archive-ui.yml'
 
 permissions:

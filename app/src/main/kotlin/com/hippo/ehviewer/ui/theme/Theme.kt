@@ -3,6 +3,7 @@ package com.hippo.ehviewer.ui.theme
 import android.app.WallpaperManager
 import android.os.Build
 import androidx.annotation.RequiresApi
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.scrollbar.LocalScrollbarStyle
 import androidx.compose.material3.ColorScheme
@@ -90,7 +91,9 @@ fun extractWallPaperPalette(): WallPaperPalette? {
     return WallPaperPalette(primary, secondary, tertiary)
 }
 
-// https://issuetracker.google.com/363892346
+// Spatial motion retains a physical settling curve; colour/opacity use Material's effect specs.
 object CustomMotionScheme : MotionScheme by MotionScheme.expressive() {
-    override fun <T> defaultSpatialSpec() = defaultEffectsSpec<T>()
+    override fun <T> defaultSpatialSpec() = spring<T>(dampingRatio = 1f, stiffness = 400f)
+    override fun <T> fastSpatialSpec() = spring<T>(dampingRatio = 1f, stiffness = 550f)
+    override fun <T> slowSpatialSpec() = spring<T>(dampingRatio = 1f, stiffness = 250f)
 }

@@ -3,8 +3,8 @@
 package androidx.compose.material3
 
 import androidx.compose.animation.core.AnimationSpec
-import androidx.compose.animation.core.TweenSpec
 import androidx.compose.animation.core.animate
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.AnchoredDraggableDefaults
@@ -21,7 +21,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.State
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -30,13 +29,9 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.BlurEffect
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.RectangleShape
-import androidx.compose.ui.graphics.TileMode
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.layout
@@ -52,7 +47,7 @@ import kotlin.math.roundToInt
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
 
-private val AnimationSpec = TweenSpec<Float>(durationMillis = 256)
+private val AnimationSpec = spring<Float>(dampingRatio = 1f, stiffness = 400f, visibilityThreshold = 0.5f)
 
 @Suppress("NotCloseable")
 @Stable
@@ -255,22 +250,7 @@ fun ModalSideDrawer(
             ),
         ),
     ) {
-        val radius by remember {
-            snapshotFlow {
-                val step = calculateFraction(maxValue, minValue, drawerState.currentOffset)
-                lerp(0, 10, step).dp
-            }
-        }.collectAsState(0.dp)
-        val blurModifier = Modifier.graphicsLayer {
-            if (radius != 0.dp) {
-                renderEffect = BlurEffect(radius.toPx(), radius.toPx(), TileMode.Clamp)
-                shape = RectangleShape
-                clip = true
-            }
-        }
-        Box(modifier = blurModifier) {
-            content()
-        }
+        Box { content() }
         Scrim(
             open = drawerState.isOpen,
             onClose = {

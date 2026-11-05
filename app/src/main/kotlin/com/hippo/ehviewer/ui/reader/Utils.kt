@@ -65,7 +65,7 @@ fun ContentScale.Companion.fromPreferences(value: Int, srcSize: Size, dstSize: S
 
 suspend fun PagerState.performScrollToPage(page: Int) {
     if (Settings.pageTransitions.value) {
-        animateScrollToPage(page)
+        animateScrollToPage(page, animationSpec = ReaderSnapAnimation)
     } else {
         scrollToPage(page)
     }

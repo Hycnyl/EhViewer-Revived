@@ -85,8 +85,10 @@ UI 模块保留 `allWarningsAsErrors`，仅用 `-Xwarning-level=DEPRECATION:warn
 - 当前阶段：已加入 Benchmark 模块、稳定版 Macrobenchmark / Baseline Profile 1.5.0 和 UI Automator 2.4.1、benchmark-only 自生成 CBZ 与本地收藏画廊、四个 Profile 采集场景、六个独立帧测量场景和冷启动对照；图片像素就绪检查避免空白采集。Release CI 已配置采集、覆盖率检查再正式组装，普通开发不启动模拟器。当前完成 Gradle DSL 与格式配置检查后推送；尚未宣称设备采集通过。
 - 采集基础提交 `5486bf756c6ac9bf4f048c68792a2c8127c5681f` 已推送：Release/Profile 构建 [42059394893](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/42059394893)，原行为帧测量 [42059397267](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/42059397267)。本地仅完成 Gradle 配置与格式整理；设备检查正在 CI 运行，未宣称通过。
 - 首次帧构建的 pinch 参数已按 UI Automator 2.4.1 的 0..1 Float API 修复，基线重跑 [42060074518](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/42060074518)。Profile 构建 [42060071637](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/42060071637) 确认 mergeIntoMain=true 只注册聚合生成入口，已将 CI 改为 :app:generateBaselineProfile；没有应用运行失败结论。
-- 下一步：验证离线采集与原行为帧追踪；在工作区准备有限位移、单层 OverscrollEffect 和临界阻尼弹簧，保留 Pager 单一吸附。随后依据追踪选择优化，完成正式升版发布与清理。
+- 本轮首个候选为 1.17.13 / 180088。动画/动态模糊改动在 performance-motion 分支提交并定向验证，main 暂保留原行为采集基础，避免新提交取消仍在运行的基线 Profile 与帧测量。原行为与优化场景使用同套夹具；待基线和优化检查通过后快进合并 main，正式构建/采集/签名发布。
 
 - 基线夹具修正：UI Automator 使用默认 pinch 速度；仅 benchmark 的 SingletonImageLoader 替换明确 OptIn DelicateCoilApi，继续保留正式构建 Werror。工作区已准备移除两处动态模糊、修正全局空间 MotionScheme、单层有界回弹及 Pager 吸附参数；这些用户行为改动尚未提交，原行为基线保持独立。
 
 - 原行为帧运行 a1330dc 已完成编译但六个测试均在启动夹具前失败：R8 变体无法按固定类名启动 BenchmarkActivity；正在使用 manifest 中的专用 Intent action 解析入口，并在启动模拟器前检查实际 APK 的 action。Profile 采集运行 42061534423 尚在进行，不能将这些夹具错误解释成应用性能/功能失败。
+
+- 新版采集入口改为专用 Intent action，测量工作流启动模拟器前检查实际 APK manifest。Performance 工作流已增加固定 Perfetto 59.1（校验 SHA-256）SQL 摘要，保留原始 traces 和分位数，未将模拟器时间解释为真机 FPS。
