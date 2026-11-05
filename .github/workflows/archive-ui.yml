@@ -1,0 +1,43 @@
+name: Check archive download UI
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'app/src/main/kotlin/com/hippo/ehviewer/ui/main/ArchiveList.kt'
+      - 'app/src/main/kotlin/com/hippo/ehviewer/ui/main/FundsItem.kt'
+      - 'app/src/test/kotlin/com/hippo/ehviewer/ui/main/ArchiveFundsLayoutTest.kt'
+      - 'app/build.gradle.kts'
+      - 'gradle/libs.versions.toml'
+      - '.github/workflows/archive-ui.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  layout:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - uses: actions/setup-java@v6.1.0
+        with:
+          distribution: temurin
+          java-version: '21'
+      - uses: android-actions/setup-android@v4.0.4
+        with:
+          packages: 'platform-tools platforms;android-37.2 build-tools;37.0.0'
+      - uses: gradle/actions/setup-gradle@v6.4.1
+      - name: Render currency layout at different font scales and directions
+        run: ./gradlew :app:testDefaultDebugUnitTest --tests '*ArchiveFundsLayoutTest' --no-configuration-cache --max-workers=2 -Pkotlin.compiler.execution.strategy=in-process --stacktrace
+      - uses: actions/upload-artifact@v7.0.2
+        if: always()
+        with:
+          name: archive-ui
+          path: |
+            app/build/reports/archive-ui/
+            app/build/reports/tests/testDefaultDebugUnitTest/
+            app/build/test-results/testDefaultDebugUnitTest/
+          if-no-files-found: warn
+          retention-days: 7

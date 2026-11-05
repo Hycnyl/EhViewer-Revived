@@ -51,4 +51,4 @@ jobs:
             done
           done
       - name: List available Android 17 emulator images
-        run: sdkmanager --list | sed -n '/system-images;android-37;/p'
+        run: sdkmanager --list | sed -n '/system-images;android-37/p'

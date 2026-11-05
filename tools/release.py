@@ -13,6 +13,11 @@ import subprocess
 import tomllib
 import zipfile
 
+try:
+    from .apk_signature import verify_content_digests
+except ImportError:
+    from apk_signature import verify_content_digests
+
 ROOT = Path(__file__).resolve().parents[1]
 CERTIFICATE = "67afb9dab5d2234ed83bc3dd8c13faaeadf4940be0a6749e0aafb9ae9e8e143f"
 ABIS = ("universal", "arm64-v8a", "armeabi-v7a", "x86_64", "x86")
@@ -37,6 +42,11 @@ def version():
     name = re.search(r'^\s*versionName = "([^"]+)"', script, re.M).group(1)
     code = int(re.search(r"^\s*versionCode = (\d+)", script, re.M).group(1))
     return name, code
+
+
+def target_sdk():
+    settings = (ROOT / "settings.gradle.kts").read_text()
+    return int(re.search(r"^\s*targetSdk = (\d+)", settings, re.M).group(1))
 
 
 def tools():
@@ -70,7 +80,7 @@ def metadata(directory, filename, signed):
         "versionCode": code,
         "applicationId": PACKAGE,
         "minimumSdk": 26,
-        "targetSdk": 36,
+        "targetSdk": target_sdk(),
         "files": {p.name: sha256(p) for p in sorted(directory.glob("*.apk"))},
     }
     with zipfile.ZipFile(next(directory.glob("*.apk"))) as archive:
@@ -98,6 +108,8 @@ def verify(directory, manifest, signed):
     commit = run("git", "-C", str(ROOT), "rev-parse", "HEAD").decode().strip()
     if (info["sourceCommit"], info["versionName"], info["versionCode"]) != (commit, name, code):
         raise RuntimeError("Build metadata does not match the checked-out source")
+    if (info["applicationId"], info["minimumSdk"], info["targetSdk"]) != (PACKAGE, 26, target_sdk()):
+        raise RuntimeError("Package/SDK manifest does not match the build configuration")
     expected = {f"EhViewer-{name}-{abi}.apk" for abi in ABIS}
     if set(info["files"]) != expected or {p.name for p in directory.glob("*.apk")} != expected:
         raise RuntimeError("Exactly one APK per supported ABI and one universal APK are required")
@@ -131,13 +143,14 @@ def verify(directory, manifest, signed):
         if native_abis != (set(ABIS[1:]) if abi == "universal" else {abi}):
             raise RuntimeError(f"Unexpected native architectures: {filename}")
         badging = run(str(sdk_tools / "aapt"), "dump", "badging", str(apk)).decode()
-        for value in (f"name='{PACKAGE}'", f"versionCode='{code}'", f"versionName='{name}'", "sdkVersion:'26'", "targetSdkVersion:'36'", "application-label:'EhViewer'"):
+        for value in (f"name='{PACKAGE}'", f"versionCode='{code}'", f"versionName='{name}'", "sdkVersion:'26'", f"targetSdkVersion:'{target_sdk()}'", "application-label:'EhViewer'"):
             if value not in badging:
                 raise RuntimeError(f"Unexpected package metadata ({value}): {filename}")
         if "application-debuggable" in badging:
             raise RuntimeError("Release APK must not be debuggable")
         run(str(sdk_tools / "zipalign"), "-c", "-P", "16", "4", str(apk))
         if signed:
+            verify_content_digests(apk)
             result = run(str(sdk_tools / "apksigner"), "verify", "--verbose", "--print-certs", str(apk)).decode()
             # Build Tools 37 labels this signer "V3.0 Signer" instead of "Signer #1".
             certificates = re.findall(r"certificate SHA-256 digest: ([0-9a-f]{64})", result)

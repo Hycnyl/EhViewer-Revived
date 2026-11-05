@@ -38,7 +38,7 @@ android {
         }
     }
     minSdk = 26
-    targetSdk = 36
+    targetSdk = 37
     ndkVersion = "30.0.16248370"
     buildToolsVersion = "37.0.0"
 }

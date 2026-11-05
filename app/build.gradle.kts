@@ -41,8 +41,8 @@ android {
 
     defaultConfig {
         applicationId = "moe.hycnyl.ehviewer"
-        versionCode = 180086
-        versionName = "1.17.11"
+        versionCode = 180087
+        versionName = "1.17.12"
         // versionNameSuffix = "-SNAPSHOT"
         buildConfigField("String", "RAW_VERSION_NAME", "\"$versionName${versionNameSuffix.orEmpty()}\"")
         buildConfigField("String", "COMMIT_SHA", "\"$commitSha\"")
@@ -137,6 +137,8 @@ android {
         compose = true
     }
 
+    testOptions.unitTests.isIncludeAndroidResources = true
+
     namespace = "com.hippo.ehviewer"
 }
 
@@ -216,6 +218,12 @@ dependencies {
 
     debugImplementation(libs.compose.ui.tooling)
     implementation(libs.compose.ui.tooling.preview)
+
+    testImplementation(platform(libs.compose.bom))
+    testImplementation("androidx.compose.ui:ui-test-junit4")
+    testImplementation("androidx.test.ext:junit:1.3.0")
+    testImplementation("org.robolectric:robolectric:4.17")
+    debugImplementation("androidx.compose.ui:ui-test-manifest")
 }
 
 kotlin {

@@ -2,10 +2,12 @@ package com.hippo.ehviewer.ui.main
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -19,6 +21,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -38,6 +41,7 @@ fun ArchiveList(
     val archiveOriginal = stringResource(R.string.archive_original)
     val archiveResample = stringResource(R.string.archive_resample)
     val fundsStyle = MaterialTheme.typography.labelLarge
+    val minimumFundsWidth = 112.dp * LocalDensity.current.fontScale
     val (hath, nonHath) = remember(items) { items.partition { it.isHath } }
     LazyVerticalGrid(
         columns = GridCells.Fixed(2),
@@ -48,21 +52,27 @@ fun ArchiveList(
         item(span = { GridItemSpan(maxLineSpan) }) {
             Text(text = currentFunds, textAlign = TextAlign.Center)
         }
-        item {
-            FundsItem(
-                type = "GP",
-                amount = funds.gp,
+        item(span = { GridItemSpan(maxLineSpan) }) {
+            FlowRow(
                 modifier = Modifier.fillMaxWidth(),
-                textStyle = fundsStyle,
-            )
-        }
-        item {
-            FundsItem(
-                type = "C",
-                amount = funds.credit,
-                modifier = Modifier.fillMaxWidth(),
-                textStyle = fundsStyle,
-            )
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+                itemVerticalAlignment = Alignment.CenterVertically,
+                maxItemsInEachRow = 2,
+            ) {
+                FundsItem(
+                    type = "GP",
+                    amount = funds.gp,
+                    modifier = Modifier.weight(1f).widthIn(min = minimumFundsWidth),
+                    textStyle = fundsStyle,
+                )
+                FundsItem(
+                    type = "C",
+                    amount = funds.credit,
+                    modifier = Modifier.weight(1f).widthIn(min = minimumFundsWidth),
+                    textStyle = fundsStyle,
+                )
+            }
         }
         items(nonHath) {
             ArchiveItem(

@@ -30,7 +30,7 @@ fun FundsItem(
         }
         RollingNumber(number = amount, style = textStyle, separator = true)
         if (type == "GP") {
-            Text(text = "k")
+            Text(text = "k", style = textStyle)
         }
     }
 }
