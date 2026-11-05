@@ -104,7 +104,7 @@ jobs:
           jobs = json.loads(subprocess.check_output(['gh', 'api', f'{base}/runs/{run_id}/jobs']))['jobs']
           previous = {j['name']: j for j in jobs}
           assert previous['prepare']['conclusion'] == 'success'
-          logs = subprocess.check_output(['gh', 'api', f"{base}/jobs/{previous['prepare']['id']}/logs"]).decode()
+          logs = subprocess.check_output(['gh', 'api', '--allow-escape-sequences', f"{base}/jobs/{previous['prepare']['id']}/logs"]).decode()
           for key in ('TAG', 'SOURCE_COMMIT', 'SIGNED_BLOB', 'BUNDLE_SHA256'):
               assert f"{key}: {os.environ[key]}" in logs, f'Previous bundle/input differs: {key}'
           for name in ('verify (26)', 'verify (33)'):
