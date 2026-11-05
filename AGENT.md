@@ -81,5 +81,6 @@ UI 模块保留 `allWarningsAsErrors`，仅用 `-Xwarning-level=DEPRECATION:warn
 - 已定位：1.17.8 正式 APK 有根目录元数据（Kotlin 2.3.0 / Gradle 9.2.1 / Java 源码兼容级别 21），1.17.10 中该文件及其他静态 Kotlin 标记均缺失。AGP 内建 Kotlin 没有注册旧 KGP 的 buildKotlinToolingMetadata 任务；原有 META-INF/kotlin 精简规则没有变化。
 - 已实现并验证生成任务：使用 Kotlin 官方元数据模型，实际输出 Kotlin 2.4.21 / Gradle 9.8.2 / Java source/target 21，记录真实 KotlinBaseApiPlugin 与 KotlinAndroidTarget。任务编译、生成与格式检查通过；通过公开 JAVA_RES Artifact API 加入 APK 根目录，不调整 R8 精简策略。
 - 已增加产物校验：打包和签名复核时检查元数据存在、版本匹配且五种 ABI 内容一致；API 33 在原迁移链中追加上一个正式 Revived 版本（本轮为 1.17.10），验证用户当前版本的覆盖升级。
-- 正在构建：[41946491046](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/41946491046)，源码提交 `bdc1985c17832ab6196a28e866d0ac58aa17236b`，版本 1.17.11 / 180086。本地元数据生成、格式、脚本/YAML 语法及 LibChecker 读取字段均已校验通过。
+- 构建已完成：[41946491046](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/41946491046)，源码 `bdc1985c17832ab6196a28e866d0ac58aa17236b`，版本 1.17.11 / 180086。五种 APK 已生成；实际 APK 内元数据为 Kotlin 2.4.21 / Gradle 9.8.2 / Java source/target 21，文件结构与 LibChecker 读取路径匹配。
+- 正在签名：已核对 GitHub Artifact SHA-256；固定源码 worktree 位于 `/workspace/.ehviewer-revived-work/source`。使用工作区私钥进行 V2+V3 签名，并逐包复核元数据一致性、身份、版本、ABI、CRC、对齐与签名。
 - 下一步：核对 Actions 五种 APK 的实际打包结果，使用固定源码的独立 worktree 本地签名（进度文档提交可继续更新）；V2+V3 复核后交给 Actions 做 API 26/33/36 和上版覆盖升级验证、正式发布。最后清理临时产物并删除本章节。
