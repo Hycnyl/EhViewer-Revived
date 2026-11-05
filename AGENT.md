@@ -82,7 +82,7 @@ UI 模块保留 `allWarningsAsErrors`，仅用 `-Xwarning-level=DEPRECATION:warn
 - 起点：正式版 1.17.11 / 180086，主分支 `7d8faae`；维护者要求三项工作完成后合并升版发布，新增 CI 优先和按改动范围验证的长期规则，已写入本文。
 - UI 已实现、待 CI：GP 的 k 后缀统一为金额的 labelLarge；GP/C 改为同一个跨列 FlowRow，以共同的垂直对齐避免独立单元高度差，大字体或窄屏时自动换行，保留 RollingNumber 动画。新增仅覆盖该组件的 CI 布局/截图检查（普通、大字体、窄屏及 RTL），不启动真实应用逻辑。
 - 已对照 Compose FlowRow 测量源码：有权重的子项会读取固有尺寸，而 RollingNumber 内部含 LazyRow，不支持该测量。布局采用 BoxWithConstraints 计算有限单元宽度，避免权重固有测量；当前候选不会引入该兼容问题。
-- UI 阶段通过：[41972213391](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/41972213391) 成功，五个实际组件排版用例均通过并生成截图；使用 Compose test v2 与 Robolectric，没有启动真实应用业务。待下载截图目检，正式 APK 构建仍在进行。
+- UI 初轮：[41972213391](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/41972213391) 的五个排版用例通过，JUnit 报告 5 测试、0 跳过/失败/错误。已下载并目检截图，确认 GP/C 对齐；同界面还发现原有 RTL 数字倒排、大字体固定宽按钮拆字问题，现已分别用数值区域 LTR 和按钮最小宽度处理，增加可见数字顺序断言。须重跑修正后的 UI 检查后再发布。
 - 当前 APK 候选源码为 `4252b4d91ca7c91e61d1208e838ba5b9d81ec837`，构建 [41972213395](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/41972213395)，布局 [41972213391](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/41972213391)。旧候选/旧夹具作业已取消以减少重复开销。布局检查首轮仅测试夹具编译失败（Compose 已迁移 v2 createComposeRule、Java File.parentFile 可空），已适配新 API。测试夹具或验证脚本修改不要求无意义地重新构建原生 APK；UI 工作流支持指定实际 APK 源码并使用当前夹具，发布门禁核对该源码的成功布局作业。
 - Target 候选已升至 37，min 26 和 compile 37.2 保留；已核对 Android 17 官方迁移要求，应用没有 MessageQueue 私有字段修改、static final 写入或自建 LAN 服务，原生库来自只读安装目录。SDK 仓库提供 android-37.2/google_apis_ps16k 镜像，可验证真实 Android 17 与 16 KiB 页；尚未宣称实测通过。
 - 签名诊断完成：[41970685302](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/41970685302)。五种官方 APK 的全部 V2/V3 SHA-512 摘要由独立实现重算一致，Build Tools 34/36/37 均验证通过。证书为固定 RSA-4096 身份，不需要更换证书或签名算法。

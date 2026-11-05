@@ -16,6 +16,7 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.junit4.v2.createComposeRule
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.unit.Density
@@ -24,6 +25,7 @@ import androidx.compose.ui.unit.dp
 import com.hippo.ehviewer.client.parser.Archive
 import com.hippo.ehviewer.client.parser.Funds
 import java.io.File
+import kotlin.math.abs
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Rule
@@ -85,6 +87,10 @@ class ArchiveFundsLayoutTest {
             }
         }
         compose.waitForIdle()
+        val image = compose.onNodeWithTag("archive").captureToImage().asAndroidBitmap()
+        val output = File("build/reports/archive-ui/$name.png")
+        checkNotNull(output.parentFile).mkdirs()
+        output.outputStream().use { image.compress(Bitmap.CompressFormat.PNG, 100, it) }
         val gp = compose.onNodeWithText("GP", useUnmergedTree = true).fetchSemanticsNode().boundsInRoot
         val credit = compose.onNodeWithText("C", useUnmergedTree = true).fetchSemanticsNode().boundsInRoot
         if (stacked) {
@@ -92,9 +98,12 @@ class ArchiveFundsLayoutTest {
         } else {
             assertEquals("GP and C badge centers must align", gp.center.y, credit.center.y, 0.5f)
         }
-        val image = compose.onNodeWithTag("archive").captureToImage().asAndroidBitmap()
-        val output = File("build/reports/archive-ui/$name.png")
-        checkNotNull(output.parentFile).mkdirs()
-        output.outputStream().use { image.compress(Bitmap.CompressFormat.PNG, 100, it) }
+        val digits = listOf("6", "7", "8", "9", "0").map { digit ->
+            compose.onAllNodesWithText(digit, useUnmergedTree = true).fetchSemanticsNodes()
+                .map { it.boundsInRoot }
+                .single { it.width > 0 && it.height > 0 && abs(it.center.y - credit.center.y) < 2f }
+                .center.x
+        }
+        assertTrue("The credit amount must read 678,901 in either layout direction", digits.zipWithNext().all { (a, b) -> a < b })
     }
 }

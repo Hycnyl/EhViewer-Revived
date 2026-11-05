@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -119,7 +120,7 @@ private fun ArchiveItem(
             text = cost,
             style = labelStyle,
         )
-        Button(onClick = onClick, shapes = ButtonDefaults.shapes(), modifier = Modifier.width(100.dp)) {
+        Button(onClick = onClick, shapes = ButtonDefaults.shapes(), modifier = Modifier.widthIn(min = 100.dp)) {
             Text(text = name)
         }
         Text(

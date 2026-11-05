@@ -7,9 +7,12 @@ import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.ehviewer.core.ui.component.RollingNumber
 
@@ -28,9 +31,16 @@ fun FundsItem(
         Badge(containerColor = MaterialTheme.colorScheme.primaryContainer) {
             Text(text = type)
         }
-        RollingNumber(number = amount, style = textStyle, separator = true)
-        if (type == "GP") {
-            Text(text = "k", style = textStyle)
+        CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(4.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                RollingNumber(number = amount, style = textStyle, separator = true)
+                if (type == "GP") {
+                    Text(text = "k", style = textStyle)
+                }
+            }
         }
     }
 }
