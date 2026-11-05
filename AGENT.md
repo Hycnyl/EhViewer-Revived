@@ -80,7 +80,7 @@ UI 模块保留 `allWarningsAsErrors`，仅用 `-Xwarning-level=DEPRECATION:warn
 ## 临时进度：压缩包下载 UI、Target 37 与 universal 签名修复
 
 - 目标：三项任务合并发布 1.17.12 / 180087；新增“CI 优先、按改动选择验证范围”长期规则已写入本文件。上个正式版为 1.17.11 / 180086。
-- 当前 APK 源码 `68034a243e7b9827b22055b66d9d4f5bf517efc7`，独立 worktree `/workspace/.ehviewer-revived-work/source` 已固定于此。构建 [41972981550](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/41972981550) 全部 17 个构建步骤成功；五种 APK 已完成本地 V2/V3 签名，经过来源、版本、SDK、CRC、ELF/ZIP 对齐、固定证书及独立内容摘要检查。
+- 最终候选源码 `f67a3c522a444e920deb17f87cb7d4b9d8b4e543`，Target 36 / Min 26 / Compile 37.2，仍为 1.17.12 / 180087。独立 worktree `/workspace/.ehviewer-revived-work/source` 已切到此提交。构建 [41977119357](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/41977119357) 与精确源码 UI 检查 [41977120870](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/41977120870) 正在进行。旧 Target 37 候选的本地 APK、交接 ZIP/JSON 已删除以避免混用；v1.17.12 仍是旧来源草稿，签署新候选后必须更新来源和附件。
 - UI 已完成：GP 的 k 后缀与数值共用 labelLarge，GP/C 使用同一跨列 FlowRow 对齐；BoxWithConstraints 给出有限单元宽度，避免 RollingNumber/LazyRow 不支持的固有尺寸测量；大字体或窄屏可换行。数值区域固定 LTR，按钮由固定宽度改最小宽度，解决截图发现的 RTL 数字倒排与按钮拆字。
 - UI 验证成功：[41972981482](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/41972981482)，5 测试、0 跳过/失败/错误。已目检普通、大字体窄屏、RTL 截图；数字顺序有实际位置断言。Artifact `13390931513` 是本版界面证据。没有启动真实应用业务；只用了实际组件和独立 Application 的 Robolectric 渲染。
 - Target 候选为 37，min 26 / compile 37.2 保留；已核对官方迁移要求，无 MessageQueue 私有字段修改、static final 写入或自建 LAN 服务，原生库来自只读安装目录。SDK 提供 android-37.2/google_apis_ps16k，可验证真实 Android 17。尚未宣称设备实测通过。
@@ -94,5 +94,5 @@ UI 模块保留 `allWarningsAsErrors`，仅用 `-Xwarning-level=DEPRECATION:warn
 - 重试 [41976148244](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/41976148244) 在复用门禁处被新版 gh 的 ANSI 日志输出保护中断，模拟器尚未运行；已为只在内存中解析的自有日志加上官方要求的 allow-escape-sequences 标志。该修正不改变 APK、签名或实际验证条件。
 - 当前定向验证：[41976390520](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/41976390520)，工作流版本 92ab532，复用门禁已成功；只重跑 API 37.2/software，APK 仍为 68034a2 的同一签名包。若该图形环境仍无法稳定验证，本轮按维护者授权保留 Target 36，不继续扩展模拟器修复范围。
 - Target 37 本轮暂停：上述 software 重试仍在安装应用前出现 activity/wifi 系统服务 Broken pipe，无法完成可靠验收。按维护者的“有难以解决阻碍则放弃”授权，已将 Target 恢复为 36，min 26 / compile 37.2 保留；UI 与完整性改动全部保留。将重建最终 APK 并验证 API 26/33/36，不再扩展官方 Android 17 模拟器修复。
-- 下一步：分析 API 37.2 系统日志，若是服务就绪/模拟器问题则只修正 CI 等待或镜像，不重建 APK；若 Target 本身有难以兼容的阻碍，按维护者授权回退 Target 36 后再构建。通过后复核发布并清理。
+- 下一步：等待最终 Target 36 构建/UI 通过，重新签名并创建新交接包；更新草稿来源/附件，以不复用旧包结果的完整 API 26/33/36 安装门禁发布，再清理全部临时状态。
 - 完成后：清理旧候选/失败或取消作业的临时 Artifact、本地 worktree、APK、日志与截图，仅保留本版有效 CI 证据；停止本地 Gradle，删除本临时章节。保留工具链缓存与私有签名目录。
