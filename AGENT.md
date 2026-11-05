@@ -60,7 +60,7 @@
 | Adaptive / Activity / Biometric | 1.2.0 / 1.12.1 / 1.4.0-alpha04 → 1.4.0-alpha01 / 1.14.0-alpha03 / 1.4.0-alpha07 | 按维护者偏好使用 UI 预览能力 |
 | Compose Preference / MaterialKolor / Telephoto | 2.1.0 / 4.0.5 / 0.18.0 → 2.2.0 / 5.0.1 / 0.19.0 | 更新设置、色彩和缩放组件；MaterialKolor 6 改模块与色彩引擎，本轮选兼容旧接口的 5.x；Telephoto Maven 最高版本号不代表当前发布线；上游最新正式 Release 为 0.19.0。1.0 Alpha 接口不匹配，已停止该尝试，经维护者确认采用 0.19.0，不重构阅读器 |
 | AppCompat / Core / Browser / WebKit | 1.7.1 / 1.17.0 / 1.9.0 / 1.14.0 → 1.8.0 / 1.19.1 / 1.10.0 / 1.18.0 | 稳定版 Android 支持组件 |
-| Room / DataStore / Work / Paging / Lifecycle | 2.8.4 / 1.2.0 / 2.11.0 / 3.3.6 / 2.10.0 → 2.8.5 / 1.2.1 / 2.12.0 / 3.5.3 / 2.11.0 | 功能组件采用稳定版，保持应用 schema 与设置键；DataStore 1.3.0 的 Android 16 首次读取等待正在以相邻稳定维护版 1.2.1 做兼容性复核 |
+| Room / DataStore / Work / Paging / Lifecycle | 2.8.4 / 1.2.0 / 2.11.0 / 3.3.6 / 2.10.0 → 2.8.5 / 1.2.1 / 2.12.0 / 3.5.3 / 2.11.0 | 功能组件采用稳定版，保持应用 schema 与设置键；DataStore 1.3.0 在 Android 16 首次读取设置时出现等待，采用相邻稳定维护版 1.2.1；已通过 API 26/36 首次启动及已有设置的冷启动，覆盖升级待本轮最终矩阵完成 |
 | Coil / OkHttp / Okio / Ktor | 3.3.0 / 5.3.2 / 3.16.4 / 3.3.3 → 3.6.3 / 5.5.1 / 3.18.2 / 3.6.1 | 同主版本稳定更新 |
 | Coroutines / Serialization / Datetime / IO | 1.10.2 / 1.9.0 / 0.7.1 / 0.8.2 → 1.11.0 / 1.12.0 / 0.8.0 / 0.9.2 | 固定稳定版本；不采用兼容旧日期类型的特殊分支 |
 | Arrow / moko-resources / AboutLibraries / Spotless | 2.2.1.1 / 0.25.2 / 13.1.0 / 8.1.0 → 2.3.0 / 0.27.1 / 15.3.0 / 8.11.0 | 采用支持新版 Kotlin/AGP 的稳定组件 |
@@ -86,4 +86,5 @@ UI 模块保留 `allWarningsAsErrors`，仅用 `-Xwarning-level=DEPRECATION:warn
 - 当前本地独立源码 worktree：`/workspace/.ehviewer-revived-work/source`，HEAD 固定为 8a11e1a。签名私钥仍在上文私有目录。v1.17.11 草稿即将更新为当前候选；设备矩阵全部通过前不得发布。
 - 设备脚本保留有限界面等待和失败诊断；API 33 新增访客模式设置保留断言，先处理下载路径提示但不重新进入访客模式掩盖重置。三台设备均新增一次带已有设置的强制停止后冷启动，并保留离线 CBZ 解包/渲染、恢复前台和崩溃检查。
 - 已交接新的七个公开文件：blob `2102ad267b65b0cf97d51f5c24ac6589b1eac79a`，ZIP SHA-256 `b831a4551ef50a417d4e88f87fa7e9869b4c74a081e6d189ec07023cf83e0919`。草稿来源已改为 8a11e1a，验证/发布 [41955422603](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/41955422603) 正在运行，工作流版本 47efe02。
-- 下一步：确认 API 26/33/36 启动、已有设置、覆盖升级、离线阅读全部通过并正式发布；如 API 36 仍等待则继续局部诊断，不发布。完成后清理临时产物并删除本章节。
+- 当前设备阶段：API 26 和 API 36 两组已完成且全部通过，日志明确确认首次启动、已存设置的再次冷启动、CBZ 原生解包/图片渲染和恢复前台；API 36 实际页大小为 16384。API 33 正在执行四版本覆盖升级链，尚未宣称通过。
+- 下一步：确认 API 33 覆盖升级及设置保留通过、Actions 正式发布，然后复核 Release/标签与附件并清理本轮临时文件，删除本章节。
