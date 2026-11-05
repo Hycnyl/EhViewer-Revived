@@ -8,6 +8,12 @@ on:
         required: true
         default: v1.17.11
         type: string
+      mode:
+        description: 'All signature checks or only the public download path'
+        required: true
+        default: all
+        type: choice
+        options: [all, public-download]
 
 permissions:
   contents: read
@@ -22,13 +28,16 @@ jobs:
     steps:
       - uses: actions/checkout@v7.0.1
       - uses: actions/setup-java@v6.1.0
+        if: inputs.mode == 'all'
         with:
           distribution: temurin
           java-version: '21'
       - uses: android-actions/setup-android@v4.0.4
+        if: inputs.mode == 'all'
         with:
           packages: 'platform-tools build-tools;34.0.0 build-tools;36.0.0 build-tools;37.0.0'
       - name: Download original published bytes and check manifest hashes
+        if: inputs.mode == 'all'
         run: |
           gh release download "$TAG" --dir published
           python3 - <<'PY'
@@ -41,8 +50,10 @@ jobs:
               print(name, digest)
           PY
       - name: Recompute every V2 and V3 digest independently
+        if: inputs.mode == 'all'
         run: python3 tools/apk_signature.py published/*.apk
       - name: Cross-check with three Android signing tool versions
+        if: inputs.mode == 'all'
         run: |
           for version in 34.0.0 36.0.0 37.0.0; do
             for apk in published/*.apk; do
@@ -51,4 +62,17 @@ jobs:
             done
           done
       - name: List available Android 17 emulator images
+        if: inputs.mode == 'all'
         run: sdkmanager --list | sed -n '/system-images;android-37/p'
+      - name: Check the public universal download without the release-download API
+        run: |
+          python3 - <<'PY'
+          import hashlib, json, os, subprocess, urllib.request
+          release = json.loads(subprocess.check_output(['gh', 'api', f"repos/{os.environ['GITHUB_REPOSITORY']}/releases/tags/{os.environ['TAG']}"]))
+          assert not release['draft']
+          asset, = [a for a in release['assets'] if a['name'].endswith('-universal.apk')]
+          with urllib.request.urlopen(asset['browser_download_url'], timeout=90) as response:
+              actual = 'sha256:' + hashlib.file_digest(response, 'sha256').hexdigest()
+          assert actual == asset['digest'], 'Public universal download differs from the published asset'
+          print(f"PASS: public browser download: {asset['name']}: {actual}")
+          PY
