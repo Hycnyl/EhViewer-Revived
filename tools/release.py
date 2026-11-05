@@ -123,6 +123,12 @@ def verify(directory, manifest, signed):
                 raise RuntimeError(f"Corrupt APK: {filename}")
             if kotlin_tooling_metadata(archive) != info["kotlinToolingMetadata"]:
                 raise RuntimeError(f"Inconsistent Kotlin tooling metadata: {filename}")
+            for profile in ("assets/dexopt/baseline.prof", "assets/dexopt/baseline.profm"):
+                if profile not in archive.namelist() or archive.getinfo(profile).file_size == 0:
+                    raise RuntimeError(f"Missing compiled Baseline Profile: {filename}: {profile}")
+            for dex in (p for p in archive.namelist() if re.fullmatch(r"classes\d*\.dex", p)):
+                if b"Lcom/hippo/ehviewer/benchmark/BenchmarkActivity;" in archive.read(dex):
+                    raise RuntimeError(f"Benchmark fixture leaked into release: {filename}")
             native_abis = {p.split("/")[1] for p in archive.namelist() if p.startswith("lib/") and p.endswith(".so")}
             for path in archive.namelist():
                 if not path.startswith("lib/") or not path.endswith(".so"):

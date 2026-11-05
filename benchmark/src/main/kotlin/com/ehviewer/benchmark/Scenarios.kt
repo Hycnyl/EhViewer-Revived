@@ -1,0 +1,106 @@
+package com.ehviewer.benchmark
+
+import android.content.ComponentName
+import android.content.Intent
+import android.graphics.BitmapFactory
+import android.graphics.Color
+import android.os.SystemClock
+import androidx.benchmark.macro.MacrobenchmarkScope
+import androidx.test.platform.app.InstrumentationRegistry
+import androidx.test.uiautomator.By
+import androidx.test.uiautomator.Direction
+import androidx.test.uiautomator.Until
+import java.io.File
+
+internal val targetAppId: String
+    get() = checkNotNull(InstrumentationRegistry.getArguments().getString("targetAppId"))
+
+internal fun MacrobenchmarkScope.prepare(scene: String) {
+    startActivityAndWait(
+        Intent().setComponent(ComponentName(packageName, "com.hippo.ehviewer.benchmark.BenchmarkActivity"))
+            .putExtra("scene", scene).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK),
+    )
+    if (scene == "pager" || scene == "webtoon") {
+        check(device.wait(Until.hasObject(By.text(" / ")), 20_000)) { "Offline reader did not become ready" }
+        waitForReaderImage()
+    } else {
+        val ready = if (scene == "grid") By.text("EN") else By.textStartsWith("Offline gallery")
+        check(device.wait(Until.hasObject(ready), 20_000)) { "Offline favourites gallery did not become ready" }
+    }
+    device.waitForIdle()
+}
+
+internal fun MacrobenchmarkScope.scrollGallery() {
+    val content = checkNotNull(device.findObject(By.scrollable(true)))
+    content.setGestureMargin(device.displayWidth / 8)
+    repeat(5) { content.fling(Direction.DOWN) }
+    repeat(5) { content.fling(Direction.UP) }
+}
+
+internal fun MacrobenchmarkScope.turnPages() {
+    val w = device.displayWidth
+    val h = device.displayHeight
+    repeat(8) {
+        device.swipe(w * 4 / 5, h / 2, w / 5, h / 2, 16)
+        device.waitForIdle()
+    }
+}
+
+internal fun MacrobenchmarkScope.scrollWebtoon() {
+    val w = device.displayWidth
+    val h = device.displayHeight
+    repeat(8) { device.swipe(w / 2, h * 4 / 5, w / 2, h / 5, 16) }
+}
+
+internal fun MacrobenchmarkScope.zoomPage() {
+    val content = checkNotNull(device.findObject(By.pkg(packageName).depth(0)))
+    content.pinchOpen(65, 24)
+    content.pinchClose(65, 24)
+    device.waitForIdle()
+}
+
+internal fun MacrobenchmarkScope.navigateGallery() {
+    repeat(3) {
+        checkNotNull(device.findObject(By.textStartsWith("Offline gallery"))).click()
+        check(device.wait(Until.hasObject(By.text("Read")), 10_000)) { "Cached gallery detail did not open" }
+        device.pressBack()
+        check(device.wait(Until.hasObject(By.textStartsWith("Offline gallery")), 10_000))
+    }
+}
+
+internal fun MacrobenchmarkScope.toggleDrawer() {
+    val w = device.displayWidth
+    val h = device.displayHeight
+    repeat(4) {
+        device.swipe(2, h / 2, w * 4 / 5, h / 2, 24)
+        check(device.wait(Until.hasObject(By.text("Settings")), 5_000)) { "Navigation drawer did not open" }
+        device.pressBack()
+        device.waitForIdle()
+    }
+}
+
+/** Wait for the fixture's actual coloured image, not just its page-count overlay. */
+private fun MacrobenchmarkScope.waitForReaderImage() {
+    val file = File(InstrumentationRegistry.getInstrumentation().context.cacheDir, "reader-ready.png")
+    val deadline = SystemClock.uptimeMillis() + 20_000
+    try {
+        while (SystemClock.uptimeMillis() < deadline) {
+            check(device.takeScreenshot(file))
+            val bitmap = checkNotNull(BitmapFactory.decodeFile(file.path))
+            var coloured = 0
+            for (x in 3..7) {
+                for (y in 2..8) {
+                    val colour = bitmap.getPixel(bitmap.width * x / 10, bitmap.height * y / 10)
+                    val channels = listOf(Color.red(colour), Color.green(colour), Color.blue(colour))
+                    if (channels.max() - channels.min() > 30 && channels.max() < 240) coloured++
+                }
+            }
+            bitmap.recycle()
+            if (coloured >= 12) return
+            SystemClock.sleep(200)
+        }
+        error("Offline reader page pixels did not load")
+    } finally {
+        file.delete()
+    }
+}

@@ -47,6 +47,7 @@ enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 enableFeaturePreview("STABLE_CONFIGURATION_CACHE")
 rootProject.name = "EhViewer-Revived"
 include(":app")
+include(":benchmark")
 include(":core:common")
 include(":core:data")
 include(":core:i18n")

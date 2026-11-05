@@ -11,9 +11,11 @@ plugins {
     alias(libs.plugins.ksp)
     alias(libs.plugins.aboutlibraries)
     alias(libs.plugins.aboutlibrariesAndroid)
+    alias(libs.plugins.baselineprofile)
 }
 
 val supportedAbis = arrayOf("arm64-v8a", "x86_64", "armeabi-v7a", "x86")
+val buildAbis = providers.gradleProperty("buildAbis").orNull?.split(',')?.toTypedArray() ?: supportedAbis
 
 android {
     splits {
@@ -21,7 +23,7 @@ android {
             isEnable = true
             reset()
             if (isRelease) {
-                include(*supportedAbis)
+                include(*buildAbis)
                 isUniversalApk = true
             } else {
                 include("arm64-v8a", "x86_64")
@@ -50,7 +52,7 @@ android {
         buildConfigField("String", "REPO_NAME", "\"$repoName\"")
         ndk {
             if (isRelease) {
-                abiFilters.addAll(supportedAbis)
+                abiFilters.addAll(buildAbis)
             }
             debugSymbolLevel = "FULL"
         }
@@ -132,6 +134,14 @@ android {
         }
     }
 
+    // Only synthetic performance variants contain the offline fixture entry point.
+    sourceSets.configureEach {
+        if (name == "benchmarkRelease" || name == "nonMinifiedRelease") {
+            kotlin.directories.add("src/benchmark/kotlin")
+            manifest.srcFile("src/benchmark/AndroidManifest.xml")
+        }
+    }
+
     buildFeatures {
         buildConfig = true
         compose = true
@@ -140,6 +150,13 @@ android {
     testOptions.unitTests.isIncludeAndroidResources = true
 
     namespace = "com.hippo.ehviewer"
+}
+
+baselineProfile {
+    mergeIntoMain = true
+    saveInSrc = true
+    automaticGenerationDuringBuild = providers.gradleProperty("generateBaselineProfile").orNull == "true"
+    filter { exclude("com.hippo.ehviewer.benchmark.**") }
 }
 
 dependencies {
@@ -215,6 +232,7 @@ dependencies {
     coreLibraryDesugaring(libs.desugar)
 
     implementation(libs.androidx.profileinstaller)
+    "baselineProfile"(projects.benchmark)
 
     debugImplementation(libs.compose.ui.tooling)
     implementation(libs.compose.ui.tooling.preview)
@@ -248,5 +266,13 @@ aboutLibraries {
         exclusionPatterns.add(Pattern.compile("org\\.jetbrains\\.(?:compose|androidx)\\..*"))
         duplicationMode = DuplicateMode.MERGE
         duplicationRule = DuplicateRule.GROUP
+    }
+}
+
+// Synthetic configurations are registered by the Baseline Profile plugin after DSL finalization.
+configurations.configureEach {
+    if (name == "benchmarkReleaseImplementation") {
+        dependencies.add(project.dependencies.platform(libs.compose.bom.get()))
+        dependencies.add(libs.compose.runtime.tracing.get())
     }
 }

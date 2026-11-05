@@ -13,7 +13,7 @@
 - 任何实际影响用户的改动完成后，除非维护者明确禁止，都须提升 versionName/versionCode，使用 GitHub Actions 发布正式 Release；提供 universal、arm64-v8a、armeabi-v7a、x86_64、x86 五种 APK，并附简短变更说明与 SHA-256 校验和。不得使用 `[skip ci]` 绕过这条规则。
 - README 保持简洁，变更通常只在“变更”章节简要记录；允许修正仓库链接、安装要求和迁移说明。不得随意重写其余内容或丢失截图、素材和致谢。
 - 单轮只改一个目标不是硬性限制。缓存导出、下载恢复和归档格式继承 1.17.8 的当前行为，维护者没有将其固化为不可修改的长期规则。
-- 全部旧测试、测试数据和基准测试模块不继承；已有 baseline-prof.txt 与 startup-prof.txt 是应用性能资源，继续保留。根据新变更的实际风险添加必要验证，不复活历史测试包袱。
+- 原初始化未继承旧测试和基准模块。维护者本轮明确要求恢复 Benchmark、Baseline Profile 自动生成与合并，并新增离线阅读器采集及独立 FrameTimingMetric 场景；按新需求维护这些有效检查，其他历史一次性测试材料仍不继承。
 
 ## 兼容性与组件选择
 
@@ -76,3 +76,11 @@ UI 模块保留 `allWarningsAsErrors`，仅用 `-Xwarning-level=DEPRECATION:warn
 发布验证按本轮改动选择场景。UI、签名和构建默认使用 API 26、33、36；Target 37 的候选将现代设备检查切换至 API 37.2。使用包含 WebView 的 google_apis 镜像，现代设备使用 google_apis_ps16k 并检查真实页大小；每次新建 AVD，分配 4096M RAM / 512M heap。验证设备端 APK SHA-256、文件式 universal/匹配 ABI 安装、上个正式版本覆盖安装和启动。UI 使用独立的 archive-ui 工作流渲染实际组件，支持指定 APK 源码与更新验证夹具，避免测试修正触发重复原生构建。只有涉及相关业务功能的改动，才增加离线 CBZ、设置迁移等对应检查。临时数据不进入源码或 Release。
 
 本托管环境先执行 `source /workspace/.ehviewer-env/activate.sh`，其中设置已固定的 JDK、SDK、Gradle/Cargo 缓存与本地 GNU m4 1.4.20。m4 是 Nettle 汇编的构建依赖；CI 检查并安装它。本地无 sudo，m4 安装于私有工具目录。Nettle 的源码包含预生成文件，CMake 必须保留其解包时间戳（DOWNLOAD_EXTRACT_TIMESTAMP TRUE）。
+
+## 临时进度：Profile、性能追踪与交互动画
+
+- 基线正式版 1.17.12 / 180087，源码工作区从 main 20bf48f 开始，维护者已完成真实用户场景检查。
+- 本轮目标：恢复 Benchmark 和 Release 的 Baseline Profile 生成/合并，覆盖离线画廊及 Pager/Webtoon/缩放；独立帧时间场景和 Perfetto；依据证据优化重组/图片调度，移除非核心动态模糊，统一克制的弹簧交互。每次正式发布递增补丁版本，保留五种 APK、原包名及 V2+V3。
+- 已完成源码调查：旧采集依赖在线列表和详情，当前仍保留 ProfileInstaller、profileable 和静态 profile；Compose 基线已为 1.13.0-beta02。MainActivity 与 core/ui SideDrawer 均需调查动态模糊；PageLoader 的解码由调用方协程继承上下文，需追踪确认。
+- 当前阶段：已加入 Benchmark 模块、稳定版 Macrobenchmark / Baseline Profile 1.5.0 和 UI Automator 2.4.1、benchmark-only 自生成 CBZ 与本地收藏画廊、四个 Profile 采集场景、六个独立帧测量场景和冷启动对照；图片像素就绪检查避免空白采集。Release CI 已配置采集、覆盖率检查再正式组装，普通开发不启动模拟器。当前完成 Gradle DSL 与格式配置检查后推送；尚未宣称设备采集通过。
+- 下一步：完成采集模块和 CI 构建配置，运行基线采集/帧追踪，再按结果落地优化与动画验证，发布并清理临时状态。

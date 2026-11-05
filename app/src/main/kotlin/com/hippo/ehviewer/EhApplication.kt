@@ -123,7 +123,7 @@ class EhApplication : Application(), SingletonImageLoader.Factory {
             }
         }
         launchIO {
-            EhTagDatabase.launchUpdate()
+            if (!AppConfig.isBenchmark) EhTagDatabase.launchUpdate()
             launch {
                 // Touch the singleton to initialize the database on the IO dispatcher.
                 @Suppress("UNUSED_EXPRESSION")
