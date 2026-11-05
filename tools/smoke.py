@@ -45,13 +45,16 @@ def tap_text(text):
     return False
 
 
-def prepare_guest():
-    # Dismiss the normal first-run download-location warning, then use guest mode.
+def dismiss_download_warning():
     for _ in range(3):
         if not tap_text("Open settings"):
             break
         adb("shell", "input", "keyevent", "KEYCODE_BACK")
         time.sleep(2)
+
+
+def prepare_guest():
+    dismiss_download_warning()
     tap_text("Guest mode")
 
 
@@ -182,13 +185,15 @@ def exercise(args):
     launch(args.output, f"revived-api-{api}")
     if api == 33:
         # Guest mode writes need_sign_in=false in the previous releases. Check
-        # it before dismissing anything, so an upgrade cannot hide a reset.
+        # it before entering guest mode again, so an upgrade cannot hide a reset.
+        dismiss_download_warning()
         view = ET.fromstring(hierarchy())
         if any(n.get("package") == PACKAGE and n.get("text") == "Guest mode" for n in view.iter("node")):
             raise RuntimeError("Upgrade lost the existing guest-mode preference")
         print("PASS: existing guest-mode preference survives the upgrade")
     prepare_guest()
     offline_reader(args.output)
+    launch(args.output, f"revived-api-{api}-cold-restart")
     # Test a normal background/foreground cycle with the same installed data.
     adb("shell", "input", "keyevent", "KEYCODE_HOME")
     adb("shell", "am", "start", "-W", "-n", ACTIVITY)
