@@ -100,3 +100,6 @@ UI 模块保留 `allWarningsAsErrors`，仅用 `-Xwarning-level=DEPRECATION:warn
 
 - 候选 7cd4e50 的优化 Frame 42131496485 / job 127608957348 已完成成功，六场景各三次，Artifact 13464328291，SHA e7cee4f3d25276590f6e81411caeb30e48e91a2ae32341ea8f8ebed3cb498e6f，已下载验证。P95 原行为 a5acc47→当前候选：侧栏 737.433→169.747；列表 130.132→134.630；网格 200.366→246.408；导航 234.149→227.066；Pager 121.913→133.012；Webtoon 123.627→128.269。不能宣称全面提速；静止绘制快路径未消除模拟器网格差异。
 - 网格追踪进一步核对：每次 AndroidOwner:draw 平均耗时没有明显增加，measureAndLayout 的实际 Running 时间约从 1.18 ms/次增至 2.15 ms/次，仍小于大额渲染/Bitmap 分配上传等待；调度等待也上升。不据软件 GPU 下的差异加入推测性的图片策略或新的缓存层。发布说明应完整记录数据与 CI 边界。当前仍等 Build 42131493833 的新 producer 过滤生成与全部 ABI 组装。
+
+- Build 42131493833 已实际通过 Generate current offline Baseline and Startup Profiles 与 Require fresh reader profile coverage 两步，新的 producer 过滤解决夹具引用，当前组装全部正式 ABI；尚未签名/发布。
+- 为判断网格指标回退是否由新增边界效果造成，单变量对照已启动：当前自定义效果源码 4c084919ace1f1ae635b8839bbef6697a220ac19 / [42137099770](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/42137099770)；仅缩略图网格恢复原 overscroll 的 a7721703d5e4dd74902c4779723c8d8d7e1e9e36 / [42137102605](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/42137102605)。两组都只执行 galleryGrid（三次），夹具/构建/设备配置完全相同。工作树 /workspace/.ehviewer-revived-work/grid-probe；临时分支 performance-grid-current / performance-grid-default。仅这些临时分支中的 performance.yml 限定单场景，不得将该临时工作流带回 main。结果未出前保留正式候选 7cd4e50；若有明确额外成本，按结果调整网格并重新构建最终源码。
