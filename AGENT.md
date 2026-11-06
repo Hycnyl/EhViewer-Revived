@@ -98,3 +98,7 @@ UI 模块保留 `allWarningsAsErrors`，仅用 `-Xwarning-level=DEPRECATION:warn
 - 待最终三项 CI 通过后：取并验证最终未签名产物→本地 V2+V3 签名→准备具体 Release 说明→创建 1.17.13 Draft / Git blob→启动 release.yml（focused_ui_workflow=interaction-ui.yml）→全部验证成功发布并复核。之后更新本文件当前正式版、删除整个临时进度章节，清理临时分支/工作树、过期 Artifact 和本轮所有临时文件，保留全局工具链/原仓库/vault。临时分支含 performance-motion、performance-collection、performance-baseline、performance-optimized、performance-grid-current/default/layer；grid-probe 工作树在 layer 分支，单场景 workflow 不得合并。
 
 - 最终 b64ff94 的四项交互 42140705273 / job 127640026469 已成功，已取 Artifact 13467272560 并核对真实 4/4，无失败/跳过，SHA 1f2835c4006b95a8484f8da086ddf33d392b6575e9c594a376a24fbbdb1f5c2e。最终 Build job 127640026265 正在 Profile 采集；完整 Frame job 127640089576 进行中。
+
+- 最终 b64 的五项核心改动版本中，四项触摸/侧栏测试和六场景联跑都成功，但联跑未完整复现单场景绘制层收益；不据此声称全面提速。现将 Frame 改为六个矩阵作业，每个场景独立新建 AVD，并关闭 Wi-Fi/移动网络。MainActivity 仅 benchmark 模式强制使用已指定的离线启动页（正式模式网络路由不变），消除夹具依赖真实网络。
+- 发布前输入复查实际复现一个缺陷：触摸回位中鼠标按下会取消回位，随后因非触摸输入不会重启而留下偏移。未修复源码 faf2921fd99338f72c2b92502f50a4f6eb995087 / 42143581923 的单项 mouseClickDuringReturnDoesNotStrandContent 在像素位置断言失败（job 127649553646，Artifact 13468364454）。现只让 Touch/Stylus 按下中断回位，并把该真实回归检查带回常规 InteractionMotionTest（共五项）。不得带回该临时分支的单项 workflow。当前工作区改动待提交后重跑最终构建、五项交互与独立场景矩阵；b64 APK 尚未签名/发布，也不得充当此新源码的 APK。
+- 独立场景的新前后比较必须使用相同离线/矩阵配置，原 a5 联跑数字仅作历史诊断，不与新矩阵结果混算；performance-baseline 控制分支须同步新 workflow/夹具与 benchmark-only 网络启动钩子，继续保留原九个 UI 文件的行为。已按明确旧 Run 白名单删除 28 个过期 Artifact，合计 988,360,791 bytes，记录在 scratch/artifact-cleanup-result.json；保留原控制、有效隔离试验和最终候选证据。新增临时工作树 scratch/input-probe / 分支 motion-input-verify，最终需清理。

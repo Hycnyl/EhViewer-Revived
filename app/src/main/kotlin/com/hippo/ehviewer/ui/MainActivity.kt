@@ -224,7 +224,7 @@ class MainActivity : EhActivity() {
                 }
             }
 
-            val hasNetwork = remember { connectivityManager.activeNetwork != null }
+            val hasNetwork = remember { AppConfig.isBenchmark || connectivityManager.activeNetwork != null }
             if (!AppConfig.isBenchmark) {
                 val noNetwork = stringResource(R.string.no_network)
                 LaunchedEffect(Unit) {

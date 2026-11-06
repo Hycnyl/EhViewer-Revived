@@ -53,7 +53,10 @@ jobs:
           force-avd-creation: true
           disable-animations: false
           emulator-options: -no-window -no-snapshot -gpu swiftshader_indirect -noaudio -no-boot-anim
-          script: ./gradlew :app:generateBaselineProfile --no-configuration-cache --max-workers=2 -PbuildAbis=x86_64 -Pkotlin.compiler.execution.strategy=in-process --stacktrace
+          script: |
+            adb shell svc wifi disable
+            adb shell svc data disable
+            ./gradlew :app:generateBaselineProfile --no-configuration-cache --max-workers=2 -PbuildAbis=x86_64 -Pkotlin.compiler.execution.strategy=in-process --stacktrace
       - name: Require fresh reader profile coverage
         run: |
           python3 - <<'PY'

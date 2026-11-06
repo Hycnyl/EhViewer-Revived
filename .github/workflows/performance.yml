@@ -27,9 +27,13 @@ env:
 
 jobs:
   measure:
-    name: measure-${{ inputs.source_commit || github.sha }}
+    name: measure-${{ inputs.source_commit || github.sha }}-${{ matrix.scenario }}
     runs-on: ubuntu-latest
     timeout-minutes: 65
+    strategy:
+      fail-fast: false
+      matrix:
+        scenario: ${{ fromJSON((inputs.mode == 'profiles' || inputs.mode == 'startup') && '["all"]' || '["galleryList","galleryGrid","pager","webtoon","navigation","drawer"]') }}
     steps:
       - uses: actions/checkout@v7.0.1
         with:
@@ -107,7 +111,9 @@ jobs:
           emulator-options: -no-window -no-snapshot -gpu swiftshader_indirect -noaudio -no-boot-anim
           script: |
             adb shell settings put system screen_off_timeout 1800000
-            if [ "$MODE" = profiles ]; then ./gradlew :app:generateBaselineProfile --no-configuration-cache --max-workers=2 -PbuildAbis=x86_64 -Pkotlin.compiler.execution.strategy=in-process --stacktrace; elif [ "$MODE" = startup ]; then ./gradlew :app:generateBaselineProfile --no-configuration-cache --max-workers=2 -PbuildAbis=x86_64 -Pkotlin.compiler.execution.strategy=in-process --stacktrace && ./gradlew :benchmark:connectedDefaultBenchmarkReleaseAndroidTest --no-configuration-cache --max-workers=2 -PbuildAbis=x86_64 -Pandroid.testInstrumentationRunnerArguments.class=com.ehviewer.benchmark.StartupBenchmarks -Pkotlin.compiler.execution.strategy=in-process --stacktrace; else ./gradlew :benchmark:connectedDefaultBenchmarkReleaseAndroidTest --no-configuration-cache --max-workers=2 -PbuildAbis=x86_64 -Pandroid.testInstrumentationRunnerArguments.class=com.ehviewer.benchmark.FrameBenchmarks -Pkotlin.compiler.execution.strategy=in-process --stacktrace; fi
+            adb shell svc wifi disable
+            adb shell svc data disable
+            if [ "$MODE" = profiles ]; then ./gradlew :app:generateBaselineProfile --no-configuration-cache --max-workers=2 -PbuildAbis=x86_64 -Pkotlin.compiler.execution.strategy=in-process --stacktrace; elif [ "$MODE" = startup ]; then ./gradlew :app:generateBaselineProfile --no-configuration-cache --max-workers=2 -PbuildAbis=x86_64 -Pkotlin.compiler.execution.strategy=in-process --stacktrace && ./gradlew :benchmark:connectedDefaultBenchmarkReleaseAndroidTest --no-configuration-cache --max-workers=2 -PbuildAbis=x86_64 -Pandroid.testInstrumentationRunnerArguments.class=com.ehviewer.benchmark.StartupBenchmarks -Pkotlin.compiler.execution.strategy=in-process --stacktrace; else ./gradlew :benchmark:connectedDefaultBenchmarkReleaseAndroidTest --no-configuration-cache --max-workers=2 -PbuildAbis=x86_64 -Pandroid.testInstrumentationRunnerArguments.class=com.ehviewer.benchmark.FrameBenchmarks#${{ matrix.scenario }} -Pkotlin.compiler.execution.strategy=in-process --stacktrace; fi
       - name: Summarize independent frame or startup measurements
         if: inputs.mode != 'profiles'
         run: |
@@ -119,7 +125,7 @@ jobs:
       - uses: actions/upload-artifact@v7.0.2
         if: always()
         with:
-          name: performance-${{ inputs.mode || 'frames' }}-${{ inputs.source_commit || github.sha }}
+          name: performance-${{ inputs.mode || 'frames' }}-${{ inputs.source_commit || github.sha }}-${{ matrix.scenario }}
           path: |
             performance-report.md
             perfetto-sections/

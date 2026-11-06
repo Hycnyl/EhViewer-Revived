@@ -64,7 +64,7 @@ private class ElasticOverscrollEffect(private val scope: CoroutineScope, private
         override fun onPointerEvent(pointerEvent: PointerEvent, pass: PointerEventPass, bounds: IntSize) {
             if (pass != PointerEventPass.Initial) return
             touchGesture = pointerEvent.changes.any { it.type == PointerType.Touch || it.type == PointerType.Stylus }
-            if (pointerEvent.changes.any { it.pressed && !it.previousPressed }) stopReturn()
+            if (touchGesture && pointerEvent.changes.any { it.pressed && !it.previousPressed }) stopReturn()
             if (touchGesture && pointerEvent.changes.none { it.pressed } && displacement != 0f) returnToRest(0f)
         }
 

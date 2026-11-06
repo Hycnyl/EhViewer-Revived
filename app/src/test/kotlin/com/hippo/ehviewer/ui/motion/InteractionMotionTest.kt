@@ -27,6 +27,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.performMouseInput
 import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
@@ -108,6 +109,27 @@ class InteractionMotionTest {
         compose.mainClock.advanceTimeBy(1500)
         compose.waitForIdle()
         assertEquals(0, redBand().first())
+    }
+
+    @Test
+    fun mouseClickDuringReturnDoesNotStrandContent() {
+        content()
+        compose.onNodeWithTag("viewport").performTouchInput {
+            down(center)
+            moveBy(Offset(0f, 300f))
+            up()
+        }
+        compose.mainClock.advanceTimeBy(64)
+        assertTrue(redBand().first() > 0)
+        compose.onNodeWithTag("viewport").performMouseInput {
+            moveTo(center)
+            press()
+            release()
+        }
+        compose.mainClock.advanceTimeBy(1500)
+        compose.waitForIdle()
+        assertEquals(0, redBand().first())
+        assertFalse(effect.isInProgress)
     }
 
     @Test
