@@ -87,8 +87,27 @@ jobs:
           blob = json.loads(subprocess.check_output(['gh', 'api', f"repos/{os.environ['GITHUB_REPOSITORY']}/git/blobs/{sha}"]))
           assert blob['encoding'] == 'base64'
           data = base64.b64decode(blob['content'])
-          assert hashlib.sha256(data).hexdigest() == digest
           assert hashlib.sha1(b'blob ' + str(len(data)).encode() + b'\0' + data).hexdigest() == sha
+          # Connector requests have size limits; an immutable manifest may reference public ZIP parts.
+          if data.startswith(b'{'):
+              manifest = json.loads(data)
+              assert manifest['format'] == 'ehviewer-release-parts-v1'
+              assert 0 < manifest['size'] < 300_000_000 and manifest['sha256'] == digest
+              assert 0 < len(manifest['parts']) <= 128
+              assert sum(p['size'] for p in manifest['parts']) == manifest['size']
+              chunks = []
+              for part in manifest['parts']:
+                  assert re.fullmatch(r'[0-9a-f]{40}', part['sha']) and 0 < part['size'] <= 4_194_304
+                  item = json.loads(subprocess.check_output(['gh', 'api', f"repos/{os.environ['GITHUB_REPOSITORY']}/git/blobs/{part['sha']}"]))
+                  assert item['encoding'] == 'base64'
+                  chunk = base64.b64decode(item['content'])
+                  assert len(chunk) == part['size']
+                  assert hashlib.sha1(b'blob ' + str(len(chunk)).encode() + b'\0' + chunk).hexdigest() == part['sha']
+                  chunks.append(chunk)
+              data = b''.join(chunks)
+              assert len(data) == manifest['size']
+              assert hashlib.sha1(b'blob ' + str(len(data)).encode() + b'\0' + data).hexdigest() == manifest['blob_sha']
+          assert hashlib.sha256(data).hexdigest() == digest
           expected = {f'EhViewer-{version()[0]}-{abi}.apk' for abi in ABIS} | {'release-info.json', 'SHA256SUMS.txt'}
           output = Path('delivery')
           output.mkdir()

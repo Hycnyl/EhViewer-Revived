@@ -1,0 +1,84 @@
+name: Deliver signed 1.17.14
+
+on:
+  push:
+    branches: [main]
+    paths: [.github/workflows/deliver-1.17.14.yml]
+
+permissions:
+  contents: write
+  actions: write
+
+jobs:
+  deliver:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      GH_TOKEN: ${{ github.token }}
+      RELEASE_NOTES: "1.17.14 / 180089\n\n- 阅读器长按菜单新增「图片信息」，显示当前实际缓存或 CBZ 图片文件的原始分辨率；按需读取文件头并清理临时文件，不补下载、不刷新图片。\n- 图片配额进度条：使用量 ≤75% 为主题色，>75% 且 <100% 为黄色，≥100% 为红色；超额时保留真实用量显示。\n- 压缩包下载弹窗将 GP/C 资金与下载选项分区，调整费用、按钮和文件大小的层次与间距，保留大字体自适应、两列选项和 H@H 分区。\n\nMin 26 / Target 36 / Compile 37.2；EhViewer / moe.hycnyl.ehviewer，正式证书 V2+V3，提供 universal 与四种 ABI。\n\n本轮按维护者要求精简检查，复用 1.17.13 已验证的 Baseline/Startup Profile 规则并针对当前 DEX 重新编译，不重复性能采集或可选 UI 测试。未做真机功能验收。\n\n[构建与格式检查](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/42198959003)通过；五种 APK 已完成正式 V2/V3 签名与独立摘要校验。Android 13 安装升级及公开下载校验将在发布前完成。\n"
+    steps:
+      - name: Publish the signed public bundle with scoped release checks
+        run: |
+          python3 - <<'PY'
+          import json, os, subprocess, time
+          from pathlib import Path
+
+          repo = os.environ['GITHUB_REPOSITORY']
+          tag = 'v1.17.14'
+          source = '5f12a93ec5a667570639c66caec9aa2968a1b773'
+          def api(path):
+              return json.loads(subprocess.check_output(['gh', 'api', f'repos/{repo}/{path}']))
+          notes = Path(os.environ['RUNNER_TEMP']) / 'release-notes.md'
+          notes.write_text(os.environ['RELEASE_NOTES'])
+          existing = subprocess.run(['gh', 'release', 'view', tag, '--repo', repo, '--json', 'isDraft,targetCommitish'], capture_output=True, text=True)
+          if existing.returncode:
+              subprocess.run(['gh', 'release', 'create', tag, '--repo', repo, '--draft', '--target', source, '--title', 'EhViewer 1.17.14', '--notes-file', str(notes)], check=True)
+          else:
+              release = json.loads(existing.stdout)
+              assert release['isDraft'] and release['targetCommitish'] == source
+          request = {'ref': 'main', 'inputs': {
+              'tag': tag,
+              'source_commit': source,
+              'signed_blob': '85b2cd70549fddf863334ec90d2f5adca590bfee',
+              'bundle_sha256': 'fbc3f3e99e29ae83e0b7832b7f2aaca438339210e30363ef28f66de664d34878',
+              'focused_ui_workflow': 'archive-ui.yml',
+              'quick_release': 'true',
+          }}
+          dispatch = Path(os.environ['RUNNER_TEMP']) / 'dispatch-release.json'
+          dispatch.write_text(json.dumps(request))
+          subprocess.run(['gh', 'api', '--method', 'POST', f'repos/{repo}/actions/workflows/release.yml/dispatches', '--input', str(dispatch)], check=True)
+          print('PASS: draft created and scoped release workflow dispatched', flush=True)
+          child_id = None
+          for attempt in range(100):
+              runs = api(f'actions/runs?head_sha={os.environ["GITHUB_SHA"]}&per_page=30')['workflow_runs']
+              children = [r for r in runs if r['path'] == '.github/workflows/release.yml' and r['event'] == 'workflow_dispatch']
+              assert len(children) <= 1
+              if children:
+                  child = children[0]
+                  if child_id is None:
+                      child_id = child['id']
+                      print(f'Release validation run: {child_id}', flush=True)
+                  jobs = api(f'actions/runs/{child_id}/jobs?per_page=100')['jobs']
+                  assert not any(j['conclusion'] in ('failure', 'cancelled', 'timed_out') for j in jobs)
+                  if {j['name'] for j in jobs} == {'prepare', 'verify (33)', 'publish'} and all(j['status'] == 'completed' and j['conclusion'] == 'success' for j in jobs):
+                      break
+              time.sleep(10)
+          else:
+              raise RuntimeError('Scoped release verification did not finish')
+          release = api(f'releases/tags/{tag}')
+          assert not release['draft'] and release['target_commitish'] == source
+          before = 'Android 13 安装升级及公开下载校验将在发布前完成。'
+          after = f'[发布验证](https://github.com/{repo}/actions/runs/{child_id})通过：Android 13 模拟器 universal/x86_64 安装、启动、从 1.17.13 覆盖升级保留数据、ProfileInstaller 写入，以及五个公开下载的 SHA-256 校验。'
+          assert before in release['body']
+          notes.write_text(release['body'].replace(before, after))
+          subprocess.run(['gh', 'release', 'edit', tag, '--repo', repo, '--notes-file', str(notes)], check=True)
+          for run_id in (42198895097, 42198895088):
+              old = api(f'actions/runs/{run_id}')
+              assert old['head_sha'] == source and old['conclusion'] == 'cancelled'
+              for artifact in api(f'actions/runs/{run_id}/artifacts')['artifacts']:
+                  assert artifact['workflow_run']['id'] == run_id
+                  subprocess.run(['gh', 'api', '--method', 'DELETE', f'repos/{repo}/actions/artifacts/{artifact["id"]}'], check=True)
+          print('PASS: 1.17.14 published, actual results recorded and cancelled-run artifacts removed', flush=True)
+          with open(os.environ['GITHUB_STEP_SUMMARY'], 'a') as summary:
+              summary.write(f'[1.17.14 release checks](https://github.com/{repo}/actions/runs/{child_id}) completed. Optional UI/performance suites omitted by request.\n')
+          PY

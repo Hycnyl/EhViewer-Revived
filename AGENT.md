@@ -96,3 +96,7 @@ UI 模块保留 `allWarningsAsErrors`，仅用 `-Xwarning-level=DEPRECATION:warn
 - 产品与精简 CI 已提交并推送 `5f12a93ec5a667570639c66caec9aa2968a1b773`。常规 Build 42198895097 和可选 Archive UI 42198895088 已请求取消；已启动 [精简 Build 42198959003](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/42198959003)，输入 reuse_profile_run=42145312240，APK 源码固定 5f12a93。当前尚未签名/建草稿/发布，正式 latest 仍为 1.17.13。下一步看编译及规则复用，成功后取最终 Artifact，用独立 release-source 工作树签名，release.yml quick_release=true 发布 1.17.14。
 
 - 精简 Build 42198959003 的 Kotlin/格式、规则来源/工具链/Artifact 摘要及两套阅读器覆盖检查已通过，已进入五 ABI 正式构建；未执行新 Profile 采集/可选 UI。scratch/release-source 已固定到实际 APK 源码 5f12a93，不能使用主分支后来仅记录进度的提交来签名复核。
+
+- 精简 Build 42198959003 / job 127829597157 完整成功，只有两项旧采集步骤按输入跳过。最终未签名 Artifact 13494790681（SHA-256 54c1846c6be09a17f7a8cf792021bd8f1bcd0ccef0f944e16577d3f3eed6cc2a，26,669,839 bytes）已下载并核对；诊断 13494431723。正在独立 5f12a93 工作树执行五包正式 V2/V3 签名，尚未建草稿/发布。后续只用这个最终输入，release.yml quick_release=true。
+
+- 五包本地签名及独立摘要已通过。CLI/Git 临时凭据再次返回 401，原 GitHub 连接器正常；不更换身份、不上传私钥。已通过连接器上传九个公开 ZIP 片段并逐个核对 Git SHA，清单 blob=85b2cd70549fddf863334ec90d2f5adca590bfee，原 ZIP SHA-256=fbc3f3e99e29ae83e0b7832b7f2aaca438339210e30363ef28f66de664d34878（26,102,120 bytes）。为请求大小限制补充分片接收，保留原二进制交接方式及所有签名/来源检查；下一步用一次性 Actions 建草稿并启动已有 quick_release 发布，完成后删临时流程和本章。
