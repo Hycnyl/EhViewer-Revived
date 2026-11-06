@@ -81,6 +81,7 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onGloballyPositioned
@@ -411,7 +412,8 @@ class MainActivity : EhActivity() {
                     ) {
                         MutableSideSheet(
                             drawerState = sideSheetState,
-                            modifier = Modifier,
+                            // Cache drawing for the main content in a separate layer.
+                            modifier = Modifier.graphicsLayer(),
                             enabled = drawerEnabled,
                         ) {
                             SharedTransitionLayout {

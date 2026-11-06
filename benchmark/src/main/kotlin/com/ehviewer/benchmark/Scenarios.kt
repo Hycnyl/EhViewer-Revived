@@ -59,8 +59,8 @@ internal fun MacrobenchmarkScope.zoomPage() {
     device.waitForIdle()
 }
 
-internal fun MacrobenchmarkScope.navigateGallery() {
-    repeat(3) {
+internal fun MacrobenchmarkScope.navigateGallery(repetitions: Int = 3) {
+    repeat(repetitions) {
         val title = checkNotNull(
             device.findObjects(By.textStartsWith("Offline gallery")).firstOrNull {
                 val bounds = it.visibleBounds
@@ -78,10 +78,10 @@ internal fun MacrobenchmarkScope.navigateGallery() {
     }
 }
 
-internal fun MacrobenchmarkScope.toggleDrawer() {
+internal fun MacrobenchmarkScope.toggleDrawer(repetitions: Int = 4) {
     val w = device.displayWidth
     val h = device.displayHeight
-    repeat(4) {
+    repeat(repetitions) {
         device.swipe(w / 8, h / 2, w * 4 / 5, h / 2, 24)
         check(device.wait(Until.hasObject(By.pkg(packageName).text("Settings")), 5_000)) { "Navigation drawer did not open" }
         device.waitForIdle()

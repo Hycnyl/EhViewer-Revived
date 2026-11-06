@@ -42,8 +42,9 @@ class BaselineProfileGenerator {
         scrollGallery()
         // Scrolling can end at any viewport; reset before testing a cached detail.
         prepare("list")
-        navigateGallery()
-        toggleDrawer()
+        // ProfileRule repeats this journey until stable; frame sampling keeps its larger loops.
+        navigateGallery(repetitions = 1)
+        toggleDrawer(repetitions = 1)
         prepare("grid")
         scrollGallery()
     }
