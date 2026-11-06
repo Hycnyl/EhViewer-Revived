@@ -94,3 +94,5 @@ UI 模块保留 `allWarningsAsErrors`，仅用 `-Xwarning-level=DEPRECATION:warn
 - 用户明确要求快速构建，本轮通过 build.yml 的 reuse_profile_run=42145312240 复用最新正式 1.17.13 的 Baseline/Startup 文本（先核对来源、工具链、版本以外构建配置及 Artifact 摘要），再针对新 DEX 编译；常规发布仍默认自动采集。release.yml quick_release=true 仅做 API33 universal/ABI 安装、覆盖升级与 ProfileInstaller，省略可选 UI 套件。自动推送触发的常规构建/UI 会取消，立即手动启动指定的精简构建，避免重复工作。
 
 - 产品与精简 CI 已提交并推送 `5f12a93ec5a667570639c66caec9aa2968a1b773`。常规 Build 42198895097 和可选 Archive UI 42198895088 已请求取消；已启动 [精简 Build 42198959003](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/42198959003)，输入 reuse_profile_run=42145312240，APK 源码固定 5f12a93。当前尚未签名/建草稿/发布，正式 latest 仍为 1.17.13。下一步看编译及规则复用，成功后取最终 Artifact，用独立 release-source 工作树签名，release.yml quick_release=true 发布 1.17.14。
+
+- 精简 Build 42198959003 的 Kotlin/格式、规则来源/工具链/Artifact 摘要及两套阅读器覆盖检查已通过，已进入五 ABI 正式构建；未执行新 Profile 采集/可选 UI。scratch/release-source 已固定到实际 APK 源码 5f12a93，不能使用主分支后来仅记录进度的提交来签名复核。
