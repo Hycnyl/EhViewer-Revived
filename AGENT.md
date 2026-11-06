@@ -97,3 +97,6 @@ UI 模块保留 `allWarningsAsErrors`，仅用 `-Xwarning-level=DEPRECATION:warn
 - 私有 scratch /workspace/.ehviewer-revived-work 已恢复，final-profile/final-before/final-after 存当前有效证据；vault /workspace/.ehviewer-revived-signing 保持 0700/0600，禁止上传。最终保留成功 CI/Release 证据，删除本轮无效/过期 Artifact、临时分支/工作树、临时文件并移除整个进度章节；保留环境工具链、原仓库和密钥保管目录。
 
 - 新候选 7cd4e50 的交互 CI 42131493825 / job 127608952231 已完成成功，实际 4 项全部通过。Artifact 13463014361，SHA-256 e45519fe025d3dfb88b31ec321f6557acf1e7d93ce394d1efd149a0c260920c5；签名 worktree 已同步至 7cd4e50。当前等待 Build 42131493833 / job 127608951558 与优化 Frame 42131496485 / job 127608957348，main 之后仅 AGENT.md 状态更新，不影响候选源码与已执行检查。
+
+- 候选 7cd4e50 的优化 Frame 42131496485 / job 127608957348 已完成成功，六场景各三次，Artifact 13464328291，SHA e7cee4f3d25276590f6e81411caeb30e48e91a2ae32341ea8f8ebed3cb498e6f，已下载验证。P95 原行为 a5acc47→当前候选：侧栏 737.433→169.747；列表 130.132→134.630；网格 200.366→246.408；导航 234.149→227.066；Pager 121.913→133.012；Webtoon 123.627→128.269。不能宣称全面提速；静止绘制快路径未消除模拟器网格差异。
+- 网格追踪进一步核对：每次 AndroidOwner:draw 平均耗时没有明显增加，measureAndLayout 的实际 Running 时间约从 1.18 ms/次增至 2.15 ms/次，仍小于大额渲染/Bitmap 分配上传等待；调度等待也上升。不据软件 GPU 下的差异加入推测性的图片策略或新的缓存层。发布说明应完整记录数据与 CI 边界。当前仍等 Build 42131493833 的新 producer 过滤生成与全部 ABI 组装。
