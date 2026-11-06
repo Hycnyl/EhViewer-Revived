@@ -27,6 +27,7 @@ env:
 
 jobs:
   measure:
+    if: github.event_name != 'push' || !github.event.deleted
     name: measure-${{ inputs.source_commit || github.sha }}-${{ matrix.scenario }}
     runs-on: ubuntu-latest
     timeout-minutes: 65

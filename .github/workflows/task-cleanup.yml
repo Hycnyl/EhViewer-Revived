@@ -1,0 +1,77 @@
+name: Finish 1.17.13 delivery
+
+on:
+  push:
+    branches: [main]
+    paths: [.github/workflows/task-cleanup.yml]
+
+permissions:
+  contents: write
+  actions: write
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - name: Record completed release checks and remove superseded task material
+        run: |
+          python3 - <<'PY'
+          import json, os, subprocess
+          from pathlib import Path
+
+          repo = 'Hycnyl/EhViewer-Revived'
+          source = 'b4a4347893a1995cbac601a1abc8aa829b926d61'
+          run_id = 42149706398
+
+          def api(path, method='GET', missing_ok=False):
+              result = subprocess.run(['gh', 'api', '--method', method, f'repos/{repo}/{path}'], capture_output=True, text=True)
+              if result.returncode:
+                  if missing_ok and 'HTTP 404' in result.stderr:
+                      return None
+                  raise RuntimeError(f'{method} {path}: {result.stderr}')
+              return json.loads(result.stdout) if result.stdout.strip() else None
+
+          run = api(f'actions/runs/{run_id}')
+          assert run['path'] == '.github/workflows/release.yml'
+          jobs = api(f'actions/runs/{run_id}/jobs?per_page=100')['jobs']
+          assert {j['name'] for j in jobs} == {'prepare', 'verify (26)', 'verify (33)', 'verify (36)', 'publish'}
+          assert all(j['status'] == 'completed' and j['conclusion'] == 'success' for j in jobs)
+          release = api('releases/tags/v1.17.13')
+          assert not release['draft'] and not release['prerelease'] and release['target_commitish'] == source
+          expected = {f'EhViewer-1.17.13-{abi}.apk' for abi in ('universal', 'arm64-v8a', 'armeabi-v7a', 'x86_64', 'x86')} | {'release-info.json', 'SHA256SUMS.txt'}
+          assert {a['name'] for a in release['assets']} == expected
+          original = '五种 APK 已通过同一正式证书的 V2/V3 签名和独立内容摘要校验。发布前将由 Actions 验证 Android 8/13/16 安装、1.17.12 覆盖升级、实际 16 KiB 页、ProfileInstaller 写入与五个公开下载的 SHA-256。'
+          completed = f'[签名、安装与发布验证](https://github.com/{repo}/actions/runs/{run_id})全部通过：五包 V2/V3 与独立摘要；universal/x86_64 在 Android 8/13/16 模拟器中安装、启动及 ProfileInstaller 写入；Android 13 从 1.17.12 覆盖升级保留数据；Android 16 实际 16 KiB 页；五个公开下载的 SHA-256 与签名产物一致。'
+          body = release['body']
+          if original in body:
+              notes = Path(os.environ['RUNNER_TEMP']) / 'release-notes.md'
+              notes.write_text(body.replace(original, completed))
+              subprocess.run(['gh', 'release', 'edit', 'v1.17.13', '--repo', repo, '--notes-file', str(notes)], check=True)
+          else:
+              assert completed in body
+          print('PASS: published source, assets and all release checks; results recorded in Release')
+
+          artifacts = [{"id": 13469527784, "run": 42140705226, "name": "build-diagnostics-b64ff942823de0837472e3d29eea45f01cca94f8", "digest": "sha256:61385b2d558501fc804a805ff003a27b7766c57e06ef1f484304e7e62b4ec596", "size": 39356795}, {"id": 13468567314, "run": 42140723220, "name": "performance-frames-b64ff942823de0837472e3d29eea45f01cca94f8", "digest": "sha256:2c60a3f4b4f5638981578568c2dffbaa258b452db19b7992f2cc3f332aa4a9f3", "size": 76811300}, {"id": 13467272560, "run": 42140705273, "name": "interaction-ui", "digest": "sha256:1f2835c4006b95a8484f8da086ddf33d392b6575e9c594a376a24fbbdb1f5c2e", "size": 8322}, {"id": 13466588274, "run": 42131493833, "name": "build-diagnostics-7cd4e5032b06b95ca69b3f5a7c4e30b1b234e361", "digest": "sha256:84f049e663713544c2108f3eaf424cefb13d5c7394945558a2f97c3b1397a1ce", "size": 56730483}, {"id": 13466119320, "run": 42131493833, "name": "unsigned-release-7cd4e5032b06b95ca69b3f5a7c4e30b1b234e361", "digest": "sha256:a766a41fff1860ace2a27beecd7434b188f8295506f803a4a5a5de6b5b188af4", "size": 26652928}, {"id": 13464328291, "run": 42131496485, "name": "performance-frames-7cd4e5032b06b95ca69b3f5a7c4e30b1b234e361", "digest": "sha256:e7cee4f3d25276590f6e81411caeb30e48e91a2ae32341ea8f8ebed3cb498e6f", "size": 73847913}, {"id": 13463014361, "run": 42131493825, "name": "interaction-ui", "digest": "sha256:e45519fe025d3dfb88b31ec321f6557acf1e7d93ce394d1efd149a0c260920c5", "size": 8324}, {"id": 13444299579, "run": 42088480537, "name": "performance-frames-a5acc471b49fd75a873fb885aa2e3fb044870470", "digest": "sha256:77fc3f8cbe9551de2467b38b17f97b367040b2ba8af59a71f3259ccfed2e3059", "size": 74331825}]
+          for artifact in artifacts:
+              path = f"actions/artifacts/{artifact['id']}"
+              current = api(path, missing_ok=True)
+              if current is not None:
+                  assert current['workflow_run']['id'] == artifact['run']
+                  assert current['name'] == artifact['name'] and current['digest'] == artifact['digest']
+                  api(path, 'DELETE')
+              print(f"PASS: superseded artifact removed: {artifact['id']}")
+
+          refs = [{"ref": "refs/heads/motion-input-verify", "sha": "faf2921fd99338f72c2b92502f50a4f6eb995087"}, {"ref": "refs/heads/performance-baseline", "sha": "6b8607230b68b2bc4fd304353fa112f73530ecb5"}, {"ref": "refs/heads/performance-grid-current", "sha": "4c084919ace1f1ae635b8839bbef6697a220ac19"}, {"ref": "refs/heads/performance-grid-default", "sha": "a7721703d5e4dd74902c4779723c8d8d7e1e9e36"}, {"ref": "refs/heads/performance-grid-layer", "sha": "1add1549e36d6f1b92c818ad6116746147321183"}, {"ref": "refs/heads/performance-motion", "sha": "6b24b49806dc13bfb13bb78c72b65dd4d918a69a"}, {"ref": "refs/heads/performance-optimized", "sha": "b4a4347893a1995cbac601a1abc8aa829b926d61"}]
+          for ref in refs:
+              name = ref['ref'].removeprefix('refs/heads/')
+              current = api(f'git/ref/heads/{name}', missing_ok=True)
+              if current is not None:
+                  assert current['object']['sha'] == ref['sha'], f'Temporary branch changed: {name}'
+                  api(f'git/refs/heads/{name}', 'DELETE')
+              print(f'PASS: task branch removed: {name}')
+          with open(os.environ['GITHUB_STEP_SUMMARY'], 'a') as summary:
+              summary.write(f'Published 1.17.13 verified; removed {len(artifacts)} superseded artifacts ({sum(a["size"] for a in artifacts):,} bytes) and {len(refs)} unchanged task branches. Final build, frame, UI and installation evidence retained.\n')
+          PY
