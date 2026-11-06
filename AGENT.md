@@ -92,3 +92,5 @@ UI 模块保留 `allWarningsAsErrors`，仅用 `-Xwarning-level=DEPRECATION:warn
 - 三项产品代码已完成：配额使用 Double 实际比率严格比较阈值，仅绘制值截断；资金 Surface/选项标题/费用-按钮-大小分层，保留有限宽 FlowRow 换行与两列/H@H；图片信息等菜单收起后再读取当前页，通过 loader.save 单页临时文件和 BitmapFactory 边界/旧系统动画 WebP VP8X 头读取像素，IO 后 finally 删除文件。文本覆盖英/简繁/HK/日，版本已升为 1.17.14 / 180089。下一步格式化并配置本轮精简 Actions。
 
 - 用户明确要求快速构建，本轮通过 build.yml 的 reuse_profile_run=42145312240 复用最新正式 1.17.13 的 Baseline/Startup 文本（先核对来源、工具链、版本以外构建配置及 Artifact 摘要），再针对新 DEX 编译；常规发布仍默认自动采集。release.yml quick_release=true 仅做 API33 universal/ABI 安装、覆盖升级与 ProfileInstaller，省略可选 UI 套件。自动推送触发的常规构建/UI 会取消，立即手动启动指定的精简构建，避免重复工作。
+
+- 产品与精简 CI 已提交并推送 `5f12a93ec5a667570639c66caec9aa2968a1b773`。常规 Build 42198895097 和可选 Archive UI 42198895088 已请求取消；已启动 [精简 Build 42198959003](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/42198959003)，输入 reuse_profile_run=42145312240，APK 源码固定 5f12a93。当前尚未签名/建草稿/发布，正式 latest 仍为 1.17.13。下一步看编译及规则复用，成功后取最终 Artifact，用独立 release-source 工作树签名，release.yml quick_release=true 发布 1.17.14。
