@@ -9,7 +9,7 @@
 ## 基线与发布
 
 - 功能源自 `Hycnyl/EhViewer` 的 `v1.17.8`，对应清理后的提交 `92923877ef671e33aa56f69688daa46af6e59ec6`；新仓库独立起始，不继承旧 Git 历史。四种语言 README 继承旧仓库最新的用户文档与完整素材引用，保留 LICENSE、NOTICE 和源码版权说明。
-- 应用名保持 `EhViewer`，正式包名保持 `moe.hycnyl.ehviewer`。当前正式版本为 `1.17.12` / `180087`，上个正式版为 `1.17.11` / `180086`，接续旧版 `1.17.8` / `180083` 和 `1.17.9` / `180084`。后续沿用版本体系，版本码递增。
+- 应用名保持 `EhViewer`，正式包名保持 `moe.hycnyl.ehviewer`。当前正式版本为 `1.17.13` / `180088`，上个正式版为 `1.17.12` / `180087`，接续旧版 `1.17.8` / `180083` 和 `1.17.9` / `180084`。后续沿用版本体系，版本码递增。
 - 任何实际影响用户的改动完成后，除非维护者明确禁止，都须提升 versionName/versionCode，使用 GitHub Actions 发布正式 Release；提供 universal、arm64-v8a、armeabi-v7a、x86_64、x86 五种 APK，并附简短变更说明与 SHA-256 校验和。不得使用 `[skip ci]` 绕过这条规则。
 - README 保持简洁，变更通常只在“变更”章节简要记录；允许修正仓库链接、安装要求和迁移说明。不得随意重写其余内容或丢失截图、素材和致谢。
 - 单轮只改一个目标不是硬性限制。缓存导出、下载恢复和归档格式继承 1.17.8 的当前行为，维护者没有将其固化为不可修改的长期规则。
@@ -34,6 +34,7 @@
 - 密钥、密码与备份不得进入 Git、日志、Artifact 或 Release。当前本地保管目录为 `/workspace/.ehviewer-revived-signing`，目录权限 0700，文件 0600；工作区或环境删除前必须由维护者保有独立备份。
 - 维护者允许在连接具备 Actions Secrets 权限时将密钥存入 Secrets；当前连接实测管理 Secrets 返回 HTTP 403，因此当前流程只能本地签名，不上传私钥。
 - Actions 构建未签名 APK；用 `tools/release.py sign` 在本地校验构建来源、证书与文件后签名。仅回交签好的 APK、校验和及公开构建信息到私有 Release 草稿，Actions 再验证并公开发布。
+- 本地 CLI 凭据失效时，可使用已授权的 GitHub 连接器完成源码提交；受限的远程收尾可交由最小权限临时 Actions，完成后删除流程文件。不得打印或转存访问令牌。
 - 当前连接本地上传 Release 附件返回 HTTP 401。将上述七个公开文件打包成 ZIP，通过 Git Data blobs API 交接（不创建分支或提交），以 `signed_blob` 和 `bundle_sha256` 输入启动 `release.yml`；Actions 先校验包内容、来源与签名，再上传草稿。APK 的 `source_commit` 固定为实际构建提交，工作流本身可以在其后的提交中修正。
 - 旧 1.17.9 已使用同一张新证书，可以直接覆盖安装。旧 1.17.8 及更早版本使用不同签名：Android 13+ 可先安装旧仓库的 1.17.9，再升级 Revived；Android 8–12 须先导出备份、卸载旧版、再安装并导入。设置/数据库备份不包含全部图片；卸载前，须把备份、下载和缓存导出文件复制到应用私有目录（如 Android/data/moe.hycnyl.ehviewer）之外，确认后再卸载。新装后重新授权下载目录并导入备份。
 
@@ -44,8 +45,8 @@
 - 本地签名：`python3 tools/release.py sign --input <Actions未签名产物目录> --output <新输出目录> --vault /workspace/.ehviewer-revived-signing`。设置 ANDROID_HOME；使用已安装的固定版 Build Tools。
 - 公开产物复核：`python3 tools/release.py verify --input <已签名产物目录>`。来源提交、版本、包名、SDK、原生 ABI、ZIP CRC、16 KiB ZIP 对齐、证书及 V2/V3 均须匹配。
 - Release CI 使用 API 35 离线场景执行 `:app:generateBaselineProfile -PbuildAbis=x86_64`，检查两套阅读器覆盖后再组装全部正式 ABI。生成文本存于 Git 忽略的 `app/src/main/generated/baselineProfiles/`，正式包须包含非空 `assets/dexopt/baseline.prof` 和 `.profm`。开发构建默认不启动模拟器，需要自动采集时显式 `-PgenerateBaselineProfile=true`。
-- Baseline Profile 1.5 会在 finalizeDsl 中复制原 Release manifest；benchmark/nonMinified 变体的专用 overlay 必须在其后配置。测试内容只进入独立 `.benchmark` 包，正式 APK 不含夹具入口。
-- 帧测试按六个独立场景执行，版本/依赖/内容/构建配置一致后再对比。runtime-tracing 1.13 使用 Tracing 2.0/tracing-wire；仅在 benchmarkRelease 显式 -PtraceCompose=true 时引入（performance.yml 的 trace_compose 选项）。Macrobenchmark 1.5 会自动连接此依赖，但其写出在软件模拟器中复现偶发 60 秒超时，默认 Frame 测量仅用标准系统 Perfetto，详细 Compose 追踪按需开启。不要启用仅对应旧 tracing-perfetto 的 perfettoSdkTracing 开关。高开销的重组状态读写追踪只用于必要定向诊断。
+- Baseline Profile 1.5 会在 finalizeDsl 中复制原 Release manifest；benchmark/nonMinified 变体的专用 overlay 必须在其后配置。测试内容只进入独立 `.benchmark` 包，正式 APK 不含夹具入口。采集端 `Rule.collect` 的 `filterPredicate` 必须排除整个夹具包，不能仅依赖 consumer filter：Startup 规则可能在后续合并时重新进入 Baseline。
+- 帧测试按六个独立矩阵作业执行，每场景使用全新 AVD、关闭 Wi-Fi/移动网络并加载固定本地内容，以 CompilationMode.Full 各测量三次；版本/依赖/内容/构建配置一致后再对比。runtime-tracing 1.13 使用 Tracing 2.0/tracing-wire；仅在 benchmarkRelease 显式 -PtraceCompose=true 时引入（performance.yml 的 trace_compose 选项）。Macrobenchmark 1.5 会自动连接此依赖，但其写出在软件模拟器中复现偶发 60 秒超时，默认 Frame 测量仅用标准系统 Perfetto，详细 Compose 追踪按需开启。不要启用仅对应旧 tracing-perfetto 的 perfettoSdkTracing 开关。高开销的重组状态读写追踪只用于必要定向诊断。
 - ProfileInstaller 保持官方最新稳定版 1.4.1（V015_S 向前兼容）；发布设备检查实际调用安装 receiver，并要求成功转码/写入 Profile。帧数据附原始 JSON/Perfetto，软件渲染模拟器不得被描述为真机 FPS 或硬件 GPU 验证。
 - APK 根目录的标准 Kotlin 工具元数据由 `GenerateKotlinToolingMetadataTask` 从实际 KGP、Gradle 和 Java 编译配置生成，通过 `ScopedArtifact.JAVA_RES` 随每个变体打包，供 LibChecker 等工具识别。Java 字段表示 compileOptions 的源码/字节码兼容级别。
 
@@ -71,41 +72,13 @@
 | Coroutines / Serialization / Datetime / IO | 1.10.2 / 1.9.0 / 0.7.1 / 0.8.2 → 1.11.0 / 1.12.0 / 0.8.0 / 0.9.2 | 固定稳定版本；不采用兼容旧日期类型的特殊分支 |
 | Arrow / moko-resources / AboutLibraries / Spotless | 2.2.1.1 / 0.25.2 / 13.1.0 / 8.1.0 → 2.3.0 / 0.27.1 / 15.3.0 / 8.11.0 | 采用支持新版 Kotlin/AGP 的稳定组件 |
 | libarchive / XZ / Corrosion | 3.8.4 / 5.8.1 / 0.6 → 3.8.11 / 5.8.4 / 0.6.1 | 原生稳定修复版，保留项目原有补丁 |
+| Baseline Profile / Macrobenchmark / UI Automator | 本轮恢复 → 1.5.0 / 1.5.0 / 2.4.1 | 固定稳定版；Release 自动采集，阅读器使用本地内容，帧测量和追踪按场景独立执行 |
 | 保留的依赖 | XMLUtil 0.91.3、WebP 1.6.0、Nettle 3.10.2、Rust 运行依赖锁文件 | XMLUtil 1.x 涉及编解码 API 迁移；其余保持原生 FFI 与解析格式兼容；TL 例外固定至同一 FooIbar fork 的 `051705e41fcc140bcb6affcca687589333976296`，上游提交仅同步 3 处 SIMD 方法名以适配新 nightly，未改变解析逻辑 |
 
 核对入口：[AGP 9.5](https://developer.android.com/build/releases/agp-9-5-0-release-notes)、[Kotlin 发布](https://kotlinlang.org/docs/releases.html)、[Compose 兼容性](https://kotlinlang.org/docs/multiplatform/compose-compatibility-and-versioning.html)、[Material 3 发布](https://developer.android.com/jetpack/androidx/releases/compose-material3)、[libarchive](https://github.com/libarchive/libarchive/releases/tag/v3.8.11)、[XZ](https://github.com/tukaani-project/xz/releases/tag/v5.8.4)。
 
 UI 模块保留 `allWarningsAsErrors`，仅用 `-Xwarning-level=DEPRECATION:warning` 将仍受支持的旧 API 弃用提示保留为日志警告，不隐藏它们；类型、ABI、其他编译警告仍阻止构建。预测返回、搜索和输入等兼容层保留现有交互语义，后续迁移新 API 时独立验证手势与输入行为。
 
-发布验证按本轮改动选择场景。UI、签名和构建默认使用 API 26、33、36；Target 37 的候选将现代设备检查切换至 API 37.2。使用包含 WebView 的 google_apis 镜像，现代设备使用 google_apis_ps16k 并检查真实页大小；每次新建 AVD，分配 4096M RAM / 512M heap。验证设备端 APK SHA-256、文件式 universal/匹配 ABI 安装、上个正式版本覆盖安装和启动。UI 使用独立的 archive-ui 工作流渲染实际组件，支持指定 APK 源码与更新验证夹具，避免测试修正触发重复原生构建。只有涉及相关业务功能的改动，才增加离线 CBZ、设置迁移等对应检查。临时数据不进入源码或 Release。
+发布验证按本轮改动选择场景。UI、签名和构建默认使用 API 26、33、36；Target 37 的候选将现代设备检查切换至 API 37.2。使用包含 WebView 的 google_apis 镜像，现代设备使用 google_apis_ps16k 并检查真实页大小；每次新建 AVD，分配 4096M RAM / 512M heap。验证设备端 APK SHA-256、文件式 universal/匹配 ABI 安装、上个正式版本覆盖安装和启动。UI 按改动选用 archive-ui 或 interaction-ui 工作流渲染实际组件，支持指定 APK 源码与更新验证夹具，避免测试修正触发重复原生构建。只有涉及相关业务功能的改动，才增加离线 CBZ、设置迁移等对应检查。临时数据不进入源码或 Release。
 
 本托管环境先执行 `source /workspace/.ehviewer-env/activate.sh`，其中设置已固定的 JDK、SDK、Gradle/Cargo 缓存与本地 GNU m4 1.4.20。m4 是 Nettle 汇编的构建依赖；CI 检查并安装它。本地无 sudo，m4 安装于私有工具目录。Nettle 的源码包含预生成文件，CMake 必须保留其解包时间戳（DOWNLOAD_EXTRACT_TIMESTAMP TRUE）。
-
-## 临时进度：Profile、性能追踪与交互动画
-
-- 最终候选源码 `b4a4347893a1995cbac601a1abc8aa829b926d61` 已推送 main / performance-optimized，版本 1.17.13 / 180088；当前正式版仍为 1.17.12，尚未签名、创建 Draft 或发布。EhViewer / moe.hycnyl.ehviewer、Min 26 / Target 36 / Compile 37.2、正式 V2+V3 证书保持。
-- 产品完成：移除主抽屉/右侧栏动态模糊，保留遮罩/滑动/预测返回和主内容无特效绘制隔离层；图库两布局/Webtoon 使用单层 48 dp 限幅回弹、临界阻尼、绘制阶段读取状态；Pager 拖动/点击/滑块共用单一吸附弹簧；Material 空间动画使用真实弹簧。未修改图片清晰度、检测、缓存和预取。
-- 已恢复 Benchmark、四个 Baseline Profile、六个独立 FrameTimingMetric 和可选冷启动对照。Release 自动采集并合并，日常开发默认不启动模拟器。24 页离线 CBZ、120 条本地收藏/详情和完整预览只进独立 .benchmark 变体；正式包检查完整夹具包 DEX 缺席。Rule.collect filterPredicate 排除夹具，避免 Startup 规则被重新并回。Profile 旅程导航/抽屉各一次，Frame 仍各三/四次。
-- 新最终 [Build 42145312240](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/42145312240) / job 127655780062 进行中。最新 [交互检查 42145312198](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/42145312198) / job 127655256786 已成功，Artifact 13469762609（SHA-256 c566429b231fa991592c7b7388703f6649ebcafa8ca8066bb9af3ba62ccf825c）已核对 XML：五项全部通过，无失败/错误/跳过。鼠标中断回位缺陷先在未修复源码 faf2921 / 42143581923 真实复现，再只让 Touch/Stylus 按下中断回位；临时分支的单项 workflow 未合并。
-- 最新 [优化后 Frame 42145313894](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/42145313894) 源码 b4a4347；[原行为对照 Frame 42145313902](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/42145313902) 源码 `6b8607230b68b2bc4fd304353fa112f73530ecb5`。每组六个矩阵作业，每个场景各三次、独立新 AVD、Wi-Fi/移动网络关闭；benchmark-only 网络路由强制本地启动页，两组夹具/版本/依赖/硬件参数一致。必须使用这两组比较，不与旧共享 AVD 联跑数据混算。
-- 完成的中间 7cd4e50 Build 42131493833 曾验证四 Profile、五 ABI 和无夹具规则；旧 b64ff94 Build 42140705226 已被新构建取代。二者 APK 都未签名/发布，不可充当最终源码产物。原先六场景共享 AVD 联跑未完整复现单场景收益，因此改为独立矩阵，不声称全面提速。
-- 实际 Perfetto 已检查：原动态模糊侧栏长帧关联 postAndWait/着色器编译；网格硬件 Bitmap 分配/上传等待发生在后台，图片解码在 DefaultDispatcher。保留无特效 graphicsLayer 的限定网格对照 42138960650 / 1add154 一项三次通过，P50/P95 为 125.034/181.022 ms；无隔离层自定义效果 42137099770 为 169.596/282.670 ms。详细 Compose Tracing 2.0 偶发 FLUSH 超时，现仅 -PtraceCompose=true 按需启用；默认使用标准系统 Perfetto。软件 GPU、独立 CI 机器且未锁频，不宣称真机 FPS；冷启动对照未运行。
-- scratch `/workspace/.ehviewer-revived-work` 的 release-notes.md 仍有旧中间结果，发布前须替换为新矩阵数据、五项交互及实际安装记录。旧 Artifact 白名单中 28 项共 988,360,791 bytes 已删除，记录在 scratch/artifact-cleanup-result.json；最终成功后再清理本轮中间产物。
-- 签名工作树 scratch/release-source 已切到 b4a4347893a1995cbac601a1abc8aa829b926d61；新产物使用新目录。vault `/workspace/.ehviewer-revived-signing` 保持 0700/0600，禁止上传。Secrets 无权限，继续本地签名；仅七个公开文件 ZIP 经 Git blob 交接，Release CI 验证 API26/33/36、1.17.12 覆盖升级、16 KiB、真实 ProfileInstaller 写入和五个公开下载。dispatch 间歇 500/502，先查是否实际创建再重试。
-- 下一步：等最终 Build/两组 Frame，取并核对五项交互和所有 Artifact→最终源码本地 V2+V3 签名→更新具体 Release 说明→创建 1.17.13 Draft / Git blob→启动 release.yml（focused_ui_workflow=interaction-ui.yml）→全部验证发布。之后更新当前正式版本，删除整个临时章节，清理临时分支/工作树、过期 Artifact 和本轮临时文件，保留全局环境/原仓库/附件/vault。
-- 临时工作树：scratch/baseline-source（performance-baseline）、grid-probe（performance-grid-layer）、input-probe（motion-input-verify）、release-source（detached）。本轮临时分支还包括 performance-motion、performance-collection、performance-optimized、performance-grid-current、performance-grid-default；清理前核对引用仍为本轮提交。
-
-- 已停止本地 Gradle Daemon，删除被取代的本地中间 APK/重复追踪和失败诊断658,849,511 bytes；对应有效 CI 证据仍在 GitHub。最新五项交互报告、三组限定网格对照、最终 CI 状态与发布说明草稿仍保留。
-
-- 两组最新独立 Frame 均完成：42145313894 / 42145313902 的各六场景全部通过，无失败/跳过，每场景三次；12 个 Artifact 已逐一核对 GitHub SHA-256、XML 和原始 JSON，来源索引 scratch/final-performance-provenance.json。CPU 帧时 P95（原行为→新）：drawer 585.199→140.819、grid 291.599→177.188、navigation 295.193→203.701、pager 136.176→102.084、list 112.251→138.905、webtoon 139.133→154.279 ms。不宣称全面提速。新旧侧栏代表 Perfetto 的 shader_compile 累计 2362.277→187.454 ms，postAndWait 峰值 1170.038→350.459 ms；解码仍在后台。Release 草稿说明已换成这组最终对照，尚待正式 Build 和签名安装结果。
-
-- 最终 Build 42145312240 已完成 Profile 生成与两套阅读器覆盖检查，现进入 Build all release architectures；还没有最终 Artifact，不得提前签名或使用旧包。
-
-- 最终 Build 42145312240 / job 127655780062 全步骤成功并完成收尾。Artifact 未签名 13471871634（SHA 6bd738c738379efb5912dbbdc96f36c6ea9b145e3ce00076b217cd178b11c55b），诊断 13471337222（SHA 65a8f8a5393521851ae432cecbc5aeeb2cadad5ee4e62a8d50735a8f6a7c43f1）；下载摘要已核对。四 Profile 真正通过，另八个非采集测试按插件跳过；Baseline 39,166 / Startup 29,237 条，无夹具。五 APK 均含 19,133 bytes baseline.prof / 1,237 bytes .profm；release.verify 已验证最终 b4a4347 来源、版本、ABI、CRC、16 KiB、元数据、无夹具。scratch/final-unsigned、final-diagnostics 为最终输入，签名进程正在写 scratch/final-signed；delivery-state.json 已保存交接状态，不能把旧包混入。
-
-- 本地正式 V2+V3 签名已完成并复核五包/最小 API/独立摘要；最终签名目录 scratch/final-signed 共七个公开文件。已创建 v1.17.13 Draft，targetCommitish=b4a4347893a1995cbac601a1abc8aa829b926d61。公开 ZIP SHA-256 `88ebb438f38a7a51960bc0e273ffe0cceef550818b0526697e6d1e140067aa6d`，Git blob `4ea4456c2418cfbfafeb30bbb8a634dbad12e18e`，二者均已核对（没有私钥）。已启动 [最终发布验证 42149706398](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/42149706398)，workflow ref 86587e8，仅 AGENT 记录晚于 APK 源码；输入 fixed source=b4a4347 / focused_ui_workflow=interaction-ui.yml，未复用旧安装结果，将完整验证 API26/33/36。当前正式 latest 仍为 1.17.12；只有全部检查通过才由 Actions 发布。下一步监看该 Run→核对三个安装/真实 ProfileInstaller 写入、公开下载五包→更新 Release 结果→清理临时引用和文件、删除整个临时章节。
-
-- 最终发布 42149706398 的 prepare / job 127669667547 已成功，三个安装作业 verify (26)/(33)/(36) 已启动，publish 尚未执行。另给 performance.yml 加入删除分支事件跳过条件，避免最终清理临时性能分支时意外启动十二个无用测试作业；只影响 CI 触发，不改变已测量场景或 APK 源码。已列出 8 个被最终证据替代的 Artifact 共 347,747,890 bytes，待正式发布成功后删除（scratch/remaining-obsolete-artifacts.json），保留最终两组矩阵、最终 Build/UI/安装和有效限定对照。
-
-- 发布 42149706398 已完整成功，v1.17.13 于 2026-11-06 02:24:51 UTC 成为 latest，七个公开附件的 GitHub SHA-256 与本地签名产物一致。三个模拟器 universal/x86_64 安装、启动与 ProfileInstaller 实际写入均成功，API33 旧 1.17.12 覆盖/数据保留与 API36 真实 16 KiB 均通过。
-- 本地 GH_TOKEN 突然返回 401，Git push 也认证失败；托管环境没有可刷新的凭据绑定。GitHub 连接器仍正常，匿名读取仓库正常。未上传私钥、未替换身份，改由原 GitHub 连接器提交最后的 CI 跳过删除事件条件及一次性 task-cleanup.yml：只在已发布来源和全部检查正确后更新 Release 验证结果、删除明确列出的八个过期 Artifact/七个临时分支，保留最终证据。完成后用连接器删除该一次性工作流与本临时章节，并同步本地、清理工作树和 scratch；此收尾不改变 APK 源码。
