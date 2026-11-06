@@ -100,3 +100,7 @@ UI 模块保留 `allWarningsAsErrors`，仅用 `-Xwarning-level=DEPRECATION:warn
 - 精简 Build 42198959003 / job 127829597157 完整成功，只有两项旧采集步骤按输入跳过。最终未签名 Artifact 13494790681（SHA-256 54c1846c6be09a17f7a8cf792021bd8f1bcd0ccef0f944e16577d3f3eed6cc2a，26,669,839 bytes）已下载并核对；诊断 13494431723。正在独立 5f12a93 工作树执行五包正式 V2/V3 签名，尚未建草稿/发布。后续只用这个最终输入，release.yml quick_release=true。
 
 - 五包本地签名及独立摘要已通过。CLI/Git 临时凭据再次返回 401，原 GitHub 连接器正常；不更换身份、不上传私钥。已通过连接器上传九个公开 ZIP 片段并逐个核对 Git SHA，清单 blob=85b2cd70549fddf863334ec90d2f5adca590bfee，原 ZIP SHA-256=fbc3f3e99e29ae83e0b7832b7f2aaca438339210e30363ef28f66de664d34878（26,102,120 bytes）。为请求大小限制补充分片接收，保留原二进制交接方式及所有签名/来源检查；下一步用一次性 Actions 建草稿并启动已有 quick_release 发布，完成后删临时流程和本章。
+
+- 一次性交付流程 42203235839 初次在创建草稿时收到 GitHub 403（contents/actions write 已声明）；应用构建/签名无异常。正在以临时 release-source-1.17.14 分支固定已构建的 5f12a93 为分支头，并仅重试失败的交付作业。原 APK/证书/摘要不变；结束须额外删除该临时来源分支。
+
+- 保留来源 SHA 为临时分支头后，交付流程 42203235839 的重试已成功建草稿并启动 [精简发布验证 42203981154](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/42203981154)。prepare / job 127845887885 成功，九片组合包、五个 APK、原正式签名与来源均通过；verify (33) / job 127846110975 正在执行，尚未公开发布。临时来源分支 release-source-1.17.14 必须在发布后清理，不能改动其 5f12a93 指向。
