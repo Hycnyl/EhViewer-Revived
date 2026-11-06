@@ -14,6 +14,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.FileCopy
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Save
 import androidx.compose.material.icons.filled.Share
@@ -37,6 +38,7 @@ fun ReaderPageSheetMeta(
     copy: () -> Unit,
     save: () -> Unit,
     saveTo: () -> Unit,
+    imageInfo: () -> Unit,
     showAds: (() -> Unit)?,
     dismiss: () -> Unit,
 ) {
@@ -51,6 +53,7 @@ fun ReaderPageSheetMeta(
     }
     Column(modifier = Modifier.verticalScroll(rememberScrollState()).navigationBarsPadding()) {
         showAds?.let { Item(icon = Icons.Default.Visibility, text = R.string.show_blocked_image, onClick = it) }
+        Item(icon = Icons.Default.Info, text = R.string.image_info, onClick = imageInfo)
         Item(icon = Icons.Default.Refresh, text = R.string.refresh, onClick = retry)
         Item(icon = Icons.Default.Visibility, text = R.string.view_original, onClick = retryOrigin)
         Item(icon = Icons.Default.Share, text = R.string.action_share, onClick = share)

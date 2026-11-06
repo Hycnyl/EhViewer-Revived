@@ -5,9 +5,15 @@ on:
     branches: [main]
     paths: ['app/**', 'benchmark/**', 'core/**', 'gradle/**', 'build-logic/**', 'tools/**', 'rust-toolchain.toml', '*.gradle.kts', 'gradle.properties', '.github/workflows/build.yml', '!tools/smoke.py', '!tools/install_check.py', '!tools/apk_signature.py', '!app/src/test/**']
   workflow_dispatch:
+    inputs:
+      reuse_profile_run:
+        description: 'For scoped UI patches: reuse profiles from the latest release build (empty regenerates)'
+        type: string
+        default: ''
 
 permissions:
   contents: read
+  actions: read
 
 concurrency:
   group: build-${{ github.ref }}
@@ -36,12 +42,56 @@ jobs:
       - uses: gradle/actions/setup-gradle@v6.4.1
       - name: Check release metadata, Kotlin and formatting
         run: ./gradlew :app:checkDefaultReleaseAarMetadata :app:compileDefaultReleaseKotlin spotlessCheck --no-configuration-cache --max-workers=2 -Pkotlin.compiler.execution.strategy=in-process --stacktrace
+      - name: Reuse release profiles for a scoped patch
+        if: inputs.reuse_profile_run
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PROFILE_RUN: ${{ inputs.reuse_profile_run }}
+        run: |
+          python3 - <<'PY'
+          import hashlib, json, os, re, subprocess, zipfile
+          from pathlib import Path
+          repo, run_id = os.environ['GITHUB_REPOSITORY'], os.environ['PROFILE_RUN']
+          assert re.fullmatch(r'[0-9]+', run_id)
+          def api(path):
+              return json.loads(subprocess.check_output(['gh', 'api', f'repos/{repo}/{path}']))
+          run = api(f'actions/runs/{run_id}')
+          assert run['path'] == '.github/workflows/build.yml' and run['conclusion'] == 'success'
+          assert run['head_sha'] == api('releases/latest')['target_commitish']
+          subprocess.run(['git', 'fetch', '--no-tags', '--depth=1', 'origin', run['head_sha']], check=True)
+          for name in ('gradle/libs.versions.toml', 'gradle/wrapper/gradle-wrapper.properties', 'settings.gradle.kts', 'build.gradle.kts', 'app/build.gradle.kts'):
+              previous = subprocess.check_output(['git', 'show', run['head_sha']+':'+name], text=True)
+              current = Path(name).read_text()
+              normalize = lambda s: re.sub(r'(?m)^\s*version(?:Name|Code) = .+$', '', s)
+              assert normalize(previous) == normalize(current), f'Profile toolchain/configuration changed: {name}'
+          artifacts = api(f'actions/runs/{run_id}/artifacts')['artifacts']
+          artifact = next(a for a in artifacts if a['name'] == 'build-diagnostics-'+run['head_sha'] and not a['expired'])
+          archive = Path(os.environ['RUNNER_TEMP']) / 'prior-profiles.zip'
+          with archive.open('wb') as target:
+              subprocess.run(['gh', 'api', f'repos/{repo}/actions/artifacts/{artifact["id"]}/zip'], stdout=target, check=True)
+          assert hashlib.sha256(archive.read_bytes()).hexdigest() == artifact['digest'].removeprefix('sha256:')
+          output = Path('app/src/main/generated/baselineProfiles')
+          output.mkdir(parents=True, exist_ok=True)
+          with zipfile.ZipFile(archive) as bundle:
+              for filename in ('baseline-prof.txt', 'startup-prof.txt'):
+                  names = [n for n in bundle.namelist() if n.rsplit('/', 1)[-1] == filename]
+                  assert len(names) == 1
+                  data = bundle.read(names[0])
+                  assert data and b'Lcom/hippo/ehviewer/benchmark/' not in data
+                  (output / filename).write_bytes(data)
+          archive.unlink()
+          print(f'Reused profile rules from released source {run["head_sha"]}, build {run_id}; recompiling for current APK DEX')
+          with open(os.environ['GITHUB_STEP_SUMMARY'], 'a') as summary:
+              summary.write(f'Profile rules reused from release build {run_id} ({run["head_sha"]}); no new profile or frame collection requested.\n')
+          PY
       - name: Enable emulator acceleration
+        if: ${{ !inputs.reuse_profile_run }}
         run: |
           echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
           sudo udevadm control --reload-rules
           sudo udevadm trigger --name-match=kvm
       - name: Generate current offline Baseline and Startup Profiles
+        if: ${{ !inputs.reuse_profile_run }}
         uses: ReactiveCircus/android-emulator-runner@v2.38.0
         with:
           api-level: 35
@@ -57,17 +107,17 @@ jobs:
             adb shell svc wifi disable
             adb shell svc data disable
             ./gradlew :app:generateBaselineProfile --no-configuration-cache --max-workers=2 -PbuildAbis=x86_64 -Pkotlin.compiler.execution.strategy=in-process --stacktrace
-      - name: Require fresh reader profile coverage
+      - name: Require reader profile coverage
         run: |
           python3 - <<'PY'
           from pathlib import Path
           profiles = list(Path('app/src/main/generated/baselineProfiles').glob('*-prof.txt'))
-          assert profiles, 'No newly generated profiles'
+          assert profiles, 'No baseline/startup profile rules'
           content = '\n'.join(p.read_text() for p in profiles)
           for component in ('ReaderScreenKt', 'PagerViewerKt', 'WebtoonViewerKt', 'PageLoader'):
               assert component in content, f'Missing reader coverage: {component}'
           assert 'Lcom/hippo/ehviewer/benchmark/' not in content, 'Fixture leaked into profile'
-          print('PASS: fresh baseline/startup profiles cover both actual readers')
+          print('PASS: baseline/startup profiles cover both actual readers')
           PY
       - name: Build all release architectures
         run: ./gradlew :app:assembleDefaultRelease --no-configuration-cache --max-workers=2 -Pkotlin.compiler.execution.strategy=in-process --stacktrace

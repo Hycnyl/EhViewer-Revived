@@ -564,4 +564,8 @@
     <string name="gallery_version_loading">正在載入版本資訊…</string>
     <string name="gallery_info_copy_field">複製%1$s</string>
     <string name="gallery_version_expunged">已除名</string>
+    <string name="image_info">圖片資訊</string>
+    <string name="image_resolution">解像度：%1$d × %2$d px</string>
+    <string name="image_info_unavailable">無法讀取圖片資訊</string>
+    <string name="archive_download_options">下載選項</string>
 </resources>

@@ -141,6 +141,7 @@
 
 ## Other
 
+- Add reader image information and improve quota colors and archive download layout.
 - Restore automatic Baseline Profiles and improve interaction motion.
 
 - Restore Kotlin build metadata recognition in LibChecker.

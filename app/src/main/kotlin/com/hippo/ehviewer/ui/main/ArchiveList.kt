@@ -17,6 +17,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -24,7 +25,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.ehviewer.core.i18n.R
 import com.hippo.ehviewer.client.parser.Archive
@@ -48,38 +48,44 @@ fun ArchiveList(
         columns = GridCells.Fixed(2),
         modifier = modifier,
         contentPadding = PaddingValues(horizontal = 8.dp, vertical = 16.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp),
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         item(span = { GridItemSpan(maxLineSpan) }) {
-            Text(text = currentFunds, textAlign = TextAlign.Center)
-        }
-        item(span = { GridItemSpan(maxLineSpan) }) {
-            BoxWithConstraints(Modifier.fillMaxWidth()) {
-                val spacing = 8.dp
-                val fundsWidth = if (maxWidth >= minimumFundsWidth * 2 + spacing) (maxWidth - spacing) / 2 else maxWidth
-                // Weighted FlowRow children require intrinsic measurements;
-                // RollingNumber contains a LazyRow, so use finite cell widths.
-                FlowRow(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(spacing),
-                    verticalArrangement = Arrangement.spacedBy(spacing),
-                    itemVerticalAlignment = Alignment.CenterVertically,
-                    maxItemsInEachRow = 2,
+            Surface(
+                modifier = Modifier.fillMaxWidth(),
+                shape = MaterialTheme.shapes.large,
+                color = MaterialTheme.colorScheme.surfaceContainerHigh,
+            ) {
+                Column(
+                    modifier = Modifier.padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
                 ) {
-                    FundsItem(
-                        type = "GP",
-                        amount = funds.gp,
-                        modifier = Modifier.width(fundsWidth),
-                        textStyle = fundsStyle,
-                    )
-                    FundsItem(
-                        type = "C",
-                        amount = funds.credit,
-                        modifier = Modifier.width(fundsWidth),
-                        textStyle = fundsStyle,
-                    )
+                    Text(text = currentFunds, style = MaterialTheme.typography.titleSmall)
+                    BoxWithConstraints(Modifier.fillMaxWidth()) {
+                        val spacing = 8.dp
+                        val fundsWidth = if (maxWidth >= minimumFundsWidth * 2 + spacing) (maxWidth - spacing) / 2 else maxWidth
+                        // RollingNumber contains a LazyRow: use finite widths, not intrinsic measurements.
+                        FlowRow(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(spacing),
+                            verticalArrangement = Arrangement.spacedBy(spacing),
+                            itemVerticalAlignment = Alignment.CenterVertically,
+                            maxItemsInEachRow = 2,
+                        ) {
+                            FundsItem("GP", funds.gp, Modifier.width(fundsWidth), fundsStyle)
+                            FundsItem("C", funds.credit, Modifier.width(fundsWidth), fundsStyle)
+                        }
+                    }
                 }
             }
+        }
+        item(span = { GridItemSpan(maxLineSpan) }) {
+            Text(
+                text = stringResource(R.string.archive_download_options),
+                modifier = Modifier.padding(top = 8.dp, bottom = 4.dp),
+                style = MaterialTheme.typography.titleMedium,
+            )
         }
         items(nonHath) {
             ArchiveItem(
@@ -115,17 +121,22 @@ private fun ArchiveItem(
     modifier: Modifier = Modifier,
 ) {
     val labelStyle = MaterialTheme.typography.labelMedium
-    Column(modifier = modifier, horizontalAlignment = Alignment.CenterHorizontally) {
+    Column(
+        modifier = modifier.padding(vertical = 4.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
         Text(
             text = cost,
             style = labelStyle,
         )
-        Button(onClick = onClick, shapes = ButtonDefaults.shapes(), modifier = Modifier.widthIn(min = 100.dp)) {
+        Button(onClick = onClick, shapes = ButtonDefaults.shapes(), modifier = Modifier.fillMaxWidth().widthIn(min = 100.dp)) {
             Text(text = name)
         }
         Text(
             text = size,
             style = labelStyle,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
     }
 }

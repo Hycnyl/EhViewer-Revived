@@ -733,4 +733,8 @@
     <string name="gallery_newer_versions_incomplete">Newer versions have not finished loading.</string>
     <string name="gallery_version_open_gallery">Open gallery</string>
     <string name="gallery_info_search_uploader">Search uploader</string>
+    <string name="image_info">Image information</string>
+    <string name="image_resolution">Resolution: %1$d × %2$d px</string>
+    <string name="image_info_unavailable">Unable to read image information</string>
+    <string name="archive_download_options">Download options</string>
 </resources>

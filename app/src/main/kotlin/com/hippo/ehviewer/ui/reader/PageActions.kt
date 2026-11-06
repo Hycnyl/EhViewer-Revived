@@ -12,6 +12,8 @@ import android.provider.MediaStore
 import android.webkit.MimeTypeMap
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Text
+import androidx.compose.ui.res.stringResource
 import androidx.core.content.FileProvider
 import com.ehviewer.core.files.toOkioPath
 import com.ehviewer.core.i18n.R
@@ -23,6 +25,9 @@ import com.hippo.ehviewer.BuildConfig.APPLICATION_ID
 import com.hippo.ehviewer.client.EhUrl
 import com.hippo.ehviewer.gallery.Page
 import com.hippo.ehviewer.gallery.PageLoader
+import com.hippo.ehviewer.image.readImageDimensions
+import com.hippo.ehviewer.ui.tools.DialogState
+import com.hippo.ehviewer.ui.tools.awaitConfirmationOrCancel
 import com.hippo.ehviewer.util.AppConfig
 import com.hippo.ehviewer.util.FileUtils
 import com.hippo.ehviewer.util.awaitActivityResult
@@ -30,10 +35,36 @@ import com.hippo.ehviewer.util.displayPath
 import com.hippo.ehviewer.util.requestPermission
 import java.io.File
 import kotlin.time.Clock
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import moe.tarsin.coroutines.runSuspendCatching
 import moe.tarsin.snackbar
 import moe.tarsin.string
+import okio.Path.Companion.toOkioPath
 import splitties.systemservices.clipboardManager
+
+context(_: SnackbarHostState, _: DialogState, ctx: Context, loader: PageLoader)
+suspend fun showImageInfo(page: Page) {
+    val dimensions = runSuspendCatching {
+        withContext(Dispatchers.IO) {
+            val file = File.createTempFile("reader-image-", ".tmp", ctx.cacheDir)
+            try {
+                if (loader.save(page.index, file.toOkioPath())) readImageDimensions(file) else null
+            } finally {
+                file.delete()
+            }
+        }
+    }.getOrNull()
+    if (dimensions == null) {
+        snackbar(string(R.string.image_info_unavailable))
+        return
+    }
+    awaitConfirmationOrCancel(
+        title = R.string.image_info,
+        showCancelButton = false,
+        text = { Text(stringResource(R.string.image_resolution, dimensions.width, dimensions.height)) },
+    )
+}
 
 context(loader: PageLoader, ctx: Context)
 private fun provideImage(index: Int): Uri? {

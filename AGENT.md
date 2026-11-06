@@ -82,3 +82,13 @@ UI 模块保留 `allWarningsAsErrors`，仅用 `-Xwarning-level=DEPRECATION:warn
 发布验证按本轮改动选择场景。UI、签名和构建默认使用 API 26、33、36；Target 37 的候选将现代设备检查切换至 API 37.2。使用包含 WebView 的 google_apis 镜像，现代设备使用 google_apis_ps16k 并检查真实页大小；每次新建 AVD，分配 4096M RAM / 512M heap。验证设备端 APK SHA-256、文件式 universal/匹配 ABI 安装、上个正式版本覆盖安装和启动。UI 按改动选用 archive-ui 或 interaction-ui 工作流渲染实际组件，支持指定 APK 源码与更新验证夹具，避免测试修正触发重复原生构建。只有涉及相关业务功能的改动，才增加离线 CBZ、设置迁移等对应检查。临时数据不进入源码或 Release。
 
 本托管环境先执行 `source /workspace/.ehviewer-env/activate.sh`，其中设置已固定的 JDK、SDK、Gradle/Cargo 缓存与本地 GNU m4 1.4.20。m4 是 Nettle 汇编的构建依赖；CI 检查并安装它。本地无 sudo，m4 安装于私有工具目录。Nettle 的源码包含预生成文件，CMake 必须保留其解包时间戳（DOWNLOAD_EXTRACT_TIMESTAMP TRUE）。
+
+## 临时进度：1.17.14 三项功能
+
+- 当前正式版 1.17.13 / 180088，工作区与 main 干净，基线 1e43278。计划 1.17.14 / 180089：先配额颜色、再压缩包布局、最后阅读器图片信息；保持网络/解析/缓存/下载和持久化机制不变。
+- 本轮用户要求快速发布，省略可省略检查：不运行性能矩阵、无关交互或业务回归；仅必要构建/格式/签名/安装。正在检查最近 Profile 的复用入口，以减少重复采集成本并保持正式包非空 Profile。新一轮 CLI 凭据已恢复可用；密钥仍仅在既有私有 vault。
+- 下一步完成三个功能和简繁英文本，提升版本后使用 Actions 构建五种 APK、本地正式 V2+V3 签名，再由 Actions 发布；所有收尾完成后删除本章节和本轮临时文件。
+
+- 三项产品代码已完成：配额使用 Double 实际比率严格比较阈值，仅绘制值截断；资金 Surface/选项标题/费用-按钮-大小分层，保留有限宽 FlowRow 换行与两列/H@H；图片信息等菜单收起后再读取当前页，通过 loader.save 单页临时文件和 BitmapFactory 边界/旧系统动画 WebP VP8X 头读取像素，IO 后 finally 删除文件。文本覆盖英/简繁/HK/日，版本已升为 1.17.14 / 180089。下一步格式化并配置本轮精简 Actions。
+
+- 用户明确要求快速构建，本轮通过 build.yml 的 reuse_profile_run=42145312240 复用最新正式 1.17.13 的 Baseline/Startup 文本（先核对来源、工具链、版本以外构建配置及 Artifact 摘要），再针对新 DEX 编译；常规发布仍默认自动采集。release.yml quick_release=true 仅做 API33 universal/ABI 安装、覆盖升级与 ProfileInstaller，省略可选 UI 套件。自动推送触发的常规构建/UI 会取消，立即手动启动指定的精简构建，避免重复工作。

@@ -715,4 +715,8 @@
     <string name="gallery_newer_versions_incomplete">新版本尚未完整加载。</string>
     <string name="gallery_version_open_gallery">打开画廊</string>
     <string name="gallery_info_search_uploader">搜索上传者</string>
+    <string name="image_info">图片信息</string>
+    <string name="image_resolution">分辨率：%1$d × %2$d px</string>
+    <string name="image_info_unavailable">无法读取图片信息</string>
+    <string name="archive_download_options">下载选项</string>
 </resources>

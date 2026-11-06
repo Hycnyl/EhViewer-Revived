@@ -667,4 +667,8 @@
     <string name="gallery_version_loading">バージョン情報を読み込み中…</string>
     <string name="gallery_info_copy_field">%1$sをコピー</string>
     <string name="gallery_version_expunged">除外済み</string>
+    <string name="image_info">画像情報</string>
+    <string name="image_resolution">解像度：%1$d × %2$d px</string>
+    <string name="image_info_unavailable">画像情報を読み取れません</string>
+    <string name="archive_download_options">ダウンロードオプション</string>
 </resources>

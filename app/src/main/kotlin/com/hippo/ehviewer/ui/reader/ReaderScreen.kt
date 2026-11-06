@@ -249,6 +249,7 @@ fun ReaderScreen(pageLoader: PageLoader, info: BaseGalleryInfo?) {
             if (Settings.readerLongTapAction.value) {
                 launch {
                     val blocked = page.status is PageStatus.Blocked
+                    var imageInfoRequested = false
                     dialog { cont ->
                         fun dispose() = cont.resume(Unit)
                         val state = rememberModalBottomSheetState()
@@ -265,11 +266,13 @@ fun ReaderScreen(pageLoader: PageLoader, info: BaseGalleryInfo?) {
                                 copy = { launchIO { with(pageLoader) { copy(page) } } },
                                 save = { launchIO { with(pageLoader) { save(page) } } },
                                 saveTo = { launchIO { with(pageLoader) { saveTo(page) } } },
+                                imageInfo = { imageInfoRequested = true },
                                 showAds = { page.unblock() }.takeIf { blocked },
                                 dismiss = { launch { state.hide().also { dispose() } } },
                             )
                         }
                     }
+                    if (imageInfoRequested) with(pageLoader) { showImageInfo(page) }
                 }
             }
         }
