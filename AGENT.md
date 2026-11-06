@@ -98,3 +98,5 @@ UI 模块保留 `allWarningsAsErrors`，仅用 `-Xwarning-level=DEPRECATION:warn
 - 已停止本地 Gradle Daemon，删除被取代的本地中间 APK/重复追踪和失败诊断658,849,511 bytes；对应有效 CI 证据仍在 GitHub。最新五项交互报告、三组限定网格对照、最终 CI 状态与发布说明草稿仍保留。
 
 - 两组最新独立 Frame 均完成：42145313894 / 42145313902 的各六场景全部通过，无失败/跳过，每场景三次；12 个 Artifact 已逐一核对 GitHub SHA-256、XML 和原始 JSON，来源索引 scratch/final-performance-provenance.json。CPU 帧时 P95（原行为→新）：drawer 585.199→140.819、grid 291.599→177.188、navigation 295.193→203.701、pager 136.176→102.084、list 112.251→138.905、webtoon 139.133→154.279 ms。不宣称全面提速。新旧侧栏代表 Perfetto 的 shader_compile 累计 2362.277→187.454 ms，postAndWait 峰值 1170.038→350.459 ms；解码仍在后台。Release 草稿说明已换成这组最终对照，尚待正式 Build 和签名安装结果。
+
+- 最终 Build 42145312240 已完成 Profile 生成与两套阅读器覆盖检查，现进入 Build all release architectures；还没有最终 Artifact，不得提前签名或使用旧包。
