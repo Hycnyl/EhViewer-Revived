@@ -568,4 +568,14 @@
     <string name="image_resolution">解像度：%1$d × %2$d px</string>
     <string name="image_info_unavailable">無法讀取圖片資訊</string>
     <string name="archive_download_options">下載選項</string>
+    <string name="image_info_format">格式</string>
+    <string name="image_info_file_size">檔案大小</string>
+    <string name="image_info_aspect_ratio">長寬比</string>
+    <string name="image_info_pixels">像素數</string>
+    <string name="image_info_page">頁碼</string>
+    <string name="image_info_orientation">顯示方向</string>
+    <string name="image_info_portrait">直向</string>
+    <string name="image_info_landscape">橫向</string>
+    <string name="image_info_square">正方形</string>
+    <string name="image_info_encoded_resolution">檔案像素</string>
 </resources>

@@ -18,6 +18,7 @@ import androidx.compose.material.icons.filled.RestartAlt
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularWavyProgressIndicator
+import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
@@ -34,6 +35,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
@@ -59,6 +61,11 @@ import com.hippo.ehviewer.ui.login.refreshAccountInfo
 import com.hippo.ehviewer.ui.tools.DialogState
 import com.hippo.ehviewer.ui.tools.awaitConfirmationOrCancel
 import com.hippo.ehviewer.util.displayString
+import com.materialkolor.blend.Blend
+import com.materialkolor.hct.Hct
+import com.materialkolor.ktx.from
+import com.materialkolor.scheme.SchemeTonalSpot
+import com.materialkolor.toColorScheme
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -123,10 +130,12 @@ fun AvatarIcon() {
                                         val (limits, funds) = current.value
                                         if (limits.maximum > 0) {
                                             val ratio = limits.current.toDouble() / limits.maximum
+                                            val scheme = MaterialTheme.colorScheme
+                                            val (warning, critical) = remember(scheme) { quotaAlertColors(scheme) }
                                             val color = when {
-                                                ratio >= 1.0 -> Color(0xFFF44336)
-                                                ratio > 0.75 -> Color(0xFFFFC107)
-                                                else -> MaterialTheme.colorScheme.primary
+                                                ratio >= 1.0 -> critical
+                                                ratio > 0.75 -> warning
+                                                else -> scheme.primary
                                             }
                                             val value by animateFloatAsState(ratio.toFloat().coerceIn(0f, 1f))
                                             LinearWavyProgressIndicator(
@@ -226,4 +235,16 @@ fun AvatarIcon() {
             Icon(imageVector = Icons.Default.NoAccounts, contentDescription = null)
         }
     }
+}
+
+/** Low-chroma Tonal Spot roles, harmonized to Monet while retaining amber/red semantics. */
+internal fun quotaAlertColors(scheme: ColorScheme): Pair<Color, Color> {
+    val dark = scheme.surface.luminance() < 0.5f
+    val theme = Hct.from(scheme.primary)
+    fun tone(hue: Double) = SchemeTonalSpot(
+        Blend.harmonize(Hct.from(hue, 36.0, 50.0), theme),
+        dark,
+        -0.1,
+    ).toColorScheme().primary
+    return tone(90.0) to tone(25.0)
 }

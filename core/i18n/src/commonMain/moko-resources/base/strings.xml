@@ -737,4 +737,14 @@
     <string name="image_resolution">Resolution: %1$d × %2$d px</string>
     <string name="image_info_unavailable">Unable to read image information</string>
     <string name="archive_download_options">Download options</string>
+    <string name="image_info_format">Format</string>
+    <string name="image_info_file_size">File size</string>
+    <string name="image_info_aspect_ratio">Aspect ratio</string>
+    <string name="image_info_pixels">Pixel count</string>
+    <string name="image_info_page">Page</string>
+    <string name="image_info_orientation">Orientation</string>
+    <string name="image_info_portrait">Portrait</string>
+    <string name="image_info_landscape">Landscape</string>
+    <string name="image_info_square">Square</string>
+    <string name="image_info_encoded_resolution">Encoded pixels</string>
 </resources>

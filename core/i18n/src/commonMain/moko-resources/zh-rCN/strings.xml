@@ -719,4 +719,14 @@
     <string name="image_resolution">分辨率：%1$d × %2$d px</string>
     <string name="image_info_unavailable">无法读取图片信息</string>
     <string name="archive_download_options">下载选项</string>
+    <string name="image_info_format">格式</string>
+    <string name="image_info_file_size">文件大小</string>
+    <string name="image_info_aspect_ratio">长宽比</string>
+    <string name="image_info_pixels">像素数</string>
+    <string name="image_info_page">页码</string>
+    <string name="image_info_orientation">显示方向</string>
+    <string name="image_info_portrait">纵向</string>
+    <string name="image_info_landscape">横向</string>
+    <string name="image_info_square">正方形</string>
+    <string name="image_info_encoded_resolution">文件像素</string>
 </resources>

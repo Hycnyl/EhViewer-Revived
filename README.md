@@ -141,6 +141,7 @@
 
 ## Other
 
+- Harmonize quota warnings and redesign archive cards and image information.
 - Add reader image information and improve quota colors and archive download layout.
 - Restore automatic Baseline Profiles and improve interaction motion.
 

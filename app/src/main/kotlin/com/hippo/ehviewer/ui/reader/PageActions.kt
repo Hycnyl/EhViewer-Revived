@@ -12,8 +12,6 @@ import android.provider.MediaStore
 import android.webkit.MimeTypeMap
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Text
-import androidx.compose.ui.res.stringResource
 import androidx.core.content.FileProvider
 import com.ehviewer.core.files.toOkioPath
 import com.ehviewer.core.i18n.R
@@ -25,7 +23,7 @@ import com.hippo.ehviewer.BuildConfig.APPLICATION_ID
 import com.hippo.ehviewer.client.EhUrl
 import com.hippo.ehviewer.gallery.Page
 import com.hippo.ehviewer.gallery.PageLoader
-import com.hippo.ehviewer.image.readImageDimensions
+import com.hippo.ehviewer.image.readImageFileInfo
 import com.hippo.ehviewer.ui.tools.DialogState
 import com.hippo.ehviewer.ui.tools.awaitConfirmationOrCancel
 import com.hippo.ehviewer.util.AppConfig
@@ -45,24 +43,24 @@ import splitties.systemservices.clipboardManager
 
 context(_: SnackbarHostState, _: DialogState, ctx: Context, loader: PageLoader)
 suspend fun showImageInfo(page: Page) {
-    val dimensions = runSuspendCatching {
+    val info = runSuspendCatching {
         withContext(Dispatchers.IO) {
             val file = File.createTempFile("reader-image-", ".tmp", ctx.cacheDir)
             try {
-                if (loader.save(page.index, file.toOkioPath())) readImageDimensions(file) else null
+                if (loader.save(page.index, file.toOkioPath())) readImageFileInfo(file) else null
             } finally {
                 file.delete()
             }
         }
     }.getOrNull()
-    if (dimensions == null) {
+    if (info == null) {
         snackbar(string(R.string.image_info_unavailable))
         return
     }
     awaitConfirmationOrCancel(
         title = R.string.image_info,
         showCancelButton = false,
-        text = { Text(stringResource(R.string.image_resolution, dimensions.width, dimensions.height)) },
+        text = { ImageInfoContent(info, page.index + 1, loader.size) },
     )
 }
 

@@ -671,4 +671,14 @@
     <string name="image_resolution">解像度：%1$d × %2$d px</string>
     <string name="image_info_unavailable">画像情報を読み取れません</string>
     <string name="archive_download_options">ダウンロードオプション</string>
+    <string name="image_info_format">形式</string>
+    <string name="image_info_file_size">ファイルサイズ</string>
+    <string name="image_info_aspect_ratio">縦横比</string>
+    <string name="image_info_pixels">画素数</string>
+    <string name="image_info_page">ページ</string>
+    <string name="image_info_orientation">表示方向</string>
+    <string name="image_info_portrait">縦向き</string>
+    <string name="image_info_landscape">横向き</string>
+    <string name="image_info_square">正方形</string>
+    <string name="image_info_encoded_resolution">ファイルの画素</string>
 </resources>

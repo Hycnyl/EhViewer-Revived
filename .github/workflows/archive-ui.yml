@@ -12,7 +12,9 @@ on:
     paths:
       - 'app/src/main/kotlin/com/hippo/ehviewer/ui/main/ArchiveList.kt'
       - 'app/src/main/kotlin/com/hippo/ehviewer/ui/main/FundsItem.kt'
-      - 'app/src/test/kotlin/com/hippo/ehviewer/ui/main/ArchiveFundsLayoutTest.kt'
+      - 'app/src/test/kotlin/com/hippo/ehviewer/ui/reader/MaterialDialogDesignTest.kt'
+      - 'app/src/main/kotlin/com/hippo/ehviewer/ui/reader/ImageInfoContent.kt'
+      - 'app/src/main/kotlin/com/hippo/ehviewer/ui/main/AvatarIcon.kt'
       - '.github/workflows/archive-ui.yml'
 
 permissions:
@@ -38,18 +40,18 @@ jobs:
       - name: Load the UI fixture for this verification revision
         run: |
           git fetch --no-tags --depth=1 origin "$GITHUB_SHA"
-          git show "$GITHUB_SHA:app/src/test/kotlin/com/hippo/ehviewer/ui/main/ArchiveFundsLayoutTest.kt" > "$RUNNER_TEMP/ArchiveFundsLayoutTest.kt"
-          cp "$RUNNER_TEMP/ArchiveFundsLayoutTest.kt" app/src/test/kotlin/com/hippo/ehviewer/ui/main/ArchiveFundsLayoutTest.kt
+          git show "$GITHUB_SHA:app/src/test/kotlin/com/hippo/ehviewer/ui/reader/MaterialDialogDesignTest.kt" > "$RUNNER_TEMP/MaterialDialogDesignTest.kt"
+          cp "$RUNNER_TEMP/MaterialDialogDesignTest.kt" app/src/test/kotlin/com/hippo/ehviewer/ui/reader/MaterialDialogDesignTest.kt
           git diff --exit-code -- app/src/main core
           git rev-parse HEAD
-      - name: Render currency layout at different font scales and directions
-        run: ./gradlew :app:testDefaultDebugUnitTest --tests '*ArchiveFundsLayoutTest' --no-configuration-cache --max-workers=2 -Pkotlin.compiler.execution.strategy=in-process --stacktrace
+      - name: Render only the changed Material dialog designs
+        run: ./gradlew :app:testDefaultDebugUnitTest --tests '*MaterialDialogDesignTest' --no-configuration-cache --max-workers=2 -Pkotlin.compiler.execution.strategy=in-process --stacktrace
       - uses: actions/upload-artifact@v7.0.2
         if: always()
         with:
           name: archive-ui
           path: |
-            app/build/reports/archive-ui/
+            app/build/reports/material-dialog-ui/
             app/build/reports/tests/testDefaultDebugUnitTest/
             app/build/test-results/testDefaultDebugUnitTest/
           if-no-files-found: warn
