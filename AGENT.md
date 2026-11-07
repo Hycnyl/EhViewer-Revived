@@ -105,3 +105,5 @@ UI 模块保留 `allWarningsAsErrors`，仅用 `-Xwarning-level=DEPRECATION:warn
 - 实际入口为固定 280dp 的 BasicAlertDialog，因此同时将小量下载选项改为两列有限宽 FlowRow/可滚动 Column，按内容高度收缩，消除 LazyGrid 的满高留白；H@H 标签移至费用行，保证窄卡片标题空间。渲染夹具按真实 280dp 宽度、内容自适应高度和完整 Tonal Spot 主题复核。
 
 - 最终候选更新为 `e2a6426059bd1788abfec967ffeb523e0c77a836`，来源分支头和私有 Draft target 已同步，签名工作树也已切换。最终 [Build 42334402277](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/42334402277) 与 [两图复核 42334309169](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/42334309169) 已启动；重复常规 Build 42334309158 已取消。旧 c525866 包即使编译成功也不得发布。深色语义色增加“区分两级/保留色度”的实际失色回归断言，继续仅两例渲染。
+
+- 最终两例 UI 渲染已成功并人工查看：`42334309169` 的 XML 为 2 tests / 0 failures / 0 errors；深色两级预警保留清楚色相，280dp 资金/卡片紧凑自适应，真实比例/转向尺寸图正确。最终 Build 的元数据/编译/格式、规则复用及阅读器覆盖检查已通过，正在组装五包；Draft 437291146 已明确设 tag=v1.17.15、target=e2a6426。下一步下载此最终构建、本地签名并交 CI 精简发布。
