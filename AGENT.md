@@ -97,3 +97,5 @@ UI 模块保留 `allWarningsAsErrors`，仅用 `-Xwarning-level=DEPRECATION:warn
 - 轻量渲染检查已限定为 MaterialDialogDesignTest 两例：明亮 EXIF 纵向图及深色横向图，同时渲染新的资金/下载卡片和两级预警颜色，确认去除显式标题、H@H 标签与整卡点击数据。仅该 UI 套件与精简正式构建并行，未增加其他业务/性能测试；下一步推送并使用最新正式 Build 42198959003 复用规则。
 
 - 源码已提交推送 `c52586662eda55c3f3c63b09e85726733cb355f6`。已保留 release-source-1.17.15 来源分支头并创建同 SHA 的私有 Draft，APK 尚未签名/发布。精简 [Build 42333212290](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/42333212290) 输入 reuse_profile_run=42198959003；两例 [定向 UI 渲染 42333162382](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/42333162382) 并行，常规重复 Build 42333162405 已取消。下一步核对编译和两张截图，成功后取最终五包、本地签名、quick_release=true 发布。
+
+- 精简构建的应用编译、规则复用和阅读器覆盖已通过，进入五 ABI 打包。首个 UI 作业 128284028179 因测试夹具错误导入 onNode（该版本为 rule 成员）编译失败；只移除该测试导入并重跑两例，应用代码与 c525866 相同，不重复正式构建。
