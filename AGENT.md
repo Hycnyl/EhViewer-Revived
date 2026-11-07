@@ -111,3 +111,5 @@ UI 模块保留 `allWarningsAsErrors`，仅用 `-Xwarning-level=DEPRECATION:warn
 - 最终 Build 42334402277 完整成功；已按 GitHub Artifact SHA-256 取回唯一 e2a6426 五包。私有 vault 签名及 release.py 的来源/包名/SDK/ABI/CRC/16KiB/Kotlin/Profile/V2+V3 摘要校验全部通过。公开七文件 ZIP 已分片交接（manifest f0bc1a64bd346d8ca1524a7779f5b610f9042ade，ZIP SHA-256 2366d503855004b3de5d3e5b4b62d8d42db3fbfb290ee9ea3ac4e44944d784fe），不含私钥；下一步 quick_release=true 执行 API33 安装/覆盖升级后公开发布，完成后清理临时来源分支、旧 Artifact 和本章节。
 
 - 精简正式发布已启动：[42335569785](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/42335569785)，工作流 revision=1cf5052，APK source=e2a6426；输入 quick_release=true / archive-ui.yml / 已验证公开分片 manifest。下一步依次确认 prepare、verify(33)、publish，更新正式版本与 Release 的实际结果，再清理草稿来源分支、本轮旧 Artifact、本地工作树/临时包及整个进度章节。
+
+- 发布 prepare 作业 128291605549 已成功：CI 收齐七个公开文件，按固定构建源码复核五包，并额外使用 Build Tools 36 验证五包 V2/V3；正式草稿已填充。API33 作业 128291762555 正执行文件式安装、启动和上版覆盖升级，随后 publish 会重新校验并从公开链接下载核对五包。
