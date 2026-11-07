@@ -100,3 +100,7 @@ UI 模块保留 `allWarningsAsErrors`，仅用 `-Xwarning-level=DEPRECATION:warn
 - 应用源码已推送 `4681eed6676d6e88a0f71f55253c083021ebeed7`；Draft 437351236 与来源分支均固定此 SHA。精简 [Build 42341393511](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/42341393511) 使用 42334402277 Profile；[本轮四例 UI 42341366071](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/42341366071) 并行。重复常规 Build 42341366087 已取消。下一步核对定向截图/编译后取五包、本地正式 V2+V3 签名、quick_release 发布。
 
 - 四例定向 UI 42341366071 已完整成功，Artifact 13560944327 的 SHA-256 与 XML（4 tests / 0 failures / 0 errors）已核对，四张图均已查看：真实宽弹窗左右排布、矩形本体居中、深浅预警明亮且可分辨、共享开关双向可用。Build 的编译/格式、Profile 复用及阅读器覆盖检查已过，正在组装五包。应用源码仍固定 4681eed，不再增补测试或功能。
+
+- 精简 Build 42341393511 所有作业步骤已成功，最终未签名 Artifact=13561928852（SHA-256 ff77599fe7e484fadbaf67856c9b29705242ccd4e164bdbfcd7d78bc636693b0），诊断/生成规则=13561893976。正在从此唯一来源取回五包，并在固定 4681eed 的独立工作树中用私有 vault 签名；下一步公开七文件 ZIP 分片交接及 API33 精简发布。
+
+- 五包本地签名及来源/SDK/ABI/CRC/16KiB/Kotlin/Profile/V2+V3 独立内容摘要校验已全部通过。公开七文件 ZIP 已以九片交接，manifest=99dc03c22f7239b2e9c2f8e6bce26d4e2fd8443f，ZIP SHA-256=96d4432cce3d1879c1e6117bfa10031f2b7cf1f1a962153c91e2cf7dc412fdfc；无私钥上传。已核对被取消的重复 Build 无 Artifact。下一步 quick_release=true API33 安装/升级并发布，完成后清理来源分支、本地工作树和本章。
