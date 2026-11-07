@@ -95,3 +95,5 @@ UI 模块保留 `allWarningsAsErrors`，仅用 `-Xwarning-level=DEPRECATION:warn
 - 三项实现已完成：HCT 语义黄/红与当前主色 harmonize，采用 Tonal Spot、contrast=-0.1 的主色角色，保留真实用量阈值；压缩包顶部直接显示 GP/C，选项改画廊信息风格整卡点击，H@H 在卡内打标并用分线隔组、16dp 边距；图片信息新增文件头 MIME/字节/EXIF 方向、真实像素轮廓和双向尺寸线、格式/大小/比例/MP/页码/方向，IO 后仍清临时文件，无请求/缓存/下载机制变更。版本已升 1.17.15 / 180090，接下来只运行定向轻量渲染和精简构建。
 
 - 轻量渲染检查已限定为 MaterialDialogDesignTest 两例：明亮 EXIF 纵向图及深色横向图，同时渲染新的资金/下载卡片和两级预警颜色，确认去除显式标题、H@H 标签与整卡点击数据。仅该 UI 套件与精简正式构建并行，未增加其他业务/性能测试；下一步推送并使用最新正式 Build 42198959003 复用规则。
+
+- 源码已提交推送 `c52586662eda55c3f3c63b09e85726733cb355f6`。已保留 release-source-1.17.15 来源分支头并创建同 SHA 的私有 Draft，APK 尚未签名/发布。精简 [Build 42333212290](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/42333212290) 输入 reuse_profile_run=42198959003；两例 [定向 UI 渲染 42333162382](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/42333162382) 并行，常规重复 Build 42333162405 已取消。下一步核对编译和两张截图，成功后取最终五包、本地签名、quick_release=true 发布。
