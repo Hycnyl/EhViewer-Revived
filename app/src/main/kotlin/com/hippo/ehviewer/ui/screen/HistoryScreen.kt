@@ -3,11 +3,17 @@ package com.hippo.ehviewer.ui.screen
 import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.plus
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
+import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ClearAll
 import androidx.compose.material3.Icon
@@ -44,6 +50,7 @@ import androidx.paging.compose.itemKey
 import androidx.paging.map
 import com.ehviewer.core.i18n.R
 import com.ehviewer.core.ui.component.FastScrollLazyColumn
+import com.ehviewer.core.ui.component.FastScrollLazyVerticalStaggeredGrid
 import com.ehviewer.core.ui.icons.EhIcons
 import com.ehviewer.core.ui.icons.big.History
 import com.ehviewer.core.ui.util.Await
@@ -52,11 +59,15 @@ import com.ehviewer.core.ui.util.thenIf
 import com.ehviewer.core.util.launch
 import com.hippo.ehviewer.EhDB
 import com.hippo.ehviewer.Settings
+import com.hippo.ehviewer.asMutableState
 import com.hippo.ehviewer.collectAsState
 import com.hippo.ehviewer.ui.DrawerHandle
 import com.hippo.ehviewer.ui.Screen
 import com.hippo.ehviewer.ui.doGalleryInfoAction
+import com.hippo.ehviewer.ui.main.DEFAULT_RATIO
+import com.hippo.ehviewer.ui.main.GalleryInfoGridItem
 import com.hippo.ehviewer.ui.main.GalleryInfoListItem
+import com.hippo.ehviewer.ui.main.GalleryViewToggle
 import com.hippo.ehviewer.ui.tools.awaitConfirmationOrCancel
 import com.hippo.ehviewer.util.FavouriteStatusRouter
 import com.ramcosta.composedestinations.annotation.Destination
@@ -73,6 +84,7 @@ fun AnimatedVisibilityScope.HistoryScreen(navigator: DestinationsNavigator) = Sc
     val title = stringResource(id = R.string.history)
     val hint = stringResource(R.string.search_bar_hint, title)
     val animateItems by Settings.animateItems.collectAsState()
+    var listMode by Settings.listMode.asMutableState()
 
     var searchBarExpanded by rememberSaveable { mutableStateOf(false) }
     var searchBarOffsetY by remember { mutableIntStateOf(0) }
@@ -107,6 +119,7 @@ fun AnimatedVisibilityScope.HistoryScreen(navigator: DestinationsNavigator) = Sc
         searchFieldHint = hint,
         searchBarOffsetY = { searchBarOffsetY },
         trailingIcon = {
+            GalleryViewToggle(listMode != 0, onToggle = { listMode = if (it) 1 else 0 })
             IconButton(
                 onClick = {
                     launch {
@@ -137,37 +150,81 @@ fun AnimatedVisibilityScope.HistoryScreen(navigator: DestinationsNavigator) = Sc
         val cardHeight by collectListThumbSizeAsState()
         val showPages by Settings.showGalleryPages.collectAsState()
         val showProgress by Settings.showReadingProgress.collectAsState()
-        FastScrollLazyColumn(
-            modifier = Modifier.nestedScroll(searchBarConnection).fillMaxSize(),
-            contentPadding = paddingValues,
-            verticalArrangement = Arrangement.spacedBy(dimensionResource(com.hippo.ehviewer.R.dimen.gallery_list_interval)),
-        ) {
-            items(
-                count = historyData.itemCount,
-                key = historyData.itemKey(key = { item -> item.gid }),
-                contentType = historyData.itemContentType(),
-            ) { index ->
-                val info = historyData[index]
-                if (info != null) {
-                    val dismissState = rememberSwipeToDismissBoxState()
-                    SwipeToDismissBox(
-                        state = dismissState,
-                        backgroundContent = {},
-                        modifier = Modifier.thenIf(animateItems) { animateItem() },
-                        enableDismissFromStartToEnd = false,
-                        onDismiss = { EhDB.deleteHistoryInfo(info) },
-                    ) {
-                        GalleryInfoListItem(
-                            onClick = { navigate(info.asDst()) },
-                            onLongClick = { launch { doGalleryInfoAction(info) } },
-                            info = info,
-                            showPages = showPages,
-                            showProgress = showProgress,
-                            modifier = Modifier.height(cardHeight).padding(horizontal = marginH),
-                        )
+        val listState = rememberLazyListState()
+        val gridState = rememberLazyStaggeredGridState()
+        if (listMode != 0) {
+            val thumbColumns by Settings.thumbColumns.collectAsState()
+            val interval = dimensionResource(com.hippo.ehviewer.R.dimen.gallery_grid_interval)
+            FastScrollLazyVerticalStaggeredGrid(
+                columns = StaggeredGridCells.Fixed(thumbColumns),
+                modifier = Modifier.nestedScroll(searchBarConnection).fillMaxSize(),
+                state = gridState,
+                contentPadding = paddingValues + PaddingValues(horizontal = marginH),
+                verticalItemSpacing = interval,
+                horizontalArrangement = Arrangement.spacedBy(interval),
+            ) {
+                items(
+                    count = historyData.itemCount,
+                    key = historyData.itemKey(key = { item -> item.gid }),
+                    contentType = historyData.itemContentType(),
+                ) { index ->
+                    val info = historyData[index]
+                    if (info != null) {
+                        val dismissState = rememberSwipeToDismissBoxState()
+                        SwipeToDismissBox(
+                            state = dismissState,
+                            backgroundContent = {},
+                            modifier = Modifier.thenIf(animateItems) { animateItem() },
+                            enableDismissFromStartToEnd = false,
+                            onDismiss = { EhDB.deleteHistoryInfo(info) },
+                        ) {
+                            GalleryInfoGridItem(
+                                onClick = { navigate(info.asDst()) },
+                                onLongClick = { launch { doGalleryInfoAction(info) } },
+                                info = info,
+                                showPages = showPages,
+                                showProgress = showProgress,
+                            )
+                        }
+                    } else {
+                        Spacer(Modifier.fillMaxWidth().aspectRatio(DEFAULT_RATIO))
                     }
-                } else {
-                    Spacer(modifier = Modifier.height(cardHeight).fillMaxWidth())
+                }
+            }
+        } else {
+            FastScrollLazyColumn(
+                modifier = Modifier.nestedScroll(searchBarConnection).fillMaxSize(),
+                state = listState,
+                contentPadding = paddingValues,
+                verticalArrangement = Arrangement.spacedBy(dimensionResource(com.hippo.ehviewer.R.dimen.gallery_list_interval)),
+            ) {
+                items(
+                    count = historyData.itemCount,
+                    key = historyData.itemKey(key = { item -> item.gid }),
+                    contentType = historyData.itemContentType(),
+                ) { index ->
+                    val info = historyData[index]
+                    if (info != null) {
+                        val dismissState = rememberSwipeToDismissBoxState()
+                        SwipeToDismissBox(
+                            state = dismissState,
+                            backgroundContent = {},
+                            modifier = Modifier.thenIf(animateItems) { animateItem() },
+                            enableDismissFromStartToEnd = false,
+                            onDismiss = { EhDB.deleteHistoryInfo(info) },
+                        ) {
+                            GalleryInfoListItem(
+                                onClick = { navigate(info.asDst()) },
+                                onLongClick = { launch { doGalleryInfoAction(info) } },
+                                info = info,
+                                showPages = showPages,
+                                showProgress = showProgress,
+                                modifier = Modifier.height(cardHeight).padding(horizontal = marginH),
+                            )
+                        }
+                    } else {
+                        Spacer(modifier = Modifier.height(cardHeight).fillMaxWidth())
+                    }
                 }
             }
         }

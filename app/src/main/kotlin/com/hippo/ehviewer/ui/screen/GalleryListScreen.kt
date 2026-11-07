@@ -114,6 +114,7 @@ import com.hippo.ehviewer.ui.main.AvatarIcon
 import com.hippo.ehviewer.ui.main.GalleryInfoGridItem
 import com.hippo.ehviewer.ui.main.GalleryInfoListItem
 import com.hippo.ehviewer.ui.main.GalleryList
+import com.hippo.ehviewer.ui.main.GalleryViewToggle
 import com.hippo.ehviewer.ui.main.SearchFilter
 import com.hippo.ehviewer.ui.tools.DialogState
 import com.hippo.ehviewer.ui.tools.awaitConfirmationOrCancel
@@ -192,7 +193,7 @@ fun AnimatedVisibilityScope.GalleryListScreen(
     val data = viewModel.data.collectAsLazyPagingItems()
     ReportDrawnWhen { data.loadState.refresh !is LoadState.Loading }
     FavouriteStatusRouter.Observe(data)
-    val listMode by Settings.listMode.collectAsState()
+    var listMode by Settings.listMode.asMutableState()
 
     val entries = stringArrayResource(id = com.hippo.ehviewer.R.array.toplist_entries)
     val values = stringArrayResource(id = com.hippo.ehviewer.R.array.toplist_values)
@@ -489,6 +490,7 @@ fun AnimatedVisibilityScope.GalleryListScreen(
         localSearch = false,
         searchBarOffsetY = { searchBarOffsetY },
         trailingIcon = {
+            GalleryViewToggle(listMode != 0, onToggle = { listMode = if (it) 1 else 0 })
             val sheetState = LocalSideSheetState.current
             IconButton(onClick = { launch { sheetState.open() } }, shapes = IconButtonDefaults.shapes()) {
                 Icon(

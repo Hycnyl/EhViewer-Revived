@@ -9,7 +9,6 @@ import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.Security
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -53,35 +52,30 @@ fun AnimatedVisibilityScope.SettingsScreen(navigator: DestinationsNavigator) = S
                 childRoute = EhScreenDestination,
                 navigator = navigator,
             )
-            HorizontalDivider()
             PreferenceHeader(
                 icon = Icons.Default.Palette,
                 title = R.string.settings_theme,
                 childRoute = ThemeScreenDestination,
                 navigator = navigator,
             )
-            HorizontalDivider()
             PreferenceHeader(
                 icon = Icons.Default.Download,
                 title = R.string.settings_download,
                 childRoute = DownloadScreenDestination,
                 navigator = navigator,
             )
-            HorizontalDivider()
             PreferenceHeader(
                 icon = Icons.Default.Security,
                 title = R.string.settings_privacy,
                 childRoute = PrivacyScreenDestination,
                 navigator = navigator,
             )
-            HorizontalDivider()
             PreferenceHeader(
                 icon = Icons.Default.Adb,
                 title = R.string.settings_advanced,
                 childRoute = AdvancedScreenDestination,
                 navigator = navigator,
             )
-            HorizontalDivider()
             PreferenceHeader(
                 icon = Icons.Default.Info,
                 title = R.string.settings_about,

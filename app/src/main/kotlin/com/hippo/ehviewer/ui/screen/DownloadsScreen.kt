@@ -33,14 +33,12 @@ import androidx.compose.foundation.text.input.setTextAndPlaceCursorAtEnd
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.DriveFileMove
 import androidx.compose.material.icons.automirrored.filled.Sort
-import androidx.compose.material.icons.automirrored.filled.ViewList
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.DoneAll
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.FilterAlt
 import androidx.compose.material.icons.filled.FilterList
-import androidx.compose.material.icons.filled.GridView
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.NewLabel
 import androidx.compose.material.icons.filled.Pause
@@ -129,6 +127,7 @@ import com.hippo.ehviewer.ui.Screen
 import com.hippo.ehviewer.ui.confirmRemoveDownloadRange
 import com.hippo.ehviewer.ui.main.DownloadCard
 import com.hippo.ehviewer.ui.main.GalleryInfoGridItem
+import com.hippo.ehviewer.ui.main.GalleryViewToggle
 import com.hippo.ehviewer.ui.navToReader
 import com.hippo.ehviewer.ui.showMoveDownloadLabelList
 import com.hippo.ehviewer.ui.tools.DialogState
@@ -517,10 +516,7 @@ fun AnimatedVisibilityScope.DownloadsScreen(navigator: DestinationsNavigator) = 
         trailingIcon = {
             var expanded by remember { mutableStateOf(false) }
             val sideSheetState = LocalSideSheetState.current
-            IconButton(onClick = { gridView = !gridView }, shapes = IconButtonDefaults.shapes()) {
-                val icon = if (gridView) Icons.AutoMirrored.Default.ViewList else Icons.Default.GridView
-                Icon(imageVector = icon, contentDescription = null)
-            }
+            GalleryViewToggle(gridView, onToggle = { gridView = it })
             IconButton(onClick = { launch { sideSheetState.open() } }, shapes = IconButtonDefaults.shapes()) {
                 Icon(imageVector = Icons.Default.FilterAlt, contentDescription = filtersTitle)
             }

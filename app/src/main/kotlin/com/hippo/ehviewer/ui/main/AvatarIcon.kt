@@ -66,7 +66,7 @@ import com.materialkolor.dynamiccolor.ColorSpec.SpecVersion
 import com.materialkolor.hct.Hct
 import com.materialkolor.ktx.from
 import com.materialkolor.ktx.toColor
-import com.materialkolor.scheme.SchemeTonalSpot
+import com.materialkolor.scheme.SchemeVibrant
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -242,12 +242,12 @@ fun AvatarIcon() {
 internal fun quotaAlertColors(scheme: ColorScheme): Pair<Color, Color> {
     val dark = scheme.surface.luminance() < 0.5f
     val theme = Hct.from(scheme.primary)
-    val foregroundTone = if (dark) (theme.tone - 10.0).coerceIn(60.0, 75.0) else (theme.tone + 5.0).coerceIn(40.0, 55.0)
-    fun tone(hue: Double) = SchemeTonalSpot(
-        Blend.harmonize(Hct.from(hue, 36.0, 50.0), theme),
-        dark,
-        0.0,
-        SpecVersion.SPEC_2021,
-    ).primaryPalette.getHct(foregroundTone).toColor()
-    return tone(90.0) to tone(25.0)
+    fun tone(hue: Double, hueRange: ClosedFloatingPointRange<Double>, lightTone: Double, darkTone: Double): Color {
+        val harmonized = Blend.harmonize(Hct.from(hue, 64.0, 80.0), theme)
+        // Keep yellow recognizably yellow: a text-like dark tone turns it brown on light surfaces.
+        val seed = Hct.from(harmonized.hue.coerceIn(hueRange), 64.0, 80.0)
+        return SchemeVibrant(seed, dark, 0.0, SpecVersion.SPEC_2021)
+            .primaryPalette.getHct(if (dark) darkTone else lightTone).toColor()
+    }
+    return tone(108.0, 104.0..112.0, 83.0, 80.0) to tone(25.0, 20.0..30.0, 60.0, 72.0)
 }

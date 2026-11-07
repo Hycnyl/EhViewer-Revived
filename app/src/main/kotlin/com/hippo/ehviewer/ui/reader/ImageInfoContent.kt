@@ -3,18 +3,25 @@ package com.hippo.ehviewer.ui.reader
 import android.text.format.Formatter
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.AlertDialogDefaults
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
@@ -30,6 +37,8 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import com.ehviewer.core.i18n.R
 import com.hippo.ehviewer.image.ImageFileInfo
 import java.text.NumberFormat
@@ -37,7 +46,31 @@ import java.util.Locale
 import kotlin.math.min
 
 @Composable
-internal fun ImageInfoContent(info: ImageFileInfo, pageNumber: Int, totalPages: Int) {
+internal fun ImageInfoDialog(info: ImageFileInfo, pageNumber: Int, totalPages: Int, onDismiss: () -> Unit, onConfirm: () -> Unit) {
+    Dialog(onDismissRequest = onDismiss, properties = DialogProperties(usePlatformDefaultWidth = false)) {
+        BoxWithConstraints(Modifier.padding(24.dp)) {
+            Surface(
+                modifier = Modifier.widthIn(max = 840.dp).fillMaxWidth().heightIn(max = maxHeight),
+                shape = AlertDialogDefaults.shape,
+                color = AlertDialogDefaults.containerColor,
+                tonalElevation = AlertDialogDefaults.TonalElevation,
+            ) {
+                Column(Modifier.padding(24.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                    Text(stringResource(R.string.image_info), style = MaterialTheme.typography.headlineSmall)
+                    ImageInfoContent(info, pageNumber, totalPages, Modifier.weight(1f, fill = false))
+                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+                        TextButton(onClick = onConfirm, shapes = ButtonDefaults.shapes()) {
+                            Text(stringResource(android.R.string.ok))
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+internal fun ImageInfoContent(info: ImageFileInfo, pageNumber: Int, totalPages: Int, modifier: Modifier = Modifier) {
     val width = info.displayWidth
     val height = info.displayHeight
     val locale = LocalConfiguration.current.locales[0]
@@ -60,13 +93,9 @@ internal fun ImageInfoContent(info: ImageFileInfo, pageNumber: Int, totalPages: 
             else -> R.string.image_info_square
         },
     )
-    Column(
-        Modifier.fillMaxWidth().verticalScroll(rememberScrollState()),
-        verticalArrangement = Arrangement.spacedBy(12.dp),
-    ) {
-        Surface(shape = MaterialTheme.shapes.large, color = MaterialTheme.colorScheme.surfaceContainerLow) {
-            ImageDimensionDiagram(width, height, Modifier.fillMaxWidth().padding(8.dp))
-        }
+
+    @Composable
+    fun Metadata(modifier: Modifier = Modifier) = Column(modifier, verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
             InfoValue(stringResource(R.string.image_info_format), format, Modifier.weight(1f))
             InfoValue(stringResource(R.string.image_info_file_size), Formatter.formatFileSize(LocalContext.current, info.byteCount), Modifier.weight(1f))
@@ -85,6 +114,27 @@ internal fun ImageInfoContent(info: ImageFileInfo, pageNumber: Int, totalPages: 
                 stringResource(R.string.image_info_encoded_resolution),
                 "${info.dimensions.width} × ${info.dimensions.height} px",
             )
+        }
+    }
+
+    @Composable
+    fun Diagram(modifier: Modifier = Modifier) {
+        Surface(modifier, shape = MaterialTheme.shapes.large, color = MaterialTheme.colorScheme.surfaceContainerLow) {
+            ImageDimensionDiagram(width, height, Modifier.fillMaxWidth().padding(8.dp))
+        }
+    }
+    val fontScale = LocalDensity.current.fontScale.coerceAtLeast(1f)
+    BoxWithConstraints(modifier.fillMaxWidth().verticalScroll(rememberScrollState())) {
+        if (maxWidth >= 520.dp * fontScale) {
+            Row(horizontalArrangement = Arrangement.spacedBy(24.dp), verticalAlignment = Alignment.CenterVertically) {
+                Diagram(Modifier.weight(1f))
+                Metadata(Modifier.weight(1f))
+            }
+        } else {
+            Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                Diagram()
+                Metadata()
+            }
         }
     }
 }
@@ -107,19 +157,20 @@ internal fun ImageDimensionDiagram(width: Int, height: Int, modifier: Modifier =
     val heightText = textMeasurer.measure("$height px", style)
     val description = stringResource(R.string.image_resolution, width, height)
     val fontScale = LocalDensity.current.fontScale.coerceIn(1f, 1.5f)
-    Canvas(modifier.height(208.dp * fontScale).semantics { contentDescription = description }) {
+    Canvas(modifier.height(240.dp * fontScale).semantics { contentDescription = description }) {
         val inset = 8.dp.toPx()
         val leader = 14.dp.toPx()
         val labelGap = 4.dp.toPx()
-        val leftGutter = heightText.size.height + leader + labelGap + inset
-        val topGutter = widthText.size.height + leader + labelGap + inset
-        val availableWidth = (size.width - leftGutter - inset).coerceAtLeast(1f)
-        val availableHeight = (size.height - topGutter - inset).coerceAtLeast(1f)
+        val horizontalGutter = heightText.size.height + leader + labelGap + inset
+        val verticalGutter = widthText.size.height + leader + labelGap + inset
+        val availableWidth = (size.width - horizontalGutter * 2).coerceAtLeast(1f)
+        val availableHeight = (size.height - verticalGutter * 2).coerceAtLeast(1f)
         val scale = min(availableWidth / width, availableHeight / height)
         val boxWidth = width * scale
         val boxHeight = height * scale
-        val left = leftGutter + (availableWidth - boxWidth) / 2
-        val top = topGutter + (availableHeight - boxHeight) / 2
+        // Center the image itself; the measurement leaders remain outside it, above and left.
+        val left = (size.width - boxWidth) / 2
+        val top = (size.height - boxHeight) / 2
         val right = left + boxWidth
         val bottom = top + boxHeight
         val lineY = top - leader

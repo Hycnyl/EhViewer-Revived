@@ -1,4 +1,4 @@
-name: Check archive download UI
+name: Check focused Material UI
 
 on:
   workflow_dispatch:
@@ -15,6 +15,7 @@ on:
       - 'app/src/test/kotlin/com/hippo/ehviewer/ui/reader/MaterialDialogDesignTest.kt'
       - 'app/src/main/kotlin/com/hippo/ehviewer/ui/reader/ImageInfoContent.kt'
       - 'app/src/main/kotlin/com/hippo/ehviewer/ui/main/AvatarIcon.kt'
+      - 'app/src/main/kotlin/com/hippo/ehviewer/ui/main/GalleryViewToggle.kt'
       - '.github/workflows/archive-ui.yml'
 
 permissions:

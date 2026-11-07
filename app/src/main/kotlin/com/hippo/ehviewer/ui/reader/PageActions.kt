@@ -26,12 +26,14 @@ import com.hippo.ehviewer.gallery.PageLoader
 import com.hippo.ehviewer.image.readImageFileInfo
 import com.hippo.ehviewer.ui.tools.DialogState
 import com.hippo.ehviewer.ui.tools.awaitConfirmationOrCancel
+import com.hippo.ehviewer.ui.tools.dialog
 import com.hippo.ehviewer.util.AppConfig
 import com.hippo.ehviewer.util.FileUtils
 import com.hippo.ehviewer.util.awaitActivityResult
 import com.hippo.ehviewer.util.displayPath
 import com.hippo.ehviewer.util.requestPermission
 import java.io.File
+import kotlin.coroutines.resume
 import kotlin.time.Clock
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -57,11 +59,9 @@ suspend fun showImageInfo(page: Page) {
         snackbar(string(R.string.image_info_unavailable))
         return
     }
-    awaitConfirmationOrCancel(
-        title = R.string.image_info,
-        showCancelButton = false,
-        text = { ImageInfoContent(info, page.index + 1, loader.size) },
-    )
+    dialog<Unit> { cont ->
+        ImageInfoDialog(info, page.index + 1, loader.size, onDismiss = { cont.cancel() }, onConfirm = { cont.resume(Unit) })
+    }
 }
 
 context(loader: PageLoader, ctx: Context)

@@ -70,6 +70,7 @@ import com.ehviewer.core.util.onEachLatest
 import com.ehviewer.core.util.withUIContext
 import com.hippo.ehviewer.EhDB
 import com.hippo.ehviewer.Settings
+import com.hippo.ehviewer.asMutableState
 import com.hippo.ehviewer.client.EhEngine
 import com.hippo.ehviewer.client.data.FavListUrlBuilder
 import com.hippo.ehviewer.collectAsState
@@ -80,6 +81,7 @@ import com.hippo.ehviewer.ui.main.AvatarIcon
 import com.hippo.ehviewer.ui.main.GalleryInfoGridItem
 import com.hippo.ehviewer.ui.main.GalleryInfoListItem
 import com.hippo.ehviewer.ui.main.GalleryList
+import com.hippo.ehviewer.ui.main.GalleryViewToggle
 import com.hippo.ehviewer.ui.startDownload
 import com.hippo.ehviewer.ui.tools.awaitConfirmationOrCancel
 import com.hippo.ehviewer.ui.tools.awaitSelectItem
@@ -98,6 +100,7 @@ fun AnimatedVisibilityScope.FavouritesScreen(navigator: DestinationsNavigator, v
     val localFavName = stringResource(R.string.local_favorites)
     val cloudFavName = stringResource(R.string.cloud_favorites)
     val animateItems by Settings.animateItems.collectAsState()
+    var listMode by Settings.listMode.asMutableState()
     val hasSignedIn by Settings.hasSignedIn.collectAsState()
 
     // Meta State
@@ -191,6 +194,7 @@ fun AnimatedVisibilityScope.FavouritesScreen(navigator: DestinationsNavigator, v
         localSearch = urlBuilder.isLocal,
         searchBarOffsetY = { searchBarOffsetY },
         trailingIcon = {
+            GalleryViewToggle(listMode != 0, onToggle = { listMode = if (it) 1 else 0 })
             val sheetState = LocalSideSheetState.current
             IconButton(onClick = { launch { sheetState.open() } }, shapes = IconButtonDefaults.shapes()) {
                 Icon(imageVector = Icons.Outlined.FolderSpecial, contentDescription = null)
@@ -198,7 +202,6 @@ fun AnimatedVisibilityScope.FavouritesScreen(navigator: DestinationsNavigator, v
             AvatarIcon()
         },
     ) { contentPadding ->
-        val listMode by Settings.listMode.collectAsState()
         val height by collectListThumbSizeAsState()
         val showPages by Settings.showGalleryPages.collectAsState()
         val showProgress by Settings.showReadingProgress.collectAsState()

@@ -85,3 +85,14 @@ UI 模块保留 `allWarningsAsErrors`，仅用 `-Xwarning-level=DEPRECATION:warn
 发布验证按本轮改动选择场景。UI、签名和构建默认使用 API 26、33、36；Target 37 的候选将现代设备检查切换至 API 37.2。使用包含 WebView 的 google_apis 镜像，现代设备使用 google_apis_ps16k 并检查真实页大小；每次新建 AVD，分配 4096M RAM / 512M heap。验证设备端 APK SHA-256、文件式 universal/匹配 ABI 安装、上个正式版本覆盖安装和启动。UI 按改动选用 archive-ui 或 interaction-ui 工作流渲染实际组件，支持指定 APK 源码与更新验证夹具，避免测试修正触发重复原生构建。只有涉及相关业务功能的改动，才增加离线 CBZ、设置迁移等对应检查。临时数据不进入源码或 Release。
 
 本托管环境先执行 `source /workspace/.ehviewer-env/activate.sh`，其中设置已固定的 JDK、SDK、Gradle/Cargo 缓存与本地 GNU m4 1.4.20。m4 是 Nettle 汇编的构建依赖；CI 检查并安装它。本地无 sudo，m4 安装于私有工具目录。Nettle 的源码包含预生成文件，CMake 必须保留其解包时间戳（DOWNLOAD_EXTRACT_TIMESTAMP TRUE）。
+
+## 临时进度：1.17.16 细节与视图切换
+
+- 基线 1.17.15 / 180090，main=1ce4b55，工作区干净；本轮 1.17.16 / 180091。已核对 AboutScreen/AppUpdater 均由 BuildConfig.REPO_NAME=Hycnyl/EhViewer-Revived 构造链接，按要求忽略此项。
+- GalleryListScreen 已为主页/订阅/热门/排行及搜索提供现有双布局，收藏也已有双布局；复用 Settings.listMode，增加与下载页同位置的共享切换按钮。历史页仅补现有 StaggeredGrid/卡片分支，保留分页、长按、滑删和清空逻辑，无需大范围工程改造。
+- 其余目标：仅移除设置主分类分隔线；警示色改为更明亮的 Material Vibrant 语义色阶；图片本体居中且标尺偏左上，图片信息弹窗按实际可用宽度左右排布。下一步实施并定向渲染，CI 精简构建复用正式 1.17.15 Build 42334402277 的 Profile，签名及 API33 安装升级后发布；不用无关业务/性能套件。
+
+- 五项实施已完成：更新仓库确认正确无需修改；设置主分类去分线；Vibrant 高明度语义黄/红，保留原阈值；矩形本体严格居中，独立 Material 弹窗最大840dp并按实际宽度排版；工具栏首位共用切换组件，沿用现有 list_mode_2 和 grid_view，历史新增可滑删的同款瀑布流及有尺寸的分页占位。版本 1.17.16 /180091。
+- 定向 CI 仅覆盖本轮四种 UI 场景（窄屏、明暗宽屏及真实宽弹窗），同时确认共享开关双向切换和明亮黄色；不跑无关业务与性能套件。下一步格式整理后推送，轻量构建与 UI 渲染并行。
+
+- 本地仅执行必要格式整理，spotlessApply 已成功（1m05s）；接下来只由 Actions 进行构建和四例定向 UI 验证。未增加库依赖、数据库/网络/缓存改动，未改变构建配置（仅版本迭代），可沿用最新正式 Profile 文本。
