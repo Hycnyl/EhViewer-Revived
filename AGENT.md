@@ -9,7 +9,7 @@
 ## 基线与发布
 
 - 功能源自 `Hycnyl/EhViewer` 的 `v1.17.8`，对应清理后的提交 `92923877ef671e33aa56f69688daa46af6e59ec6`；新仓库独立起始，不继承旧 Git 历史。四种语言 README 继承旧仓库最新的用户文档与完整素材引用，保留 LICENSE、NOTICE 和源码版权说明。
-- 应用名保持 `EhViewer`，正式包名保持 `moe.hycnyl.ehviewer`。当前正式版本为 `1.17.14` / `180089`，上个正式版为 `1.17.13` / `180088`，接续旧版 `1.17.8` / `180083` 和 `1.17.9` / `180084`。后续沿用版本体系，版本码递增。
+- 应用名保持 `EhViewer`，正式包名保持 `moe.hycnyl.ehviewer`。当前正式版本为 `1.17.15` / `180090`，上个正式版为 `1.17.14` / `180089`，接续旧版 `1.17.8` / `180083` 和 `1.17.9` / `180084`。后续沿用版本体系，版本码递增。
 - 任何实际影响用户的改动完成后，除非维护者明确禁止，都须提升 versionName/versionCode，使用 GitHub Actions 发布正式 Release；提供 universal、arm64-v8a、armeabi-v7a、x86_64、x86 五种 APK，并附简短变更说明与 SHA-256 校验和。不得使用 `[skip ci]` 绕过这条规则。
 - README 保持简洁，变更通常只在“变更”章节简要记录；允许修正仓库链接、安装要求和迁移说明。不得随意重写其余内容或丢失截图、素材和致谢。
 - 单轮只改一个目标不是硬性限制。缓存导出、下载恢复和归档格式继承 1.17.8 的当前行为，维护者没有将其固化为不可修改的长期规则。
@@ -85,31 +85,3 @@ UI 模块保留 `allWarningsAsErrors`，仅用 `-Xwarning-level=DEPRECATION:warn
 发布验证按本轮改动选择场景。UI、签名和构建默认使用 API 26、33、36；Target 37 的候选将现代设备检查切换至 API 37.2。使用包含 WebView 的 google_apis 镜像，现代设备使用 google_apis_ps16k 并检查真实页大小；每次新建 AVD，分配 4096M RAM / 512M heap。验证设备端 APK SHA-256、文件式 universal/匹配 ABI 安装、上个正式版本覆盖安装和启动。UI 按改动选用 archive-ui 或 interaction-ui 工作流渲染实际组件，支持指定 APK 源码与更新验证夹具，避免测试修正触发重复原生构建。只有涉及相关业务功能的改动，才增加离线 CBZ、设置迁移等对应检查。临时数据不进入源码或 Release。
 
 本托管环境先执行 `source /workspace/.ehviewer-env/activate.sh`，其中设置已固定的 JDK、SDK、Gradle/Cargo 缓存与本地 GNU m4 1.4.20。m4 是 Nettle 汇编的构建依赖；CI 检查并安装它。本地无 sudo，m4 安装于私有工具目录。Nettle 的源码包含预生成文件，CMake 必须保留其解包时间戳（DOWNLOAD_EXTRACT_TIMESTAMP TRUE）。
-
-## 临时进度：1.17.15 Material 界面迭代
-
-- 正式基线 1.17.14 / 180089，main=3385755，工作区干净。本轮计划 1.17.15 / 180090：Material 柔和协调的配额预警色；紧凑资金顶栏和按分区排列的下载小卡片；带真实比例/方向和工程双向尺寸标注的图片信息界面及文件元数据。
-- 继续按维护者要求精简验证：不跑性能或业务回归；只对复杂新图形补一组相关可视化检查，和正式构建并行。复用最新正式版 Build 42198959003 的规则并按新 DEX 编译，正式发布仅 API33 安装升级检查。CLI 当前可用，仍须准备连接器分片交接及临时来源分支，以应对其过期。私钥始终仅在私有 vault。
-- 下一步完成三项 UI/元数据与英简繁文本，检查定向渲染，快速构建/本地 V2+V3 签名/Actions 发布；任务完成删除全部临时文件、分支、流程及本章节。
-
-- 三项实现已完成：HCT 语义黄/红与当前主色 harmonize，采用 Tonal Spot、contrast=-0.1 的主色角色，保留真实用量阈值；压缩包顶部直接显示 GP/C，选项改画廊信息风格整卡点击，H@H 在卡内打标并用分线隔组、16dp 边距；图片信息新增文件头 MIME/字节/EXIF 方向、真实像素轮廓和双向尺寸线、格式/大小/比例/MP/页码/方向，IO 后仍清临时文件，无请求/缓存/下载机制变更。版本已升 1.17.15 / 180090，接下来只运行定向轻量渲染和精简构建。
-
-- 轻量渲染检查已限定为 MaterialDialogDesignTest 两例：明亮 EXIF 纵向图及深色横向图，同时渲染新的资金/下载卡片和两级预警颜色，确认去除显式标题、H@H 标签与整卡点击数据。仅该 UI 套件与精简正式构建并行，未增加其他业务/性能测试；下一步推送并使用最新正式 Build 42198959003 复用规则。
-
-- 源码已提交推送 `c52586662eda55c3f3c63b09e85726733cb355f6`。已保留 release-source-1.17.15 来源分支头并创建同 SHA 的私有 Draft，APK 尚未签名/发布。精简 [Build 42333212290](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/42333212290) 输入 reuse_profile_run=42198959003；两例 [定向 UI 渲染 42333162382](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/42333162382) 并行，常规重复 Build 42333162405 已取消。下一步核对编译和两张截图，成功后取最终五包、本地签名、quick_release=true 发布。
-
-- 精简构建的应用编译、规则复用和阅读器覆盖已通过，进入五 ABI 打包。首个 UI 作业 128284028179 因测试夹具错误导入 onNode（该版本为 rule 成员）编译失败；只移除该测试导入并重跑两例，应用代码与 c525866 相同，不重复正式构建。
-
-- 已取并查看修正夹具后两张真实渲染（42333527743，Artifact 13558950102，XML 2/2 通过）；尺寸线、EXIF 方向和卡片正确，但深色预警角色在新色彩规范下变为近白。发布前改用经典 Tonal Spot 色板，依据当前主题前景明度选取略低对比的色阶，保留黄/红色相，追加同两例中的失色保护；这项产品修正需新源码构建，旧 c525866 不发布。
-
-- 实际入口为固定 280dp 的 BasicAlertDialog，因此同时将小量下载选项改为两列有限宽 FlowRow/可滚动 Column，按内容高度收缩，消除 LazyGrid 的满高留白；H@H 标签移至费用行，保证窄卡片标题空间。渲染夹具按真实 280dp 宽度、内容自适应高度和完整 Tonal Spot 主题复核。
-
-- 最终候选更新为 `e2a6426059bd1788abfec967ffeb523e0c77a836`，来源分支头和私有 Draft target 已同步，签名工作树也已切换。最终 [Build 42334402277](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/42334402277) 与 [两图复核 42334309169](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/42334309169) 已启动；重复常规 Build 42334309158 已取消。旧 c525866 包即使编译成功也不得发布。深色语义色增加“区分两级/保留色度”的实际失色回归断言，继续仅两例渲染。
-
-- 最终两例 UI 渲染已成功并人工查看：`42334309169` 的 XML 为 2 tests / 0 failures / 0 errors；深色两级预警保留清楚色相，280dp 资金/卡片紧凑自适应，真实比例/转向尺寸图正确。最终 Build 的元数据/编译/格式、规则复用及阅读器覆盖检查已通过，正在组装五包；Draft 437291146 已明确设 tag=v1.17.15、target=e2a6426。下一步下载此最终构建、本地签名并交 CI 精简发布。
-
-- 最终 Build 42334402277 完整成功；已按 GitHub Artifact SHA-256 取回唯一 e2a6426 五包。私有 vault 签名及 release.py 的来源/包名/SDK/ABI/CRC/16KiB/Kotlin/Profile/V2+V3 摘要校验全部通过。公开七文件 ZIP 已分片交接（manifest f0bc1a64bd346d8ca1524a7779f5b610f9042ade，ZIP SHA-256 2366d503855004b3de5d3e5b4b62d8d42db3fbfb290ee9ea3ac4e44944d784fe），不含私钥；下一步 quick_release=true 执行 API33 安装/覆盖升级后公开发布，完成后清理临时来源分支、旧 Artifact 和本章节。
-
-- 精简正式发布已启动：[42335569785](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/42335569785)，工作流 revision=1cf5052，APK source=e2a6426；输入 quick_release=true / archive-ui.yml / 已验证公开分片 manifest。下一步依次确认 prepare、verify(33)、publish，更新正式版本与 Release 的实际结果，再清理草稿来源分支、本轮旧 Artifact、本地工作树/临时包及整个进度章节。
-
-- 发布 prepare 作业 128291605549 已成功：CI 收齐七个公开文件，按固定构建源码复核五包，并额外使用 Build Tools 36 验证五包 V2/V3；正式草稿已填充。API33 作业 128291762555 正执行文件式安装、启动和上版覆盖升级，随后 publish 会重新校验并从公开链接下载核对五包。
