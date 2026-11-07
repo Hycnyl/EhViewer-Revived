@@ -99,3 +99,7 @@ UI 模块保留 `allWarningsAsErrors`，仅用 `-Xwarning-level=DEPRECATION:warn
 - 源码已提交推送 `c52586662eda55c3f3c63b09e85726733cb355f6`。已保留 release-source-1.17.15 来源分支头并创建同 SHA 的私有 Draft，APK 尚未签名/发布。精简 [Build 42333212290](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/42333212290) 输入 reuse_profile_run=42198959003；两例 [定向 UI 渲染 42333162382](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/42333162382) 并行，常规重复 Build 42333162405 已取消。下一步核对编译和两张截图，成功后取最终五包、本地签名、quick_release=true 发布。
 
 - 精简构建的应用编译、规则复用和阅读器覆盖已通过，进入五 ABI 打包。首个 UI 作业 128284028179 因测试夹具错误导入 onNode（该版本为 rule 成员）编译失败；只移除该测试导入并重跑两例，应用代码与 c525866 相同，不重复正式构建。
+
+- 已取并查看修正夹具后两张真实渲染（42333527743，Artifact 13558950102，XML 2/2 通过）；尺寸线、EXIF 方向和卡片正确，但深色预警角色在新色彩规范下变为近白。发布前改用经典 Tonal Spot 色板，依据当前主题前景明度选取略低对比的色阶，保留黄/红色相，追加同两例中的失色保护；这项产品修正需新源码构建，旧 c525866 不发布。
+
+- 实际入口为固定 280dp 的 BasicAlertDialog，因此同时将小量下载选项改为两列有限宽 FlowRow/可滚动 Column，按内容高度收缩，消除 LazyGrid 的满高留白；H@H 标签移至费用行，保证窄卡片标题空间。渲染夹具按真实 280dp 宽度、内容自适应高度和完整 Tonal Spot 主题复核。

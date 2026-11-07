@@ -6,16 +6,13 @@ import android.media.ExifInterface
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.darkColorScheme
-import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -39,8 +36,14 @@ import com.hippo.ehviewer.image.ImageDimensions
 import com.hippo.ehviewer.image.ImageFileInfo
 import com.hippo.ehviewer.ui.main.ArchiveList
 import com.hippo.ehviewer.ui.main.quotaAlertColors
+import com.materialkolor.dynamiccolor.ColorSpec.SpecVersion
+import com.materialkolor.hct.Hct
+import com.materialkolor.ktx.from
+import com.materialkolor.scheme.SchemeTonalSpot
+import com.materialkolor.toColorScheme
 import java.io.File
 import org.junit.Assert.assertSame
+import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -69,14 +72,17 @@ class MaterialDialogDesignTest {
         var selected: Archive? = null
         compose.setContent {
             CompositionLocalProvider(LocalDensity provides Density(1f, if (dark) 1.3f else 1f)) {
-                MaterialTheme(colorScheme = if (dark) darkColorScheme(primary = Color(0xFFB9C7E4)) else lightColorScheme(primary = Color(0xFF4B626D))) {
-                    Surface(Modifier.width(360.dp).height(1280.dp).testTag("design")) {
-                        Column(Modifier.fillMaxSize().padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                MaterialTheme(colorScheme = SchemeTonalSpot(Hct.from(Color(0xFF63758F)), dark, 0.0, SpecVersion.SPEC_2021).toColorScheme()) {
+                    Surface(Modifier.width(360.dp).testTag("design")) {
+                        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                             Text("Image information", style = MaterialTheme.typography.titleLarge)
-                            Box(Modifier.height(500.dp)) { ImageInfoContent(info, 12, 48) }
+                            Box(Modifier.width(280.dp).heightIn(max = 500.dp)) { ImageInfoContent(info, 12, 48) }
                             Text("Archive download", style = MaterialTheme.typography.titleLarge)
-                            ArchiveList(Funds(gp = 12345, credit = 678901), archives, { selected = it }, Modifier.height(520.dp))
+                            ArchiveList(Funds(gp = 12345, credit = 678901), archives, { selected = it }, Modifier.width(280.dp).heightIn(max = 520.dp))
                             val (warning, critical) = quotaAlertColors(MaterialTheme.colorScheme)
+                            assertTrue("Warning and critical colors must remain distinct", warning != critical)
+                            assertTrue("Warning must retain semantic color rather than turn white", Hct.from(warning).chroma > 10.0)
+                            assertTrue("Critical must retain semantic color rather than turn white", Hct.from(critical).chroma > 10.0)
                             LinearProgressIndicator(progress = { 0.85f }, color = warning)
                             LinearProgressIndicator(progress = { 1f }, color = critical)
                         }

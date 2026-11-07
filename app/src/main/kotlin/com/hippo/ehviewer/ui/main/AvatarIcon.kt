@@ -62,10 +62,11 @@ import com.hippo.ehviewer.ui.tools.DialogState
 import com.hippo.ehviewer.ui.tools.awaitConfirmationOrCancel
 import com.hippo.ehviewer.util.displayString
 import com.materialkolor.blend.Blend
+import com.materialkolor.dynamiccolor.ColorSpec.SpecVersion
 import com.materialkolor.hct.Hct
 import com.materialkolor.ktx.from
+import com.materialkolor.ktx.toColor
 import com.materialkolor.scheme.SchemeTonalSpot
-import com.materialkolor.toColorScheme
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -241,10 +242,12 @@ fun AvatarIcon() {
 internal fun quotaAlertColors(scheme: ColorScheme): Pair<Color, Color> {
     val dark = scheme.surface.luminance() < 0.5f
     val theme = Hct.from(scheme.primary)
+    val foregroundTone = if (dark) (theme.tone - 10.0).coerceIn(60.0, 75.0) else (theme.tone + 5.0).coerceIn(40.0, 55.0)
     fun tone(hue: Double) = SchemeTonalSpot(
         Blend.harmonize(Hct.from(hue, 36.0, 50.0), theme),
         dark,
-        -0.1,
-    ).toColorScheme().primary
+        0.0,
+        SpecVersion.SPEC_2021,
+    ).primaryPalette.getHct(foregroundTone).toColor()
     return tone(90.0) to tone(25.0)
 }
