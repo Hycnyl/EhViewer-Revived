@@ -103,3 +103,5 @@ UI 模块保留 `allWarningsAsErrors`，仅用 `-Xwarning-level=DEPRECATION:warn
 - 已取并查看修正夹具后两张真实渲染（42333527743，Artifact 13558950102，XML 2/2 通过）；尺寸线、EXIF 方向和卡片正确，但深色预警角色在新色彩规范下变为近白。发布前改用经典 Tonal Spot 色板，依据当前主题前景明度选取略低对比的色阶，保留黄/红色相，追加同两例中的失色保护；这项产品修正需新源码构建，旧 c525866 不发布。
 
 - 实际入口为固定 280dp 的 BasicAlertDialog，因此同时将小量下载选项改为两列有限宽 FlowRow/可滚动 Column，按内容高度收缩，消除 LazyGrid 的满高留白；H@H 标签移至费用行，保证窄卡片标题空间。渲染夹具按真实 280dp 宽度、内容自适应高度和完整 Tonal Spot 主题复核。
+
+- 最终候选更新为 `e2a6426059bd1788abfec967ffeb523e0c77a836`，来源分支头和私有 Draft target 已同步，签名工作树也已切换。最终 [Build 42334402277](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/42334402277) 与 [两图复核 42334309169](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/42334309169) 已启动；重复常规 Build 42334309158 已取消。旧 c525866 包即使编译成功也不得发布。深色语义色增加“区分两级/保留色度”的实际失色回归断言，继续仅两例渲染。
