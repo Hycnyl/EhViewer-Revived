@@ -9,7 +9,7 @@
 ## 基线与发布
 
 - 功能源自 `Hycnyl/EhViewer` 的 `v1.17.8`，对应清理后的提交 `92923877ef671e33aa56f69688daa46af6e59ec6`；新仓库独立起始，不继承旧 Git 历史。四种语言 README 继承旧仓库最新的用户文档与完整素材引用，保留 LICENSE、NOTICE 和源码版权说明。
-- 应用名保持 `EhViewer`，正式包名保持 `moe.hycnyl.ehviewer`。当前正式版本为 `1.17.15` / `180090`，上个正式版为 `1.17.14` / `180089`，接续旧版 `1.17.8` / `180083` 和 `1.17.9` / `180084`。后续沿用版本体系，版本码递增。
+- 应用名保持 `EhViewer`，正式包名保持 `moe.hycnyl.ehviewer`。当前正式版本为 `1.17.16` / `180091`，上个正式版为 `1.17.15` / `180090`，接续旧版 `1.17.8` / `180083` 和 `1.17.9` / `180084`。后续沿用版本体系，版本码递增。
 - 任何实际影响用户的改动完成后，除非维护者明确禁止，都须提升 versionName/versionCode，使用 GitHub Actions 发布正式 Release；提供 universal、arm64-v8a、armeabi-v7a、x86_64、x86 五种 APK，并附简短变更说明与 SHA-256 校验和。不得使用 `[skip ci]` 绕过这条规则。
 - README 保持简洁，变更通常只在“变更”章节简要记录；允许修正仓库链接、安装要求和迁移说明。不得随意重写其余内容或丢失截图、素材和致谢。
 - 单轮只改一个目标不是硬性限制。缓存导出、下载恢复和归档格式继承 1.17.8 的当前行为，维护者没有将其固化为不可修改的长期规则。
@@ -85,26 +85,3 @@ UI 模块保留 `allWarningsAsErrors`，仅用 `-Xwarning-level=DEPRECATION:warn
 发布验证按本轮改动选择场景。UI、签名和构建默认使用 API 26、33、36；Target 37 的候选将现代设备检查切换至 API 37.2。使用包含 WebView 的 google_apis 镜像，现代设备使用 google_apis_ps16k 并检查真实页大小；每次新建 AVD，分配 4096M RAM / 512M heap。验证设备端 APK SHA-256、文件式 universal/匹配 ABI 安装、上个正式版本覆盖安装和启动。UI 按改动选用 archive-ui 或 interaction-ui 工作流渲染实际组件，支持指定 APK 源码与更新验证夹具，避免测试修正触发重复原生构建。只有涉及相关业务功能的改动，才增加离线 CBZ、设置迁移等对应检查。临时数据不进入源码或 Release。
 
 本托管环境先执行 `source /workspace/.ehviewer-env/activate.sh`，其中设置已固定的 JDK、SDK、Gradle/Cargo 缓存与本地 GNU m4 1.4.20。m4 是 Nettle 汇编的构建依赖；CI 检查并安装它。本地无 sudo，m4 安装于私有工具目录。Nettle 的源码包含预生成文件，CMake 必须保留其解包时间戳（DOWNLOAD_EXTRACT_TIMESTAMP TRUE）。
-
-## 临时进度：1.17.16 细节与视图切换
-
-- 基线 1.17.15 / 180090，main=1ce4b55，工作区干净；本轮 1.17.16 / 180091。已核对 AboutScreen/AppUpdater 均由 BuildConfig.REPO_NAME=Hycnyl/EhViewer-Revived 构造链接，按要求忽略此项。
-- GalleryListScreen 已为主页/订阅/热门/排行及搜索提供现有双布局，收藏也已有双布局；复用 Settings.listMode，增加与下载页同位置的共享切换按钮。历史页仅补现有 StaggeredGrid/卡片分支，保留分页、长按、滑删和清空逻辑，无需大范围工程改造。
-- 其余目标：仅移除设置主分类分隔线；警示色改为更明亮的 Material Vibrant 语义色阶；图片本体居中且标尺偏左上，图片信息弹窗按实际可用宽度左右排布。下一步实施并定向渲染，CI 精简构建复用正式 1.17.15 Build 42334402277 的 Profile，签名及 API33 安装升级后发布；不用无关业务/性能套件。
-
-- 五项实施已完成：更新仓库确认正确无需修改；设置主分类去分线；Vibrant 高明度语义黄/红，保留原阈值；矩形本体严格居中，独立 Material 弹窗最大840dp并按实际宽度排版；工具栏首位共用切换组件，沿用现有 list_mode_2 和 grid_view，历史新增可滑删的同款瀑布流及有尺寸的分页占位。版本 1.17.16 /180091。
-- 定向 CI 仅覆盖本轮四种 UI 场景（窄屏、明暗宽屏及真实宽弹窗），同时确认共享开关双向切换和明亮黄色；不跑无关业务与性能套件。下一步格式整理后推送，轻量构建与 UI 渲染并行。
-
-- 本地仅执行必要格式整理，spotlessApply 已成功（1m05s）；接下来只由 Actions 进行构建和四例定向 UI 验证。未增加库依赖、数据库/网络/缓存改动，未改变构建配置（仅版本迭代），可沿用最新正式 Profile 文本。
-
-- 应用源码已推送 `4681eed6676d6e88a0f71f55253c083021ebeed7`；Draft 437351236 与来源分支均固定此 SHA。精简 [Build 42341393511](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/42341393511) 使用 42334402277 Profile；[本轮四例 UI 42341366071](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/42341366071) 并行。重复常规 Build 42341366087 已取消。下一步核对定向截图/编译后取五包、本地正式 V2+V3 签名、quick_release 发布。
-
-- 四例定向 UI 42341366071 已完整成功，Artifact 13560944327 的 SHA-256 与 XML（4 tests / 0 failures / 0 errors）已核对，四张图均已查看：真实宽弹窗左右排布、矩形本体居中、深浅预警明亮且可分辨、共享开关双向可用。Build 的编译/格式、Profile 复用及阅读器覆盖检查已过，正在组装五包。应用源码仍固定 4681eed，不再增补测试或功能。
-
-- 精简 Build 42341393511 所有作业步骤已成功，最终未签名 Artifact=13561928852（SHA-256 ff77599fe7e484fadbaf67856c9b29705242ccd4e164bdbfcd7d78bc636693b0），诊断/生成规则=13561893976。正在从此唯一来源取回五包，并在固定 4681eed 的独立工作树中用私有 vault 签名；下一步公开七文件 ZIP 分片交接及 API33 精简发布。
-
-- 五包本地签名及来源/SDK/ABI/CRC/16KiB/Kotlin/Profile/V2+V3 独立内容摘要校验已全部通过。公开七文件 ZIP 已以九片交接，manifest=99dc03c22f7239b2e9c2f8e6bce26d4e2fd8443f，ZIP SHA-256=96d4432cce3d1879c1e6117bfa10031f2b7cf1f1a962153c91e2cf7dc412fdfc；无私钥上传。已核对被取消的重复 Build 无 Artifact。下一步 quick_release=true API33 安装/升级并发布，完成后清理来源分支、本地工作树和本章。
-
-- [正式精简发布 42342684563](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/42342684563) 已启动，工作流 revision=d02961f，APK source=4681eed，quick_release=true，仅 API33 安装/升级。下一步确认 prepare / verify(33) / publish 均成功，补 Release 的实际结果并核对七附件摘要；然后删临时来源分支及本地中间文件，更新正式版本并删除整个进度章节。
-
-- 发布 prepare 作业 128313621943 已成功：七文件收取、五包来源复核及 Build Tools 36/37 的正式 V2/V3 签名检查通过。API33 作业 128313748406 正执行文件式安装/启动、1.17.15→1.17.16 覆盖升级及数据标记、ProfileInstaller 写入；通过后 publish 会复核公开下载摘要。当前无失败或扩大范围的改动。
