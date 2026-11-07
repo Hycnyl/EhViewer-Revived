@@ -98,3 +98,5 @@ UI 模块保留 `allWarningsAsErrors`，仅用 `-Xwarning-level=DEPRECATION:warn
 - 本地仅执行必要格式整理，spotlessApply 已成功（1m05s）；接下来只由 Actions 进行构建和四例定向 UI 验证。未增加库依赖、数据库/网络/缓存改动，未改变构建配置（仅版本迭代），可沿用最新正式 Profile 文本。
 
 - 应用源码已推送 `4681eed6676d6e88a0f71f55253c083021ebeed7`；Draft 437351236 与来源分支均固定此 SHA。精简 [Build 42341393511](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/42341393511) 使用 42334402277 Profile；[本轮四例 UI 42341366071](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/42341366071) 并行。重复常规 Build 42341366087 已取消。下一步核对定向截图/编译后取五包、本地正式 V2+V3 签名、quick_release 发布。
+
+- 四例定向 UI 42341366071 已完整成功，Artifact 13560944327 的 SHA-256 与 XML（4 tests / 0 failures / 0 errors）已核对，四张图均已查看：真实宽弹窗左右排布、矩形本体居中、深浅预警明亮且可分辨、共享开关双向可用。Build 的编译/格式、Profile 复用及阅读器覆盖检查已过，正在组装五包。应用源码仍固定 4681eed，不再增补测试或功能。
