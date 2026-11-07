@@ -104,3 +104,5 @@ UI 模块保留 `allWarningsAsErrors`，仅用 `-Xwarning-level=DEPRECATION:warn
 - 精简 Build 42341393511 所有作业步骤已成功，最终未签名 Artifact=13561928852（SHA-256 ff77599fe7e484fadbaf67856c9b29705242ccd4e164bdbfcd7d78bc636693b0），诊断/生成规则=13561893976。正在从此唯一来源取回五包，并在固定 4681eed 的独立工作树中用私有 vault 签名；下一步公开七文件 ZIP 分片交接及 API33 精简发布。
 
 - 五包本地签名及来源/SDK/ABI/CRC/16KiB/Kotlin/Profile/V2+V3 独立内容摘要校验已全部通过。公开七文件 ZIP 已以九片交接，manifest=99dc03c22f7239b2e9c2f8e6bce26d4e2fd8443f，ZIP SHA-256=96d4432cce3d1879c1e6117bfa10031f2b7cf1f1a962153c91e2cf7dc412fdfc；无私钥上传。已核对被取消的重复 Build 无 Artifact。下一步 quick_release=true API33 安装/升级并发布，完成后清理来源分支、本地工作树和本章。
+
+- [正式精简发布 42342684563](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/42342684563) 已启动，工作流 revision=d02961f，APK source=4681eed，quick_release=true，仅 API33 安装/升级。下一步确认 prepare / verify(33) / publish 均成功，补 Release 的实际结果并核对七附件摘要；然后删临时来源分支及本地中间文件，更新正式版本并删除整个进度章节。
