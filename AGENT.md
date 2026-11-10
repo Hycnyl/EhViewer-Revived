@@ -106,3 +106,7 @@ UI 模块保留 `allWarningsAsErrors`，仅用 `-Xwarning-level=DEPRECATION:warn
 - c5473f5 的主代码/签名元数据编译与规则复用已通过，Build 正组装五包；UI 作业129837503759执行5项，4项通过，Hover显示断言未过。长按提示不触发点击、明暗选择、自定义确认/取消均通过。先修正夹具为显式鼠标中心 Enter+Move，原生源码确认是 Mouse Enter 触发展示；仅重跑同5项UI，暂不改应用或重构手势。APK候选仍c5473f5，若验证为夹具问题不重复原生构建。
 
 - 鼠标中心 Enter+Move 的检查已确认原生悬停能够显示 Tooltip；剩余失败位于窗口内原坐标发送合成 HOVER_EXIT 后的移除断言。改用真实的“指针移出锚点、仍留在窗口内”Mouse Move，避免 Android 为区分点击而延迟窗口级 Exit。仅夹具修正；应用继续使用原生输入/自动消失，无自定义手势或弹窗，APK源码仍c5473f5。明暗配色和调色对话框截图已查看，布局正常。
+
+- 最终5项 UI [42820140116](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/42820140116) 全部通过，XML 5/0/0，Artifact13766496168 摘要已核对；Hover 中心进入/移出锚点正确触发显示/消失，长按不触发点击及自动消失、明暗配色和调色确认/取消通过。三张配色/调色截图已查看。Build 42818460982 全成功，最终五包13766570749经Artifact摘要取回，本地正式V2+V3签名、来源/SDK/ABI/CRC/16KiB/Kotlin/Profile/独立签名摘要校验已通过。应用源码仍c5473f5；UI夹具revision0bc8ebb，不重复已完成的原生构建。下一步公开ZIP交接并API33精简发布。
+
+- 已签名的公开七文件ZIP交接完成：manifest7e879604cd6c10d7675638536500aafda7d024e4，ZIP SHA-256=62f5640158f378d94d7dacb8a4033be113688e55a2c1560f9709f21608c9c0c2；私钥仅在vault。待清理旧Artifact3个：13765727497/13765943544/13765889127，最终Build/UI产物保留。下一步 quick_release=true API33 安装升级、ProfileInstaller及公开五包下载验证，成功后清理并更新正式基线。
