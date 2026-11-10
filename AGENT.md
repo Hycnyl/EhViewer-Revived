@@ -110,3 +110,5 @@ UI 模块保留 `allWarningsAsErrors`，仅用 `-Xwarning-level=DEPRECATION:warn
 - 最终5项 UI [42820140116](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/42820140116) 全部通过，XML 5/0/0，Artifact13766496168 摘要已核对；Hover 中心进入/移出锚点正确触发显示/消失，长按不触发点击及自动消失、明暗配色和调色确认/取消通过。三张配色/调色截图已查看。Build 42818460982 全成功，最终五包13766570749经Artifact摘要取回，本地正式V2+V3签名、来源/SDK/ABI/CRC/16KiB/Kotlin/Profile/独立签名摘要校验已通过。应用源码仍c5473f5；UI夹具revision0bc8ebb，不重复已完成的原生构建。下一步公开ZIP交接并API33精简发布。
 
 - 已签名的公开七文件ZIP交接完成：manifest7e879604cd6c10d7675638536500aafda7d024e4，ZIP SHA-256=62f5640158f378d94d7dacb8a4033be113688e55a2c1560f9709f21608c9c0c2；私钥仅在vault。待清理旧Artifact3个：13765727497/13765943544/13765889127，最终Build/UI产物保留。下一步 quick_release=true API33 安装升级、ProfileInstaller及公开五包下载验证，成功后清理并更新正式基线。
+
+- [正式发布 42821420510](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/42821420510) 已启动，工作流revision3240f05，APK source=c5473f5，quick_release=true，仅API33。下一步确认prepare/verify(33)/publish均成功，补全Release实际结果，核对七附件摘要，删旧Artifact和临时来源分支、本地工作树/临时包及本章。
