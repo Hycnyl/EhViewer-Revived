@@ -57,6 +57,7 @@ import androidx.compose.ui.unit.dp
 import com.ehviewer.core.database.model.Filter
 import com.ehviewer.core.database.model.FilterMode
 import com.ehviewer.core.i18n.R
+import com.ehviewer.core.ui.component.IconTooltip
 import com.ehviewer.core.ui.util.Await
 import com.ehviewer.core.ui.util.thenIf
 import com.ehviewer.core.util.async
@@ -191,20 +192,22 @@ fun AnimatedVisibilityScope.FilterScreen(navigator: DestinationsNavigator) = Scr
                 title = { Text(text = stringResource(id = R.string.filter)) },
                 navigationIcon = { NavigationIcon() },
                 actions = {
-                    IconButton(
-                        onClick = {
-                            launch {
-                                awaitConfirmationOrCancel(
-                                    title = R.string.filter,
-                                    showCancelButton = false,
-                                ) {
-                                    Text(text = stringResource(id = R.string.filter_tip))
+                    IconTooltip(stringResource(R.string.tooltip_help)) {
+                        IconButton(
+                            onClick = {
+                                launch {
+                                    awaitConfirmationOrCancel(
+                                        title = R.string.filter,
+                                        showCancelButton = false,
+                                    ) {
+                                        Text(text = stringResource(id = R.string.filter_tip))
+                                    }
                                 }
-                            }
-                        },
-                        shapes = IconButtonDefaults.shapes(),
-                    ) {
-                        Icon(imageVector = Icons.AutoMirrored.Default.Help, contentDescription = null)
+                            },
+                            shapes = IconButtonDefaults.shapes(),
+                        ) {
+                            Icon(imageVector = Icons.AutoMirrored.Default.Help, contentDescription = stringResource(R.string.tooltip_help))
+                        }
                     }
                 },
                 scrollBehavior = scrollBehavior,
@@ -251,20 +254,22 @@ fun AnimatedVisibilityScope.FilterScreen(navigator: DestinationsNavigator) = Scr
                                     onCheckedChange = { filter.trigger { filterCheckBoxRecomposeScope.invalidate() } },
                                 )
                                 Text(text = filter.text, modifier = Modifier.weight(1F))
-                                IconButton(
-                                    onClick = {
-                                        launch {
-                                            awaitConfirmationOrCancel(confirmText = R.string.delete) {
-                                                Text(text = stringResource(id = R.string.delete_filter, filter.text))
+                                IconTooltip(stringResource(R.string.delete)) {
+                                    IconButton(
+                                        onClick = {
+                                            launch {
+                                                awaitConfirmationOrCancel(confirmText = R.string.delete) {
+                                                    Text(text = stringResource(id = R.string.delete_filter, filter.text))
+                                                }
+                                                filter.forget {
+                                                    filters.remove(filter)
+                                                }
                                             }
-                                            filter.forget {
-                                                filters.remove(filter)
-                                            }
-                                        }
-                                    },
-                                    shapes = IconButtonDefaults.shapes(),
-                                ) {
-                                    Icon(imageVector = Icons.Default.Delete, contentDescription = null)
+                                        },
+                                        shapes = IconButtonDefaults.shapes(),
+                                    ) {
+                                        Icon(imageVector = Icons.Default.Delete, contentDescription = stringResource(R.string.delete))
+                                    }
                                 }
                             }
                         }

@@ -85,3 +85,14 @@ UI 模块保留 `allWarningsAsErrors`，仅用 `-Xwarning-level=DEPRECATION:warn
 发布验证按本轮改动选择场景。UI、签名和构建默认使用 API 26、33、36；Target 37 的候选将现代设备检查切换至 API 37.2。使用包含 WebView 的 google_apis 镜像，现代设备使用 google_apis_ps16k 并检查真实页大小；每次新建 AVD，分配 4096M RAM / 512M heap。验证设备端 APK SHA-256、文件式 universal/匹配 ABI 安装、上个正式版本覆盖安装和启动。UI 按改动选用 archive-ui 或 interaction-ui 工作流渲染实际组件，支持指定 APK 源码与更新验证夹具，避免测试修正触发重复原生构建。只有涉及相关业务功能的改动，才增加离线 CBZ、设置迁移等对应检查。临时数据不进入源码或 Release。
 
 本托管环境先执行 `source /workspace/.ehviewer-env/activate.sh`，其中设置已固定的 JDK、SDK、Gradle/Cargo 缓存与本地 GNU m4 1.4.20。m4 是 Nettle 汇编的构建依赖；CI 检查并安装它。本地无 sudo，m4 安装于私有工具目录。Nettle 的源码包含预生成文件，CMake 必须保留其解包时间戳（DOWNLOAD_EXTRACT_TIMESTAMP TRUE）。
+
+## 临时进度：1.17.17 Tooltip 与主题色彩
+
+- 基线 1.17.16 / 180091，main=fa66030，工作区干净。当前任务只做 UI：原生 Plain Tooltip（长按/悬停、无障碍、保留点击）、配额恢复全程主题色、主题色彩扩展动态/预设/自定义；主题模式及全部无关设置保持原行为。计划 1.17.17 /180092。
+- 已核对 FlClash v0.8.99（chen08209/FlClash，tag tree 68c71b8ef9b7486a224972eb371ff153c6b2de0f）的主题页、色板、预览与调色入口，仅参考预览/色板/自定义思路，用 Compose 实现，不移植 Flutter 代码或无关设置。已盘点约47处图标按钮及现有长按路径，下一步统一原生 Tooltip 包装与补齐简短本地化描述；保留画廊/阅读器既有长按手势。
+- 继续 CI 优先且按 UI 精简验证：只做本轮配色/Tooltip 定向交互渲染及构建签名/API33安装升级，复用正式 1.17.16 Build 42341393511 的 Profile；不跑无关软件功能或性能测试。每个关键阶段更新本章，完成后删整章并清临时文件/来源分支。
+
+- 实施完成：原生 IconTooltip（TooltipBox + PlainTooltip、非持久、非聚焦、原生上方/边缘定位），已覆盖36处图标按钮及动态 FAB/3处点击图标，补齐英/简繁/HK/日描述；保留原点击回调和图片/卡片长按区域，悬浮和行内按钮的父级对齐/偏移修饰符已移到提示锚点以保位置。配额移除警示色函数，保留真实用量与截断绘图，完全使用 Material 默认主题色。
+- 新增独立配色区域：动态/八个预设/自定义；五种 Material 配色风格；配色预览；原生对话框十六进制输入及 HCT 滑块，确认保存、取消不保存。仅四个新增设置键，默认路径保留原壁纸方案；主题模式、纯黑、分类协调与原有列表/阅读/语言等设置未改。已添加本轮5个定向 UI 检查（明暗选择、调色确认/取消、长按和Hover），不跑旧无关UI或业务/性能套件。版本1.17.17 /180092，下一步格式整理并交CI构建/渲染。
+
+- 必要格式整理已完成（app/core.ui spotlessApply），修正清理警示色时遗留的注释及包装表达式声明的格式问题；未运行本地软件/性能测试。ThemeScreen 差异仅新增一行 ThemeColorPreference，Settings 差异仅四个新配色键；默认壁纸与现有主题模式逻辑保留。下一步推送源码、只运行5项新 UI 检查和复用 Profile 的精简构建，并取消旧交互动画自动作业。

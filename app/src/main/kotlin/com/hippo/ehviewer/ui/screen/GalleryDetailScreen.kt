@@ -42,6 +42,7 @@ import com.ehviewer.core.i18n.R
 import com.ehviewer.core.model.BaseGalleryInfo
 import com.ehviewer.core.model.GalleryDetail
 import com.ehviewer.core.model.GalleryInfo
+import com.ehviewer.core.ui.component.IconTooltip
 import com.ehviewer.core.ui.util.LocalWindowSizeClass
 import com.ehviewer.core.ui.util.isExpanded
 import com.ehviewer.core.ui.util.launchInVM
@@ -192,8 +193,10 @@ fun AnimatedVisibilityScope.GalleryDetailScreen(args: GalleryDetailScreenArgs, n
                 actions = {
                     AppBarRow(
                         overflowIndicator = {
-                            IconButton(onClick = { it.show() }, shapes = IconButtonDefaults.shapes()) {
-                                Icon(imageVector = Icons.Default.MoreVert, contentDescription = null)
+                            IconTooltip(stringResource(R.string.tooltip_more)) {
+                                IconButton(onClick = { it.show() }, shapes = IconButtonDefaults.shapes()) {
+                                    Icon(imageVector = Icons.Default.MoreVert, contentDescription = stringResource(R.string.tooltip_more))
+                                }
                             }
                         },
                         maxItemCount = if (windowSizeClass.isExpanded) 4 else 2,

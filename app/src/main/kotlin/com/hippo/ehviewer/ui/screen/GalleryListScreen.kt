@@ -75,6 +75,7 @@ import com.ehviewer.core.i18n.R
 import com.ehviewer.core.ui.component.FAB_ANIMATE_TIME
 import com.ehviewer.core.ui.component.FabLayout
 import com.ehviewer.core.ui.component.FastScrollLazyColumn
+import com.ehviewer.core.ui.component.IconTooltip
 import com.ehviewer.core.ui.component.LocalSideSheetState
 import com.ehviewer.core.ui.component.ProvideSideSheetContent
 import com.ehviewer.core.ui.icons.EhIcons
@@ -242,70 +243,74 @@ fun AnimatedVisibilityScope.GalleryListScreen(
                 title = { Text(text = stringResource(id = R.string.quick_search)) },
                 colors = topBarOnDrawerColor(),
                 actions = {
-                    IconButton(
-                        onClick = {
-                            launch {
-                                awaitConfirmationOrCancel(title = R.string.quick_search, showCancelButton = false) {
-                                    Text(text = stringResource(id = R.string.add_quick_search_tip))
+                    IconTooltip(stringResource(R.string.tooltip_help)) {
+                        IconButton(
+                            onClick = {
+                                launch {
+                                    awaitConfirmationOrCancel(title = R.string.quick_search, showCancelButton = false) {
+                                        Text(text = stringResource(id = R.string.add_quick_search_tip))
+                                    }
                                 }
-                            }
-                        },
-                        shapes = IconButtonDefaults.shapes(),
-                    ) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Default.Help,
-                            contentDescription = stringResource(id = R.string.readme),
-                        )
+                            },
+                            shapes = IconButtonDefaults.shapes(),
+                        ) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Default.Help,
+                                contentDescription = stringResource(R.string.tooltip_help),
+                            )
+                        }
                     }
                     val invalidImageQuickSearch = stringResource(R.string.image_search_not_quick_search)
                     val nameEmpty = stringResource(R.string.name_is_empty)
                     val dupName = stringResource(R.string.duplicate_name)
-                    IconButton(
-                        onClick = {
-                            launch {
-                                if (urlBuilder.mode == MODE_IMAGE_SEARCH) {
-                                    snackbar(invalidImageQuickSearch)
-                                } else {
-                                    // itemCount == 0 is treated as error, so no need to check here
-                                    val firstItem = data.itemSnapshotList.items[getFirstVisibleItemIndex()]
-                                    val next = firstItem.gid + 1
-                                    quickSearchList.fastForEach { q ->
-                                        if (urlBuilder.equalsQuickSearch(q)) {
-                                            val nextStr = q.name.substringAfterLast('@', "")
-                                            if (nextStr.toLongOrNull() == next) {
-                                                snackbar(string(R.string.duplicate_quick_search, q.name))
-                                                return@launch
+                    IconTooltip(stringResource(R.string.add_quick_search_dialog_title)) {
+                        IconButton(
+                            onClick = {
+                                launch {
+                                    if (urlBuilder.mode == MODE_IMAGE_SEARCH) {
+                                        snackbar(invalidImageQuickSearch)
+                                    } else {
+                                        // itemCount == 0 is treated as error, so no need to check here
+                                        val firstItem = data.itemSnapshotList.items[getFirstVisibleItemIndex()]
+                                        val next = firstItem.gid + 1
+                                        quickSearchList.fastForEach { q ->
+                                            if (urlBuilder.equalsQuickSearch(q)) {
+                                                val nextStr = q.name.substringAfterLast('@', "")
+                                                if (nextStr.toLongOrNull() == next) {
+                                                    snackbar(string(R.string.duplicate_quick_search, q.name))
+                                                    return@launch
+                                                }
                                             }
                                         }
-                                    }
-                                    awaitInputTextWithCheckBox(
-                                        initial = quickSearchName ?: urlBuilder.keyword.orEmpty(),
-                                        title = R.string.add_quick_search_dialog_title,
-                                        hint = R.string.quick_search,
-                                        checked = saveProgress,
-                                        checkBoxText = R.string.save_progress,
-                                    ) { input, checked ->
-                                        var text = input.trim()
-                                        ensure(text.isNotBlank()) { nameEmpty }
-                                        if (checked) text += "@$next"
-                                        ensure(quickSearchList.none { it.name == text }) { dupName }
-                                        val quickSearch = urlBuilder.toQuickSearch(text)
-                                        quickSearch.position = quickSearchList.size
-                                        // Insert to DB first to update the id
-                                        EhDB.insertQuickSearch(quickSearch)
-                                        quickSearchList.add(quickSearch)
-                                        saveProgress = checked
+                                        awaitInputTextWithCheckBox(
+                                            initial = quickSearchName ?: urlBuilder.keyword.orEmpty(),
+                                            title = R.string.add_quick_search_dialog_title,
+                                            hint = R.string.quick_search,
+                                            checked = saveProgress,
+                                            checkBoxText = R.string.save_progress,
+                                        ) { input, checked ->
+                                            var text = input.trim()
+                                            ensure(text.isNotBlank()) { nameEmpty }
+                                            if (checked) text += "@$next"
+                                            ensure(quickSearchList.none { it.name == text }) { dupName }
+                                            val quickSearch = urlBuilder.toQuickSearch(text)
+                                            quickSearch.position = quickSearchList.size
+                                            // Insert to DB first to update the id
+                                            EhDB.insertQuickSearch(quickSearch)
+                                            quickSearchList.add(quickSearch)
+                                            saveProgress = checked
+                                        }
                                     }
                                 }
-                            }
-                        },
-                        shapes = IconButtonDefaults.shapes(),
-                        enabled = data.loadState.isIdle,
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Add,
-                            contentDescription = stringResource(id = R.string.add),
-                        )
+                            },
+                            shapes = IconButtonDefaults.shapes(),
+                            enabled = data.loadState.isIdle,
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Add,
+                                contentDescription = stringResource(R.string.add_quick_search_dialog_title),
+                            )
+                        }
                     }
                 },
                 windowInsets = WindowInsets(),
@@ -385,29 +390,31 @@ fun AnimatedVisibilityScope.GalleryListScreen(
                                         Text(text = item.name)
                                     },
                                     trailingContent = {
-                                        IconButton(
-                                            onClick = {},
-                                            shapes = IconButtonDefaults.shapes(),
-                                            modifier = Modifier.draggableHandle(
-                                                onDragStarted = {
-                                                    hapticFeedback.performHapticFeedback(HapticFeedbackType.START)
-                                                    fromIndex = index
-                                                },
-                                                onDragStopped = {
-                                                    hapticFeedback.performHapticFeedback(HapticFeedbackType.END)
-                                                    if (fromIndex != -1) {
-                                                        if (fromIndex != index) {
-                                                            val range = if (fromIndex < index) fromIndex..index else index..fromIndex
-                                                            val toUpdate = quickSearchList.slice(range)
-                                                            toUpdate.zip(range).forEach { it.first.position = it.second }
-                                                            launchIO { EhDB.updateQuickSearch(toUpdate) }
+                                        IconTooltip(stringResource(R.string.tooltip_reorder)) {
+                                            IconButton(
+                                                onClick = {},
+                                                shapes = IconButtonDefaults.shapes(),
+                                                modifier = Modifier.draggableHandle(
+                                                    onDragStarted = {
+                                                        hapticFeedback.performHapticFeedback(HapticFeedbackType.START)
+                                                        fromIndex = index
+                                                    },
+                                                    onDragStopped = {
+                                                        hapticFeedback.performHapticFeedback(HapticFeedbackType.END)
+                                                        if (fromIndex != -1) {
+                                                            if (fromIndex != index) {
+                                                                val range = if (fromIndex < index) fromIndex..index else index..fromIndex
+                                                                val toUpdate = quickSearchList.slice(range)
+                                                                toUpdate.zip(range).forEach { it.first.position = it.second }
+                                                                launchIO { EhDB.updateQuickSearch(toUpdate) }
+                                                            }
+                                                            fromIndex = -1
                                                         }
-                                                        fromIndex = -1
-                                                    }
-                                                },
-                                            ),
-                                        ) {
-                                            Icon(imageVector = Icons.Default.Reorder, contentDescription = null)
+                                                    },
+                                                ),
+                                            ) {
+                                                Icon(imageVector = Icons.Default.Reorder, contentDescription = stringResource(R.string.tooltip_reorder))
+                                            }
                                         }
                                     },
                                     colors = listItemOnDrawerColor(false),
@@ -492,21 +499,31 @@ fun AnimatedVisibilityScope.GalleryListScreen(
         trailingIcon = {
             GalleryViewToggle(listMode != 0, onToggle = { listMode = if (it) 1 else 0 })
             val sheetState = LocalSideSheetState.current
-            IconButton(onClick = { launch { sheetState.open() } }, shapes = IconButtonDefaults.shapes()) {
-                Icon(
-                    imageVector = if (isTopList) {
-                        Icons.Default.FormatListNumbered
+            IconTooltip(
+                stringResource(
+                    id = if (isTopList) {
+                        R.string.toplist
                     } else {
-                        Icons.Outlined.Bookmarks
+                        R.string.quick_search
                     },
-                    contentDescription = stringResource(
-                        id = if (isTopList) {
-                            R.string.toplist
+                ),
+            ) {
+                IconButton(onClick = { launch { sheetState.open() } }, shapes = IconButtonDefaults.shapes()) {
+                    Icon(
+                        imageVector = if (isTopList) {
+                            Icons.Default.FormatListNumbered
                         } else {
-                            R.string.quick_search
+                            Icons.Outlined.Bookmarks
                         },
-                    ),
-                )
+                        contentDescription = stringResource(
+                            id = if (isTopList) {
+                                R.string.toplist
+                            } else {
+                                R.string.quick_search
+                            },
+                        ),
+                    )
+                }
             }
             AvatarIcon()
         },
@@ -589,18 +606,20 @@ fun AnimatedVisibilityScope.GalleryListScreen(
     )
 
     FabLayout(
+        expandLabel = stringResource(R.string.tooltip_more_actions),
+        collapseLabel = stringResource(R.string.tooltip_close_actions),
         hidden = hideFab,
         expanded = fabExpanded,
         onExpandChanged = { fabExpanded = it },
         autoCancel = true,
     ) {
         if (urlBuilder.mode in arrayOf(MODE_NORMAL, MODE_UPLOADER, MODE_TAG)) {
-            onClick(Icons.Default.Shuffle) {
+            onClick(Icons.Default.Shuffle, string(R.string.tooltip_random)) {
                 urlBuilder.setRange(Random.nextInt(100))
                 data.refresh()
             }
         }
-        onClick(Icons.Default.Refresh) {
+        onClick(Icons.Default.Refresh, string(R.string.tooltip_refresh)) {
             urlBuilder.setRange(0)
             data.refresh()
         }
@@ -619,7 +638,7 @@ fun AnimatedVisibilityScope.GalleryListScreen(
                 }
                 data.refresh()
             }
-            onClick(Icons.AutoMirrored.Default.LastPage) {
+            onClick(Icons.AutoMirrored.Default.LastPage, string(R.string.tooltip_last_page)) {
                 if (isTopList) {
                     urlBuilder.page = TOPLIST_PAGES
                 } else {

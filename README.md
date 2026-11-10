@@ -141,6 +141,8 @@
 
 ## Other
 
+- Add native icon tooltips and selectable theme palettes; restore theme-colored quota progress.
+
 - Add gallery view toggles and refine warning colors, settings and adaptive image information.
 
 - Harmonize quota warnings and redesign archive cards and image information.

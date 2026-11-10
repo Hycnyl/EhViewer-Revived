@@ -31,6 +31,7 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.fromHtml
 import com.ehviewer.core.i18n.R
 import com.ehviewer.core.network.EhCookieStore
+import com.ehviewer.core.ui.component.IconTooltip
 import com.ehviewer.core.util.isAtLeastT
 import com.ehviewer.core.util.launch
 import com.hippo.ehviewer.Settings
@@ -99,15 +100,17 @@ fun AnimatedVisibilityScope.EhScreen(navigator: DestinationsNavigator) = Screen(
                                     state = state,
                                     readOnly = true,
                                     trailingIcon = {
-                                        IconButton(
-                                            onClick = {
-                                                copyTextToClipboard(state.text, true)
-                                                // Avoid double notify user since system have done that on Tiramisu above
-                                                if (!isAtLeastT) launchSnackBar(copiedToClipboard)
-                                            },
-                                            shapes = IconButtonDefaults.shapes(),
-                                        ) {
-                                            Icon(imageVector = Icons.Default.ContentCopy, contentDescription = null)
+                                        IconTooltip(stringResource(R.string.tooltip_copy)) {
+                                            IconButton(
+                                                onClick = {
+                                                    copyTextToClipboard(state.text, true)
+                                                    // Avoid double notify user since system have done that on Tiramisu above
+                                                    if (!isAtLeastT) launchSnackBar(copiedToClipboard)
+                                                },
+                                                shapes = IconButtonDefaults.shapes(),
+                                            ) {
+                                                Icon(imageVector = Icons.Default.ContentCopy, contentDescription = stringResource(R.string.tooltip_copy))
+                                            }
                                         }
                                     },
                                 )

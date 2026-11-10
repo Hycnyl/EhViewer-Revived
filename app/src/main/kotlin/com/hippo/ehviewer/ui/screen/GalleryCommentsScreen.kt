@@ -88,6 +88,7 @@ import com.ehviewer.core.database.model.Filter
 import com.ehviewer.core.database.model.FilterMode
 import com.ehviewer.core.i18n.R
 import com.ehviewer.core.model.GalleryComment
+import com.ehviewer.core.ui.component.IconTooltip
 import com.ehviewer.core.ui.util.animateFloatMergePredictiveBackAsState
 import com.ehviewer.core.ui.util.snackBarPadding
 import com.ehviewer.core.ui.util.thenIf
@@ -283,17 +284,19 @@ fun AnimatedVisibilityScope.GalleryCommentsScreen(gid: Long, navigator: Destinat
         },
         floatingActionButton = {
             if (hasSignedIn && !commenting) {
-                FloatingActionButton(
-                    onClick = {
-                        if (commentId != -1L) {
-                            commentId = -1L
-                            userComment = TextFieldValue()
-                        }
-                        commenting = true
-                    },
-                    modifier = Modifier.snackBarPadding(),
-                ) {
-                    Icon(imageVector = Icons.AutoMirrored.Default.Reply, contentDescription = null)
+                IconTooltip(stringResource(R.string.tooltip_write_comment)) {
+                    FloatingActionButton(
+                        onClick = {
+                            if (commentId != -1L) {
+                                commentId = -1L
+                                userComment = TextFieldValue()
+                            }
+                            commenting = true
+                        },
+                        modifier = Modifier.snackBarPadding(),
+                    ) {
+                        Icon(imageVector = Icons.AutoMirrored.Default.Reply, contentDescription = stringResource(R.string.tooltip_write_comment))
+                    }
                 }
             }
         },
@@ -493,16 +496,17 @@ fun AnimatedVisibilityScope.GalleryCommentsScreen(gid: Long, navigator: Destinat
                         textStyle = MaterialTheme.typography.bodyLarge.merge(color = color),
                         cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
                     )
-                    IconButton(
-                        onClick = { launchIO { sendComment() } },
-                        shapes = IconButtonDefaults.shapes(),
-                        modifier = Modifier.align(Alignment.CenterVertically).padding(16.dp),
-                    ) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Default.Send,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.onPrimaryContainer,
-                        )
+                    IconTooltip(stringResource(R.string.tooltip_send_comment), modifier = Modifier.align(Alignment.CenterVertically).padding(16.dp)) {
+                        IconButton(
+                            onClick = { launchIO { sendComment() } },
+                            shapes = IconButtonDefaults.shapes(),
+                        ) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Default.Send,
+                                contentDescription = stringResource(R.string.tooltip_send_comment),
+                                tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                            )
+                        }
                     }
                 }
             }

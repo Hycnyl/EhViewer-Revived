@@ -78,6 +78,7 @@ fun AnimatedVisibilityScope.ThemeScreen(navigator: DestinationsNavigator) = Scre
                     state = Settings.blackDarkTheme.asMutableState(),
                 )
             }
+            ThemeColorPreference(isDarkTheme)
             SwitchPreference(
                 title = stringResource(id = R.string.harmonize_category_color),
                 state = Settings.harmonizeCategoryColor.asMutableState(),

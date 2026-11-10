@@ -28,6 +28,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.ehviewer.core.i18n.R
+import com.ehviewer.core.ui.component.IconTooltip
 import com.ehviewer.core.ui.icons.EhIcons
 import com.ehviewer.core.ui.icons.filled.Crop
 import com.ehviewer.core.ui.icons.filled.CropOff
@@ -129,15 +130,17 @@ private fun ActionButton(
     contentDescription: String,
     modifier: Modifier = Modifier,
 ) {
-    IconButton(
-        onClick = onClick,
-        modifier = modifier.size(IconButtonDefaults.mediumContainerSize(IconButtonDefaults.IconButtonWidthOption.Wide)),
-        shapes = IconButtonDefaults.shapes(IconButtonDefaults.mediumRoundShape, IconButtonDefaults.mediumPressedShape),
-    ) {
-        Icon(
-            imageVector = imageVector,
-            contentDescription = contentDescription,
-            modifier = Modifier.size(IconButtonDefaults.mediumIconSize),
-        )
+    IconTooltip(contentDescription) {
+        IconButton(
+            onClick = onClick,
+            modifier = modifier.size(IconButtonDefaults.mediumContainerSize(IconButtonDefaults.IconButtonWidthOption.Wide)),
+            shapes = IconButtonDefaults.shapes(IconButtonDefaults.mediumRoundShape, IconButtonDefaults.mediumPressedShape),
+        ) {
+            Icon(
+                imageVector = imageVector,
+                contentDescription = contentDescription,
+                modifier = Modifier.size(IconButtonDefaults.mediumIconSize),
+            )
+        }
     }
 }

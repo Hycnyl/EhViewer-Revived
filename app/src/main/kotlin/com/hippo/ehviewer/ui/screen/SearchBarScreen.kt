@@ -69,6 +69,7 @@ import com.ehviewer.core.database.dao.SearchDao
 import com.ehviewer.core.database.model.Search
 import com.ehviewer.core.i18n.R
 import com.ehviewer.core.model.TagNamespace
+import com.ehviewer.core.ui.component.IconTooltip
 import com.ehviewer.core.ui.util.ifNotNullThen
 import com.ehviewer.core.ui.util.ifTrueThen
 import com.ehviewer.core.ui.util.thenIf
@@ -250,13 +251,17 @@ fun SearchBarScreen(
                     },
                     leadingIcon = {
                         if (expanded) {
-                            IconButton(onClick = { hideSearchView() }, shapes = IconButtonDefaults.shapes()) {
-                                Icon(Icons.AutoMirrored.Default.ArrowBack, contentDescription = null)
+                            IconTooltip(stringResource(R.string.tooltip_back)) {
+                                IconButton(onClick = { hideSearchView() }, shapes = IconButtonDefaults.shapes()) {
+                                    Icon(Icons.AutoMirrored.Default.ArrowBack, contentDescription = stringResource(R.string.tooltip_back))
+                                }
                             }
                         } else {
                             val drawerState = LocalNavDrawerState.current
-                            IconButton(onClick = { scope.launch { drawerState.open() } }, shapes = IconButtonDefaults.shapes()) {
-                                Icon(Icons.Default.Menu, contentDescription = null)
+                            IconTooltip(stringResource(R.string.tooltip_menu)) {
+                                IconButton(onClick = { scope.launch { drawerState.open() } }, shapes = IconButtonDefaults.shapes()) {
+                                    Icon(Icons.Default.Menu, contentDescription = stringResource(R.string.tooltip_menu))
+                                }
                             }
                         }
                     },
@@ -264,12 +269,16 @@ fun SearchBarScreen(
                         if (expanded) {
                             AnimatedContent(targetState = searchFieldState.text.isNotEmpty()) { hasText ->
                                 if (hasText) {
-                                    IconButton(onClick = { searchFieldState.clearText() }, shapes = IconButtonDefaults.shapes()) {
-                                        Icon(Icons.Default.Close, contentDescription = null)
+                                    IconTooltip(stringResource(R.string.tooltip_clear)) {
+                                        IconButton(onClick = { searchFieldState.clearText() }, shapes = IconButtonDefaults.shapes()) {
+                                            Icon(Icons.Default.Close, contentDescription = stringResource(R.string.tooltip_clear))
+                                        }
                                     }
                                 } else {
-                                    IconButton(onClick = { navigate(ImageSearchScreenDestination) }, shapes = IconButtonDefaults.shapes()) {
-                                        Icon(Icons.Default.ImageSearch, contentDescription = null)
+                                    IconTooltip(stringResource(R.string.search_image)) {
+                                        IconButton(onClick = { navigate(ImageSearchScreenDestination) }, shapes = IconButtonDefaults.shapes()) {
+                                            Icon(Icons.Default.ImageSearch, contentDescription = stringResource(R.string.search_image))
+                                        }
                                     }
                                 }
                             }
@@ -303,11 +312,13 @@ fun SearchBarScreen(
                             )
                         },
                         trailingContent = it.canDelete.ifTrueThen {
-                            IconButton(onClick = { deleteKeyword(it.keyword) }, shapes = IconButtonDefaults.shapes()) {
-                                Icon(
-                                    imageVector = Icons.Default.Close,
-                                    contentDescription = null,
-                                )
+                            IconTooltip(stringResource(R.string.delete)) {
+                                IconButton(onClick = { deleteKeyword(it.keyword) }, shapes = IconButtonDefaults.shapes()) {
+                                    Icon(
+                                        imageVector = Icons.Default.Close,
+                                        contentDescription = stringResource(R.string.delete),
+                                    )
+                                }
                             }
                         },
                         colors = ListItemDefaults.colors(containerColor = Color.Transparent),

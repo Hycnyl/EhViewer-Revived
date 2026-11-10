@@ -30,10 +30,13 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalWindowInfo
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.round
 import androidx.compose.ui.unit.toSize
 import androidx.compose.ui.util.lerp
+import com.ehviewer.core.i18n.R
+import com.ehviewer.core.ui.component.IconTooltip
 import com.ehviewer.core.util.unreachable
 import kotlinx.coroutines.launch
 import kotlinx.serialization.KSerializer
@@ -93,9 +96,8 @@ fun BoxScope.PausableAlertDialog(
         idle = idle.safeOffset(safe)
     }
     val state = rememberDraggable2DState { delta -> idle += delta }
-    FilledTonalIconButton(
-        onClick = { showDialog = true },
-        shapes = IconButtonDefaults.shapes(),
+    IconTooltip(
+        stringResource(R.string.tooltip_resume_dialog),
         modifier = Modifier.offset {
             lerp(disappear, idle.round(), fraction)
         }.graphicsLayer {
@@ -114,7 +116,13 @@ fun BoxScope.PausableAlertDialog(
             },
         ),
     ) {
-        Icon(imageVector = idleIcon, contentDescription = null)
+        FilledTonalIconButton(
+            onClick = { showDialog = true },
+            shapes = IconButtonDefaults.shapes(),
+
+        ) {
+            Icon(imageVector = idleIcon, contentDescription = stringResource(R.string.tooltip_resume_dialog))
+        }
     }
 }
 

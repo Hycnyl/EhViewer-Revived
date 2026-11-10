@@ -51,6 +51,7 @@ import androidx.paging.map
 import com.ehviewer.core.i18n.R
 import com.ehviewer.core.ui.component.FastScrollLazyColumn
 import com.ehviewer.core.ui.component.FastScrollLazyVerticalStaggeredGrid
+import com.ehviewer.core.ui.component.IconTooltip
 import com.ehviewer.core.ui.icons.EhIcons
 import com.ehviewer.core.ui.icons.big.History
 import com.ehviewer.core.ui.util.Await
@@ -120,19 +121,21 @@ fun AnimatedVisibilityScope.HistoryScreen(navigator: DestinationsNavigator) = Sc
         searchBarOffsetY = { searchBarOffsetY },
         trailingIcon = {
             GalleryViewToggle(listMode != 0, onToggle = { listMode = if (it) 1 else 0 })
-            IconButton(
-                onClick = {
-                    launch {
-                        awaitConfirmationOrCancel(
-                            confirmText = R.string.clear_all,
-                            text = { Text(text = stringResource(id = R.string.clear_all_history)) },
-                        )
-                        EhDB.clearHistoryInfo()
-                    }
-                },
-                shapes = IconButtonDefaults.shapes(),
-            ) {
-                Icon(imageVector = Icons.Default.ClearAll, contentDescription = null)
+            IconTooltip(stringResource(R.string.tooltip_clear_history)) {
+                IconButton(
+                    onClick = {
+                        launch {
+                            awaitConfirmationOrCancel(
+                                confirmText = R.string.clear_all,
+                                text = { Text(text = stringResource(id = R.string.clear_all_history)) },
+                            )
+                            EhDB.clearHistoryInfo()
+                        }
+                    },
+                    shapes = IconButtonDefaults.shapes(),
+                ) {
+                    Icon(imageVector = Icons.Default.ClearAll, contentDescription = stringResource(R.string.tooltip_clear_history))
+                }
             }
         },
     ) { paddingValues ->

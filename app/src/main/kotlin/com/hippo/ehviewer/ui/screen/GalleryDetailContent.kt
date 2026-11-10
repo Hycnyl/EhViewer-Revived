@@ -89,6 +89,7 @@ import com.ehviewer.core.ui.component.FilledTertiaryIconButton
 import com.ehviewer.core.ui.component.FilledTertiaryIconToggleButton
 import com.ehviewer.core.ui.component.GalleryDetailRating
 import com.ehviewer.core.ui.component.GalleryRatingBar
+import com.ehviewer.core.ui.component.IconTooltip
 import com.ehviewer.core.ui.icons.EhIcons
 import com.ehviewer.core.ui.icons.filled.Magnet
 import com.ehviewer.core.ui.util.LocalWindowSizeClass
@@ -409,11 +410,13 @@ fun BelowHeader(galleryDetail: GalleryDetail, voteTag: VoteTag) {
         text: String,
         onClick: () -> Unit,
     ) = Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        FilledTertiaryIconButton(onClick = onClick) {
-            Icon(
-                imageVector = icon,
-                contentDescription = null,
-            )
+        IconTooltip(text) {
+            FilledTertiaryIconButton(onClick = onClick) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = text,
+                )
+            }
         }
         Text(text = text)
     }
@@ -502,31 +505,33 @@ fun BelowHeader(galleryDetail: GalleryDetail, voteTag: VoteTag) {
             val addSucceed = stringResource(R.string.add_to_favorite_success)
             // val removeFailed = stringResource(R.string.remove_from_favorite_failure)
             val addFailed = stringResource(R.string.add_to_favorite_failure)
-            FilledTertiaryIconToggleButton(
-                checked = favSlot != NOT_FAVORITED,
-                onCheckedChange = {
-                    launchIO {
-                        favoritesLock.mutate {
-                            runSuspendCatching {
-                                modifyFavorites(galleryDetail)
-                            }.onSuccess { add ->
-                                if (add) {
-                                    snackbar(addSucceed)
-                                } else {
-                                    snackbar(removeSucceed)
+            IconTooltip(stringResource(if (favSlot != NOT_FAVORITED) R.string.remove_from_favourites else R.string.add_to_favourites)) {
+                FilledTertiaryIconToggleButton(
+                    checked = favSlot != NOT_FAVORITED,
+                    onCheckedChange = {
+                        launchIO {
+                            favoritesLock.mutate {
+                                runSuspendCatching {
+                                    modifyFavorites(galleryDetail)
+                                }.onSuccess { add ->
+                                    if (add) {
+                                        snackbar(addSucceed)
+                                    } else {
+                                        snackbar(removeSucceed)
+                                    }
+                                }.onFailure {
+                                    // TODO: We don't know if it's add or remove
+                                    snackbar(addFailed)
                                 }
-                            }.onFailure {
-                                // TODO: We don't know if it's add or remove
-                                snackbar(addFailed)
                             }
                         }
-                    }
-                },
-            ) {
-                Icon(
-                    imageVector = getFavoriteIcon(favSlot != NOT_FAVORITED),
-                    contentDescription = null,
-                )
+                    },
+                ) {
+                    Icon(
+                        imageVector = getFavoriteIcon(favSlot != NOT_FAVORITED),
+                        contentDescription = stringResource(if (favSlot != NOT_FAVORITED) R.string.remove_from_favourites else R.string.add_to_favourites),
+                    )
+                }
             }
             Text(text = favButtonText)
         }

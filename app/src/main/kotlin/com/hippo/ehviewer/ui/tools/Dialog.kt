@@ -96,6 +96,7 @@ import arrow.core.raise.either
 import arrow.core.right
 import com.ehviewer.core.i18n.R
 import com.ehviewer.core.ui.component.FastScrollLazyColumn
+import com.ehviewer.core.ui.component.IconTooltip
 import com.ehviewer.core.ui.component.LabeledCheckbox
 import com.ehviewer.core.ui.util.ifNotNullThen
 import com.ehviewer.core.ui.util.ifTrueThen
@@ -230,11 +231,13 @@ suspend fun awaitSelectTags(): List<String> = dialog { cont ->
                             onClick = { },
                             label = { Text(text = text, overflow = TextOverflow.Ellipsis, maxLines = 1) },
                             trailingIcon = {
-                                Icon(
-                                    imageVector = Icons.Default.Close,
-                                    contentDescription = null,
-                                    modifier = Modifier.clickable { selected -= text },
-                                )
+                                IconTooltip(stringResource(R.string.tooltip_remove_tag)) {
+                                    Icon(
+                                        imageVector = Icons.Default.Close,
+                                        contentDescription = stringResource(R.string.tooltip_remove_tag),
+                                        modifier = Modifier.clickable { selected -= text },
+                                    )
+                                }
                             },
                         )
                     }
@@ -249,22 +252,24 @@ suspend fun awaitSelectTags(): List<String> = dialog { cont ->
                         state = state,
                         label = { Text(text = stringResource(id = R.string.action_add_tag_tip)) },
                         trailingIcon = {
-                            IconButton(
-                                onClick = {
-                                    val text = state.text.toString().trim()
-                                    if (text.isNotEmpty()) {
-                                        selected += text
-                                        state.clearText()
-                                    }
-                                },
-                                shapes = IconButtonDefaults.shapes(),
-                                content = {
-                                    Icon(
-                                        imageVector = Icons.Default.Add,
-                                        contentDescription = null,
-                                    )
-                                },
-                            )
+                            IconTooltip(stringResource(R.string.action_add_tag)) {
+                                IconButton(
+                                    onClick = {
+                                        val text = state.text.toString().trim()
+                                        if (text.isNotEmpty()) {
+                                            selected += text
+                                            state.clearText()
+                                        }
+                                    },
+                                    shapes = IconButtonDefaults.shapes(),
+                                    content = {
+                                        Icon(
+                                            imageVector = Icons.Default.Add,
+                                            contentDescription = stringResource(R.string.action_add_tag),
+                                        )
+                                    },
+                                )
+                            }
                         },
                     )
                     val query = state.text.toString().trim().takeIf { s -> s.isNotEmpty() }
@@ -715,8 +720,10 @@ suspend fun awaitSelectItemWithIconAndTextField(
                 label = { Text(text = stringResource(id = hint)) },
                 trailingIcon = {
                     if (note.text.isNotEmpty()) {
-                        IconButton(onClick = { note.clearText() }, shapes = IconButtonDefaults.shapes()) {
-                            Icon(imageVector = Icons.Default.Close, contentDescription = null)
+                        IconTooltip(stringResource(R.string.tooltip_close)) {
+                            IconButton(onClick = { note.clearText() }, shapes = IconButtonDefaults.shapes()) {
+                                Icon(imageVector = Icons.Default.Close, contentDescription = stringResource(R.string.tooltip_close))
+                            }
                         }
                     }
                 },

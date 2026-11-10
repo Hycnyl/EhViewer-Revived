@@ -94,8 +94,8 @@ class FabLayoutState(
 private val fabSyncSchedule = Schedule.linear<Throwable>(100.microseconds)
 
 fun interface FabBuilder {
-    fun onClick(icon: ImageVector, autoClose: Boolean, that: suspend () -> Unit)
-    fun onClick(icon: ImageVector, that: suspend () -> Unit) = onClick(icon, true, that)
+    fun onClick(icon: ImageVector, label: String, autoClose: Boolean, that: suspend () -> Unit)
+    fun onClick(icon: ImageVector, label: String, that: suspend () -> Unit) = onClick(icon, label, true, that)
 }
 
 @Composable
@@ -104,6 +104,8 @@ fun FabLayout(
     hidden: Boolean,
     expanded: Boolean,
     onExpandChanged: (Boolean) -> Unit,
+    expandLabel: String,
+    collapseLabel: String,
     autoCancel: Boolean,
     fabBuilder: FabBuilder.() -> Unit,
 ) {
@@ -170,48 +172,59 @@ fun FabLayout(
                 contentAlignment = Alignment.BottomEnd,
             ) {
                 with(secondaryFab) {
-                    forEachIndexed { index, (imageVector, autoClose, onClick) ->
-                        SmallFloatingActionButton(
-                            onClick = {
-                                launch(Dispatchers.Default) {
-                                    onClick()
-                                    if (autoClose) onExpandChanged(false)
-                                }
-                            },
+                    forEachIndexed { index, (imageVector, label, autoClose, onClick) ->
+                        IconTooltip(
+                            label,
                             modifier = Modifier.padding(20.dp).offset {
                                 val distance = lerp(0, interval * (size - index) + padding, animatedProgress)
                                 IntOffset(0, -distance)
                             },
                         ) {
-                            Icon(imageVector = imageVector, contentDescription = null)
+                            SmallFloatingActionButton(
+                                onClick = {
+                                    launch(Dispatchers.Default) {
+                                        onClick()
+                                        if (autoClose) onExpandChanged(false)
+                                    }
+                                },
+                            ) {
+                                Icon(imageVector = imageVector, contentDescription = label)
+                            }
                         }
                     }
                 }
             }
         }
         val appearState by state.appearProgress.asState()
-        FloatingActionButton(
-            onClick = { onExpandChanged(!updatedExpanded) },
+        val toggleLabel = if (updatedExpanded) collapseLabel else expandLabel
+        IconTooltip(
+            toggleLabel,
             modifier = Modifier.padding(16.dp).graphicsLayer {
                 rotationZ = lerp(-90f, 0f, appearState)
                 scaleX = appearState
                 scaleY = appearState
             },
         ) {
-            Icon(
-                imageVector = Icons.Default.Close,
-                contentDescription = null,
-                modifier = Modifier.graphicsLayer {
-                    rotationZ = lerp(-135f, 0f, animatedProgress)
-                },
-            )
+            FloatingActionButton(
+                onClick = { onExpandChanged(!updatedExpanded) },
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Close,
+                    contentDescription = toggleLabel,
+                    modifier = Modifier.graphicsLayer {
+                        rotationZ = lerp(-135f, 0f, animatedProgress)
+                    },
+                )
+            }
         }
     }
 }
 
+private data class FabAction(val icon: ImageVector, val label: String, val autoClose: Boolean, val action: suspend () -> Unit)
+
 private fun buildFab(builder: FabBuilder.() -> Unit) = buildList {
-    builder { icon, autoClose, action ->
-        add(Triple(icon, autoClose, action))
+    builder { icon, label, autoClose, action ->
+        add(FabAction(icon, label, autoClose, action))
     }
 }
 

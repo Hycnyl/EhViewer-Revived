@@ -12,10 +12,13 @@ on:
     paths:
       - 'app/src/main/kotlin/com/hippo/ehviewer/ui/main/ArchiveList.kt'
       - 'app/src/main/kotlin/com/hippo/ehviewer/ui/main/FundsItem.kt'
-      - 'app/src/test/kotlin/com/hippo/ehviewer/ui/reader/MaterialDialogDesignTest.kt'
+      - 'app/src/test/kotlin/com/hippo/ehviewer/ui/settings/ThemeAndTooltipTest.kt'
       - 'app/src/main/kotlin/com/hippo/ehviewer/ui/reader/ImageInfoContent.kt'
       - 'app/src/main/kotlin/com/hippo/ehviewer/ui/main/AvatarIcon.kt'
       - 'app/src/main/kotlin/com/hippo/ehviewer/ui/main/GalleryViewToggle.kt'
+      - 'app/src/main/kotlin/com/hippo/ehviewer/ui/settings/ThemeColorPreference.kt'
+      - 'app/src/main/kotlin/com/hippo/ehviewer/ui/theme/**'
+      - 'core/ui/src/commonMain/kotlin/com/ehviewer/core/ui/component/IconTooltip.kt'
       - '.github/workflows/archive-ui.yml'
 
 permissions:
@@ -41,18 +44,18 @@ jobs:
       - name: Load the UI fixture for this verification revision
         run: |
           git fetch --no-tags --depth=1 origin "$GITHUB_SHA"
-          git show "$GITHUB_SHA:app/src/test/kotlin/com/hippo/ehviewer/ui/reader/MaterialDialogDesignTest.kt" > "$RUNNER_TEMP/MaterialDialogDesignTest.kt"
-          cp "$RUNNER_TEMP/MaterialDialogDesignTest.kt" app/src/test/kotlin/com/hippo/ehviewer/ui/reader/MaterialDialogDesignTest.kt
+          git show "$GITHUB_SHA:app/src/test/kotlin/com/hippo/ehviewer/ui/settings/ThemeAndTooltipTest.kt" > "$RUNNER_TEMP/ThemeAndTooltipTest.kt"
+          cp "$RUNNER_TEMP/ThemeAndTooltipTest.kt" app/src/test/kotlin/com/hippo/ehviewer/ui/settings/ThemeAndTooltipTest.kt
           git diff --exit-code -- app/src/main core
           git rev-parse HEAD
-      - name: Render only the changed Material dialog designs
-        run: ./gradlew :app:testDefaultDebugUnitTest --tests '*MaterialDialogDesignTest' --no-configuration-cache --max-workers=2 -Pkotlin.compiler.execution.strategy=in-process --stacktrace
+      - name: Check only theme choices and native tooltip interactions
+        run: ./gradlew :app:testDefaultDebugUnitTest --tests '*ThemeAndTooltipTest' --no-configuration-cache --max-workers=2 -Pkotlin.compiler.execution.strategy=in-process --stacktrace
       - uses: actions/upload-artifact@v7.0.2
         if: always()
         with:
           name: archive-ui
           path: |
-            app/build/reports/material-dialog-ui/
+            app/build/reports/theme-tooltip-ui/
             app/build/reports/tests/testDefaultDebugUnitTest/
             app/build/test-results/testDefaultDebugUnitTest/
           if-no-files-found: warn

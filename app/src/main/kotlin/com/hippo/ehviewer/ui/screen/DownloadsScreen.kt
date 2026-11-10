@@ -96,6 +96,7 @@ import com.ehviewer.core.ui.component.FAB_ANIMATE_TIME
 import com.ehviewer.core.ui.component.FabLayout
 import com.ehviewer.core.ui.component.FastScrollLazyColumn
 import com.ehviewer.core.ui.component.FastScrollLazyVerticalStaggeredGrid
+import com.ehviewer.core.ui.component.IconTooltip
 import com.ehviewer.core.ui.component.LocalSideSheetState
 import com.ehviewer.core.ui.component.ProvideSideSheetContent
 import com.ehviewer.core.ui.icons.EhIcons
@@ -142,6 +143,7 @@ import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import kotlin.math.roundToInt
 import kotlinx.coroutines.delay
 import moe.tarsin.navigate
+import moe.tarsin.string
 import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.rememberReorderableLazyListState
 
@@ -250,86 +252,92 @@ fun AnimatedVisibilityScope.DownloadsScreen(navigator: DestinationsNavigator) = 
             colors = topBarOnDrawerColor(),
             actions = {
                 if (DownloadsFilterMode.CUSTOM == filterMode) {
-                    IconButton(
-                        onClick = {
-                            launch {
-                                val text = awaitInputText(title = newLabel, hint = custom) { text ->
-                                    when {
-                                        text.isBlank() -> raise(labelEmpty)
-                                        text == defaultName -> raise(defaultInvalid)
-                                        DownloadManager.containLabel(text) -> raise(labelExists)
-                                    }
-                                }
-                                DownloadManager.addLabel(text)
-                            }
-                        },
-                        shapes = IconButtonDefaults.shapes(),
-                    ) {
-                        Icon(imageVector = Icons.Default.NewLabel, contentDescription = newLabel)
-                    }
-                    val letMeSelect = stringResource(R.string.let_me_select)
-                    IconButton(
-                        onClick = {
-                            launch {
-                                val selected = if (!Settings.hasDefaultDownloadLabel) {
-                                    0
-                                } else {
-                                    DownloadManager.labelList.indexOfFirst { it.label == Settings.defaultDownloadLabel } + 2
-                                }
-                                awaitSelectAction(R.string.default_download_label, selected) {
-                                    onSelect(letMeSelect) {
-                                        Settings.hasDefaultDownloadLabel = false
-                                    }
-                                    onSelect(defaultName) {
-                                        Settings.hasDefaultDownloadLabel = true
-                                        Settings.defaultDownloadLabel = null
-                                    }
-                                    DownloadManager.labelList.forEach { (label) ->
-                                        onSelect(label) {
-                                            Settings.hasDefaultDownloadLabel = true
-                                            Settings.defaultDownloadLabel = label
+                    IconTooltip(newLabel) {
+                        IconButton(
+                            onClick = {
+                                launch {
+                                    val text = awaitInputText(title = newLabel, hint = custom) { text ->
+                                        when {
+                                            text.isBlank() -> raise(labelEmpty)
+                                            text == defaultName -> raise(defaultInvalid)
+                                            DownloadManager.containLabel(text) -> raise(labelExists)
                                         }
                                     }
+                                    DownloadManager.addLabel(text)
+                                }
+                            },
+                            shapes = IconButtonDefaults.shapes(),
+                        ) {
+                            Icon(imageVector = Icons.Default.NewLabel, contentDescription = newLabel)
+                        }
+                    }
+                    val letMeSelect = stringResource(R.string.let_me_select)
+                    IconTooltip(stringResource(R.string.default_download_label)) {
+                        IconButton(
+                            onClick = {
+                                launch {
+                                    val selected = if (!Settings.hasDefaultDownloadLabel) {
+                                        0
+                                    } else {
+                                        DownloadManager.labelList.indexOfFirst { it.label == Settings.defaultDownloadLabel } + 2
+                                    }
+                                    awaitSelectAction(R.string.default_download_label, selected) {
+                                        onSelect(letMeSelect) {
+                                            Settings.hasDefaultDownloadLabel = false
+                                        }
+                                        onSelect(defaultName) {
+                                            Settings.hasDefaultDownloadLabel = true
+                                            Settings.defaultDownloadLabel = null
+                                        }
+                                        DownloadManager.labelList.forEach { (label) ->
+                                            onSelect(label) {
+                                                Settings.hasDefaultDownloadLabel = true
+                                                Settings.defaultDownloadLabel = label
+                                            }
+                                        }
+                                    }()
+                                }
+                            },
+                            shapes = IconButtonDefaults.shapes(),
+                        ) {
+                            Box(modifier = Modifier.size(24.dp)) {
+                                Icon(
+                                    imageVector = Icons.Default.Download,
+                                    contentDescription = stringResource(R.string.default_download_label),
+                                    modifier = Modifier.align(Alignment.TopStart).size(20.dp),
+                                )
+                                Icon(
+                                    imageVector = Icons.Default.Settings,
+                                    contentDescription = null,
+                                    modifier = Modifier
+                                        .align(Alignment.BottomEnd)
+                                        .size(12.dp)
+                                        .background(DrawerDefaults.modalContainerColor, CircleShape),
+                                )
+                            }
+                        }
+                    }
+                }
+                val artist = stringResource(R.string.select_grouping_mode_artist)
+                IconTooltip(stringResource(R.string.select_grouping_mode)) {
+                    IconButton(
+                        onClick = {
+                            launch {
+                                awaitSelectAction(R.string.select_grouping_mode) {
+                                    val select = { mode: DownloadsFilterMode ->
+                                        filterState = filterState.copy(mode = mode, label = "")
+                                        Settings.downloadFilterMode.value = mode.flag
+                                        Settings.recentDownloadLabel.value = ""
+                                    }
+                                    onSelect(artist) { select(DownloadsFilterMode.ARTIST) }
+                                    onSelect(custom) { select(DownloadsFilterMode.CUSTOM) }
                                 }()
                             }
                         },
                         shapes = IconButtonDefaults.shapes(),
                     ) {
-                        Box(modifier = Modifier.size(24.dp)) {
-                            Icon(
-                                imageVector = Icons.Default.Download,
-                                contentDescription = stringResource(R.string.default_download_label),
-                                modifier = Modifier.align(Alignment.TopStart).size(20.dp),
-                            )
-                            Icon(
-                                imageVector = Icons.Default.Settings,
-                                contentDescription = null,
-                                modifier = Modifier
-                                    .align(Alignment.BottomEnd)
-                                    .size(12.dp)
-                                    .background(DrawerDefaults.modalContainerColor, CircleShape),
-                            )
-                        }
+                        Icon(imageVector = Icons.Default.SwapHoriz, contentDescription = stringResource(R.string.select_grouping_mode))
                     }
-                }
-                val artist = stringResource(R.string.select_grouping_mode_artist)
-                IconButton(
-                    onClick = {
-                        launch {
-                            awaitSelectAction(R.string.select_grouping_mode) {
-                                val select = { mode: DownloadsFilterMode ->
-                                    filterState = filterState.copy(mode = mode, label = "")
-                                    Settings.downloadFilterMode.value = mode.flag
-                                    Settings.recentDownloadLabel.value = ""
-                                }
-                                onSelect(artist) { select(DownloadsFilterMode.ARTIST) }
-                                onSelect(custom) { select(DownloadsFilterMode.CUSTOM) }
-                            }()
-                        }
-                    },
-                    shapes = IconButtonDefaults.shapes(),
-                ) {
-                    Icon(imageVector = Icons.Default.SwapHoriz, contentDescription = stringResource(R.string.select_grouping_mode))
                 }
             },
         )
@@ -430,49 +438,53 @@ fun AnimatedVisibilityScope.DownloadsScreen(navigator: DestinationsNavigator) = 
                             },
                             trailingContent = editEnable.ifTrueThen {
                                 Row {
-                                    IconButton(
-                                        onClick = {
-                                            launch {
-                                                val new = awaitInputText(initial = item, title = renameLabel, hint = custom) { text ->
-                                                    when {
-                                                        text.isBlank() -> raise(labelEmpty)
-                                                        text == defaultName -> raise(defaultInvalid)
-                                                        DownloadManager.containLabel(text) -> raise(labelExists)
+                                    IconTooltip(stringResource(R.string.rename_label_title)) {
+                                        IconButton(
+                                            onClick = {
+                                                launch {
+                                                    val new = awaitInputText(initial = item, title = renameLabel, hint = custom) { text ->
+                                                        when {
+                                                            text.isBlank() -> raise(labelEmpty)
+                                                            text == defaultName -> raise(defaultInvalid)
+                                                            DownloadManager.containLabel(text) -> raise(labelExists)
+                                                        }
+                                                    }
+                                                    DownloadManager.renameLabel(item, new)
+                                                    if (filterState.label == item) {
+                                                        switchLabel(new)
                                                     }
                                                 }
-                                                DownloadManager.renameLabel(item, new)
-                                                if (filterState.label == item) {
-                                                    switchLabel(new)
-                                                }
-                                            }
-                                        },
-                                        shapes = IconButtonDefaults.shapes(),
-                                    ) {
-                                        Icon(imageVector = Icons.Default.Edit, contentDescription = null)
+                                            },
+                                            shapes = IconButtonDefaults.shapes(),
+                                        ) {
+                                            Icon(imageVector = Icons.Default.Edit, contentDescription = stringResource(R.string.rename_label_title))
+                                        }
                                     }
-                                    IconButton(
-                                        onClick = {},
-                                        shapes = IconButtonDefaults.shapes(),
-                                        modifier = Modifier.draggableHandle(
-                                            onDragStarted = {
-                                                hapticFeedback.performHapticFeedback(HapticFeedbackType.START)
-                                                fromIndex = index
-                                            },
-                                            onDragStopped = {
-                                                hapticFeedback.performHapticFeedback(HapticFeedbackType.END)
-                                                if (fromIndex != -1) {
-                                                    if (fromIndex != index) {
-                                                        val range = if (fromIndex < index) fromIndex..index else index..fromIndex
-                                                        val toUpdate = DownloadManager.labelList.slice(range)
-                                                        toUpdate.zip(range).forEach { it.first.position = it.second }
-                                                        launchIO { EhDB.updateDownloadLabel(toUpdate) }
+                                    IconTooltip(stringResource(R.string.tooltip_reorder)) {
+                                        IconButton(
+                                            onClick = {},
+                                            shapes = IconButtonDefaults.shapes(),
+                                            modifier = Modifier.draggableHandle(
+                                                onDragStarted = {
+                                                    hapticFeedback.performHapticFeedback(HapticFeedbackType.START)
+                                                    fromIndex = index
+                                                },
+                                                onDragStopped = {
+                                                    hapticFeedback.performHapticFeedback(HapticFeedbackType.END)
+                                                    if (fromIndex != -1) {
+                                                        if (fromIndex != index) {
+                                                            val range = if (fromIndex < index) fromIndex..index else index..fromIndex
+                                                            val toUpdate = DownloadManager.labelList.slice(range)
+                                                            toUpdate.zip(range).forEach { it.first.position = it.second }
+                                                            launchIO { EhDB.updateDownloadLabel(toUpdate) }
+                                                        }
+                                                        fromIndex = -1
                                                     }
-                                                    fromIndex = -1
-                                                }
-                                            },
-                                        ),
-                                    ) {
-                                        Icon(imageVector = Icons.Default.Reorder, contentDescription = null)
+                                                },
+                                            ),
+                                        ) {
+                                            Icon(imageVector = Icons.Default.Reorder, contentDescription = stringResource(R.string.tooltip_reorder))
+                                        }
                                     }
                                 }
                             },
@@ -517,11 +529,15 @@ fun AnimatedVisibilityScope.DownloadsScreen(navigator: DestinationsNavigator) = 
             var expanded by remember { mutableStateOf(false) }
             val sideSheetState = LocalSideSheetState.current
             GalleryViewToggle(gridView, onToggle = { gridView = it })
-            IconButton(onClick = { launch { sideSheetState.open() } }, shapes = IconButtonDefaults.shapes()) {
-                Icon(imageVector = Icons.Default.FilterAlt, contentDescription = filtersTitle)
+            IconTooltip(filtersTitle) {
+                IconButton(onClick = { launch { sideSheetState.open() } }, shapes = IconButtonDefaults.shapes()) {
+                    Icon(imageVector = Icons.Default.FilterAlt, contentDescription = filtersTitle)
+                }
             }
-            IconButton(onClick = { expanded = !expanded }, shapes = IconButtonDefaults.shapes()) {
-                Icon(imageVector = Icons.Default.MoreVert, contentDescription = null)
+            IconTooltip(stringResource(R.string.tooltip_more)) {
+                IconButton(onClick = { expanded = !expanded }, shapes = IconButtonDefaults.shapes()) {
+                    Icon(imageVector = Icons.Default.MoreVert, contentDescription = stringResource(R.string.tooltip_more))
+                }
             }
             DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
                 DropdownMenuItem(
@@ -691,6 +707,8 @@ fun AnimatedVisibilityScope.DownloadsScreen(navigator: DestinationsNavigator) = 
     )
 
     FabLayout(
+        expandLabel = stringResource(R.string.tooltip_more_actions),
+        collapseLabel = stringResource(R.string.tooltip_close_actions),
         hidden = hideFab && !selectMode,
         expanded = fabExpanded || selectMode,
         onExpandChanged = {
@@ -700,12 +718,12 @@ fun AnimatedVisibilityScope.DownloadsScreen(navigator: DestinationsNavigator) = 
         autoCancel = !selectMode,
     ) {
         if (!selectMode) {
-            onClick(Icons.Default.Shuffle) {
+            onClick(Icons.Default.Shuffle, string(R.string.tooltip_random)) {
                 if (list.isNotEmpty()) {
                     withUIContext { navToReader(list.random().galleryInfo) }
                 }
             }
-            onClick(Icons.AutoMirrored.Default.Sort) {
+            onClick(Icons.AutoMirrored.Default.Sort, string(R.string.tooltip_sort)) {
                 val oldMode = SortMode.from(sortMode)
                 val sortModes = contextOf<Context>().resources.getStringArray(com.hippo.ehviewer.R.array.download_sort_modes).toList()
                 val (selected, checked) = awaitSelectItemWithCheckBox(
@@ -723,7 +741,7 @@ fun AnimatedVisibilityScope.DownloadsScreen(navigator: DestinationsNavigator) = 
                     invalidateKey = !invalidateKey
                 }
             }
-            onClick(Icons.Default.FilterList) {
+            onClick(Icons.Default.FilterList, string(R.string.tooltip_filter)) {
                 val downloadStates = contextOf<Context>().resources.getStringArray(com.hippo.ehviewer.R.array.download_state).toList()
                 val state = awaitSingleChoice(
                     downloadStates,
@@ -733,24 +751,24 @@ fun AnimatedVisibilityScope.DownloadsScreen(navigator: DestinationsNavigator) = 
                 filterState = filterState.copy(state = state)
             }
         } else {
-            onClick(Icons.Default.DoneAll, autoClose = false) {
+            onClick(Icons.Default.DoneAll, string(R.string.tooltip_select_all), autoClose = false) {
                 val info = list.associateBy { it.gid }
                 checkedInfoMap.putAll(info)
             }
-            onClick(Icons.Default.PlayArrow) {
+            onClick(Icons.Default.PlayArrow, string(R.string.tooltip_start_download)) {
                 val gidList = checkedInfoMap.takeAndClear().mapToLongArray(DownloadInfo::gid)
                 DownloadService.startRangeDownload(gidList)
             }
-            onClick(Icons.Default.Pause) {
+            onClick(Icons.Default.Pause, string(R.string.tooltip_pause_download)) {
                 val gidList = checkedInfoMap.takeAndClear().mapToLongArray(DownloadInfo::gid)
                 DownloadManager.stopRangeDownload(gidList)
             }
-            onClick(Icons.Default.Delete) {
+            onClick(Icons.Default.Delete, string(R.string.delete)) {
                 val infoList = checkedInfoMap.takeAndClear()
                 confirmRemoveDownloadRange(infoList)
                 list.removeAll(infoList)
             }
-            onClick(Icons.AutoMirrored.Default.DriveFileMove) {
+            onClick(Icons.AutoMirrored.Default.DriveFileMove, string(R.string.tooltip_move)) {
                 val infoList = checkedInfoMap.takeAndClear()
                 val toLabel = showMoveDownloadLabelList(infoList)
                 with(filterState) {

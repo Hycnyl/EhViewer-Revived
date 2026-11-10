@@ -37,7 +37,6 @@ import androidx.compose.ui.unit.dp
 import com.hippo.ehviewer.image.ImageDimensions
 import com.hippo.ehviewer.image.ImageFileInfo
 import com.hippo.ehviewer.ui.main.GalleryViewToggle
-import com.hippo.ehviewer.ui.main.quotaAlertColors
 import com.materialkolor.dynamiccolor.ColorSpec.SpecVersion
 import com.materialkolor.hct.Hct
 import com.materialkolor.ktx.from
@@ -107,13 +106,8 @@ class MaterialDialogDesignTest {
                                 GalleryViewToggle(gridView, onToggle = { gridView = it })
                                 Text("Gallery view", modifier = Modifier.padding(12.dp))
                             }
-                            val (warning, critical) = quotaAlertColors(MaterialTheme.colorScheme)
-                            assertTrue("Two alert levels remain distinct", warning != critical)
-                            assertTrue("Yellow must stay bright in light and dark themes", Hct.from(warning).tone >= 78.0)
-                            assertTrue("Yellow must retain its semantic hue", Hct.from(warning).hue in 102.0..114.0)
-                            assertTrue("Yellow must stay chromatic", Hct.from(warning).chroma > 30.0)
-                            LinearWavyProgressIndicator(progress = { 0.85f }, color = warning, modifier = Modifier.height(12.dp))
-                            LinearWavyProgressIndicator(progress = { 1f }, color = critical, modifier = Modifier.height(12.dp))
+                            LinearWavyProgressIndicator(progress = { 0.85f }, modifier = Modifier.height(12.dp))
+                            LinearWavyProgressIndicator(progress = { 1f }, modifier = Modifier.height(12.dp))
                         }
                     }
                 }
@@ -124,9 +118,9 @@ class MaterialDialogDesignTest {
         val diagram = compose.onNodeWithContentDescription(resolution).fetchSemanticsNode().boundsInRoot
         val metadata = compose.onNodeWithText("Format").fetchSemanticsNode().boundsInRoot
         assertTrue("Metadata follows the available width", if (wide) metadata.left > diagram.right else metadata.top > diagram.bottom)
-        compose.onNodeWithContentDescription("Thumb").performClick()
-        compose.onNodeWithContentDescription("Detail").assertExists().performClick()
-        compose.onNodeWithContentDescription("Thumb").assertExists()
+        compose.onNodeWithContentDescription("Cover view").performClick()
+        compose.onNodeWithContentDescription("List view").assertExists().performClick()
+        compose.onNodeWithContentDescription("Cover view").assertExists()
         val image = compose.onNodeWithTag("design").captureToImage().asAndroidBitmap()
         val file = File("build/reports/material-dialog-ui/$name.png")
         file.parentFile!!.mkdirs()

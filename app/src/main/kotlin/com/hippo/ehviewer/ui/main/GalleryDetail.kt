@@ -35,6 +35,7 @@ import androidx.compose.ui.unit.dp
 import com.ehviewer.core.i18n.R
 import com.ehviewer.core.model.GalleryDetail
 import com.ehviewer.core.model.GalleryInfo
+import com.ehviewer.core.ui.component.IconTooltip
 import com.ehviewer.core.ui.icons.EhIcons
 import com.ehviewer.core.ui.icons.big.SadAndroid
 import com.ehviewer.core.ui.util.TransitionsVisibilityScope
@@ -127,11 +128,13 @@ fun GalleryDetailHeaderCard(
                 label = { Text(text = uploaderText, overflow = TextOverflow.Visible, softWrap = false, maxLines = 1) },
                 modifier = Modifier.padding(horizontal = dimensionResource(id = com.hippo.ehviewer.R.dimen.keyline_margin)),
                 leadingIcon = {
-                    Icon(
-                        imageVector = Icons.Default.NoAccounts,
-                        contentDescription = null,
-                        modifier = Modifier.clickable(onClick = onBlockUploaderIconClick),
-                    )
+                    IconTooltip(stringResource(R.string.tooltip_block_uploader)) {
+                        Icon(
+                            imageVector = Icons.Default.NoAccounts,
+                            contentDescription = stringResource(R.string.tooltip_block_uploader),
+                            modifier = Modifier.clickable(onClick = onBlockUploaderIconClick),
+                        )
+                    }
                 },
             )
         }
@@ -144,11 +147,13 @@ fun GalleryDetailErrorTip(error: String, onClick: () -> Unit) = Column(
     horizontalAlignment = Alignment.CenterHorizontally,
     verticalArrangement = Arrangement.Center,
 ) {
-    Icon(
-        imageVector = EhIcons.Big.Default.SadAndroid,
-        contentDescription = null,
-        modifier = Modifier.clickable(onClick = onClick),
-    )
+    IconTooltip(stringResource(R.string.tooltip_retry)) {
+        Icon(
+            imageVector = EhIcons.Big.Default.SadAndroid,
+            contentDescription = stringResource(R.string.tooltip_retry),
+            modifier = Modifier.clickable(onClick = onClick),
+        )
+    }
     Spacer(modifier = Modifier.size(8.dp))
     Text(
         text = error,

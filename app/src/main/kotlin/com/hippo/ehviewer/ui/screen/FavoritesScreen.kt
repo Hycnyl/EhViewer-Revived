@@ -57,6 +57,7 @@ import com.ehviewer.core.i18n.R
 import com.ehviewer.core.model.BaseGalleryInfo
 import com.ehviewer.core.ui.component.FAB_ANIMATE_TIME
 import com.ehviewer.core.ui.component.FabLayout
+import com.ehviewer.core.ui.component.IconTooltip
 import com.ehviewer.core.ui.component.LocalSideSheetState
 import com.ehviewer.core.ui.component.ProvideSideSheetContent
 import com.ehviewer.core.ui.icons.EhIcons
@@ -92,6 +93,7 @@ import kotlin.math.roundToInt
 import kotlinx.coroutines.delay
 import moe.tarsin.coroutines.runSwallowingWithUI
 import moe.tarsin.navigate
+import moe.tarsin.string
 
 @Destination<RootGraph>
 @Composable
@@ -196,8 +198,10 @@ fun AnimatedVisibilityScope.FavouritesScreen(navigator: DestinationsNavigator, v
         trailingIcon = {
             GalleryViewToggle(listMode != 0, onToggle = { listMode = if (it) 1 else 0 })
             val sheetState = LocalSideSheetState.current
-            IconButton(onClick = { launch { sheetState.open() } }, shapes = IconButtonDefaults.shapes()) {
-                Icon(imageVector = Icons.Outlined.FolderSpecial, contentDescription = null)
+            IconTooltip(stringResource(R.string.collections)) {
+                IconButton(onClick = { launch { sheetState.open() } }, shapes = IconButtonDefaults.shapes()) {
+                    Icon(imageVector = Icons.Outlined.FolderSpecial, contentDescription = stringResource(R.string.collections))
+                }
             }
             AvatarIcon()
         },
@@ -302,6 +306,8 @@ fun AnimatedVisibilityScope.FavouritesScreen(navigator: DestinationsNavigator, v
     )
 
     FabLayout(
+        expandLabel = stringResource(R.string.tooltip_more_actions),
+        collapseLabel = stringResource(R.string.tooltip_close_actions),
         hidden = hideFab && !selectMode,
         expanded = fabExpanded || selectMode,
         onExpandChanged = {
@@ -312,7 +318,7 @@ fun AnimatedVisibilityScope.FavouritesScreen(navigator: DestinationsNavigator, v
     ) {
         if (!selectMode) {
             if (urlBuilder.isLocal) {
-                onClick(Icons.Default.Shuffle) {
+                onClick(Icons.Default.Shuffle, string(R.string.tooltip_random)) {
                     EhDB.randomLocalFav()?.let { info ->
                         withUIContext { navigate(info.asDst()) }
                     }
@@ -322,24 +328,24 @@ fun AnimatedVisibilityScope.FavouritesScreen(navigator: DestinationsNavigator, v
                 val date = awaitSelectDate()
                 refresh(urlBuilder.copy(jumpTo = date, prev = null, next = "2"))
             }
-            onClick(Icons.Default.Refresh) {
+            onClick(Icons.Default.Refresh, string(R.string.tooltip_refresh)) {
                 refresh()
             }
-            onClick(Icons.AutoMirrored.Default.LastPage) {
+            onClick(Icons.AutoMirrored.Default.LastPage, string(R.string.tooltip_last_page)) {
                 refresh(urlBuilder.copy(jumpTo = null, prev = "1-0", next = null))
             }
         } else {
-            onClick(Icons.Default.DoneAll, autoClose = false) {
+            onClick(Icons.Default.DoneAll, string(R.string.tooltip_select_all), autoClose = false) {
                 val info = data.itemSnapshotList.items.associateBy { it.gid }
                 checkedInfoMap.putAll(info)
             }
-            onClick(Icons.Default.Download) {
+            onClick(Icons.Default.Download, string(R.string.download)) {
                 val info = checkedInfoMap.takeAndClear()
                 runSwallowingWithUI {
                     startDownload(false, *info.toTypedArray())
                 }
             }
-            onClick(Icons.Default.Delete) {
+            onClick(Icons.Default.Delete, string(R.string.delete)) {
                 val info = checkedInfoMap.takeAndClear()
                 awaitConfirmationOrCancel(title = R.string.delete_favorites_dialog_title) {
                     Text(text = stringResource(R.string.delete_favorites_dialog_message, info.size))
@@ -356,7 +362,7 @@ fun AnimatedVisibilityScope.FavouritesScreen(navigator: DestinationsNavigator, v
                 // We refresh anyway as cloud data maybe partially modified
                 data.refresh()
             }
-            onClick(Icons.AutoMirrored.Default.DriveFileMove) {
+            onClick(Icons.AutoMirrored.Default.DriveFileMove, string(R.string.tooltip_move)) {
                 // First is local favorite, the other 10 is cloud favorite
                 val items = buildList {
                     add(localFavName)

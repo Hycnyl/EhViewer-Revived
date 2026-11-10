@@ -44,6 +44,7 @@ import com.ehviewer.core.database.model.DownloadInfo
 import com.ehviewer.core.i18n.R
 import com.ehviewer.core.ui.component.CrystalCard
 import com.ehviewer.core.ui.component.GalleryListCardRating
+import com.ehviewer.core.ui.component.IconTooltip
 import com.ehviewer.core.ui.util.TransitionsVisibilityScope
 import com.ehviewer.core.ui.util.listThumbGenerator
 import com.hippo.ehviewer.EhDB
@@ -174,8 +175,17 @@ fun DownloadCard(
                         Icon(imageVector = icon, contentDescription = null)
                     }
                 } else {
-                    IconButton(onClick = if (running) onStop else onStart, shapes = IconButtonDefaults.shapes(), modifier = Modifier.offset(4.dp)) {
-                        Icon(imageVector = icon, contentDescription = null)
+                    val actionLabel = stringResource(
+                        when {
+                            running -> R.string.tooltip_pause_download
+                            downloadState == DownloadInfo.STATE_FINISH -> R.string.download_state_finish
+                            else -> R.string.tooltip_start_download
+                        },
+                    )
+                    IconTooltip(actionLabel) {
+                        IconButton(onClick = if (running) onStop else onStart, shapes = IconButtonDefaults.shapes(), modifier = Modifier.offset(4.dp)) {
+                            Icon(imageVector = icon, contentDescription = actionLabel)
+                        }
                     }
                 }
             }

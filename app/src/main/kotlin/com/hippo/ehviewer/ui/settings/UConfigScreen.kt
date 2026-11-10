@@ -17,6 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import com.ehviewer.core.i18n.R
 import com.ehviewer.core.network.EhCookieStore
+import com.ehviewer.core.ui.component.IconTooltip
 import com.ehviewer.core.util.launch
 import com.google.accompanist.web.WebView
 import com.google.accompanist.web.rememberWebViewNavigator
@@ -43,14 +44,16 @@ fun AnimatedVisibilityScope.UConfigScreen(navigator: DestinationsNavigator) = Sc
                 title = { Text(text = stringResource(id = R.string.u_config)) },
                 navigationIcon = { NavigationIcon() },
                 actions = {
-                    IconButton(
-                        onClick = {
-                            wvNavigator.loadUrl(APPLY_JS)
-                            navigator.popBackStack()
-                        },
-                        shapes = IconButtonDefaults.shapes(),
-                    ) {
-                        Icon(imageVector = Icons.Default.Check, contentDescription = null)
+                    IconTooltip(stringResource(R.string.tooltip_apply)) {
+                        IconButton(
+                            onClick = {
+                                wvNavigator.loadUrl(APPLY_JS)
+                                navigator.popBackStack()
+                            },
+                            shapes = IconButtonDefaults.shapes(),
+                        ) {
+                            Icon(imageVector = Icons.Default.Check, contentDescription = stringResource(R.string.tooltip_apply))
+                        }
                     }
                 },
             )

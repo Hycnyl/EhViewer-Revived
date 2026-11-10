@@ -17,7 +17,9 @@ import androidx.compose.material3.expressiveLightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import com.ehviewer.core.ui.component.scrollbarStyle
 import com.ehviewer.core.util.isAtLeastOMR1
@@ -40,8 +42,36 @@ fun ColorScheme.amoled(amoled: Boolean) = if (amoled) {
 @Composable
 fun EhTheme(useDarkTheme: Boolean, content: @Composable () -> Unit) {
     val amoled by Settings.blackDarkTheme.collectAsState()
+    val source by Settings.themeColorSource.collectAsState()
+    val preset by Settings.themePresetColor.collectAsState()
+    val custom by Settings.themeCustomColor.collectAsState()
+    val style by Settings.themePaletteStyle.collectAsState()
+    val wallpaper = if (source !in 1..2) wallpaperColorScheme(useDarkTheme, amoled) else null
+    val seed = when (source) {
+        1 -> preset
+        2 -> custom
+        else -> wallpaper!!.primary.toArgb()
+    }
+    val colors = if (wallpaper != null && style !in 1 until themePaletteStyles.size) {
+        wallpaper
+    } else {
+        remember(seed, useDarkTheme, style, amoled) { seedColorScheme(seed, useDarkTheme, style, amoled) }
+    }
+
+    MaterialTheme(colorScheme = colors, motionScheme = CustomMotionScheme) {
+        val scrollbarStyle = scrollbarStyle(color = MaterialTheme.colorScheme.primary)
+        CompositionLocalProvider(
+            LocalContentColor provides MaterialTheme.colorScheme.onBackground,
+            LocalScrollbarStyle provides scrollbarStyle,
+            content = content,
+        )
+    }
+}
+
+@Composable
+internal fun wallpaperColorScheme(useDarkTheme: Boolean, amoled: Boolean): ColorScheme {
     val context = LocalContext.current
-    val colors = if (isAtLeastS) {
+    return if (isAtLeastS) {
         if (useDarkTheme) {
             dynamicDarkColorScheme(context).amoled(amoled)
         } else {
@@ -64,15 +94,6 @@ fun EhTheme(useDarkTheme: Boolean, content: @Composable () -> Unit) {
                 expressiveLightColorScheme()
             }
         }
-    }
-
-    MaterialTheme(colorScheme = colors, motionScheme = CustomMotionScheme) {
-        val scrollbarStyle = scrollbarStyle(color = MaterialTheme.colorScheme.primary)
-        CompositionLocalProvider(
-            LocalContentColor provides MaterialTheme.colorScheme.onBackground,
-            LocalScrollbarStyle provides scrollbarStyle,
-            content = content,
-        )
     }
 }
 
