@@ -102,3 +102,5 @@ UI 模块保留 `allWarningsAsErrors`，仅用 `-Xwarning-level=DEPRECATION:warn
 - 首轮定向 UI 的主代码编译发现两个 EhIcons.GoTo FAB 调用缺少新增提示 label，导致重载及 suspend 回调连带错误；已为主页/收藏跳转入口补齐 go_to 描述。仅补标签不改回调，候选 f046f63 不发布；下一步将来源分支/Draft/签名工作树同步新 SHA，并重跑同一精简构建及5项UI。
 
 - 修正后的候选为 `c5473f5e8a90bf6a54a65edd9c9fe0df994942b6`，来源分支、Draft target 和签名工作树均同步此 SHA。[Build 42818460982](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/42818460982) 与 [5项UI 42818456069](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/42818456069) 已重启；旧 f046f63 的两轮产物不能发布，后续清理 obsoleteRuns=42817938376/42817858474 及取消的 42817858460/42817858521/42818438870。
+
+- c5473f5 的主代码/签名元数据编译与规则复用已通过，Build 正组装五包；UI 作业129837503759执行5项，4项通过，Hover显示断言未过。长按提示不触发点击、明暗选择、自定义确认/取消均通过。先修正夹具为显式鼠标中心 Enter+Move，原生源码确认是 Mouse Enter 触发展示；仅重跑同5项UI，暂不改应用或重构手势。APK候选仍c5473f5，若验证为夹具问题不重复原生构建。

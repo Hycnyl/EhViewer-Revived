@@ -155,8 +155,11 @@ class ThemeAndTooltipTest {
         var clicks = 0
         compose.mainClock.autoAdvance = false
         tooltip { clicks++ }
-        compose.onNodeWithContentDescription("Action").performMouseInput { enter() }
-        compose.mainClock.advanceTimeBy(900)
+        compose.onNodeWithContentDescription("Action").performMouseInput {
+            enter(center)
+            moveTo(center)
+        }
+        compose.mainClock.advanceTimeBy(300)
         compose.onNodeWithText("Action").assertIsDisplayed()
         compose.onNodeWithContentDescription("Action").performMouseInput { exit() }
         compose.mainClock.advanceTimeBy(300)
