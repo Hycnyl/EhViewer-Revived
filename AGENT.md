@@ -96,3 +96,5 @@ UI 模块保留 `allWarningsAsErrors`，仅用 `-Xwarning-level=DEPRECATION:warn
 - 新增独立配色区域：动态/八个预设/自定义；五种 Material 配色风格；配色预览；原生对话框十六进制输入及 HCT 滑块，确认保存、取消不保存。仅四个新增设置键，默认路径保留原壁纸方案；主题模式、纯黑、分类协调与原有列表/阅读/语言等设置未改。已添加本轮5个定向 UI 检查（明暗选择、调色确认/取消、长按和Hover），不跑旧无关UI或业务/性能套件。版本1.17.17 /180092，下一步格式整理并交CI构建/渲染。
 
 - 必要格式整理已完成（app/core.ui spotlessApply），修正清理警示色时遗留的注释及包装表达式声明的格式问题；未运行本地软件/性能测试。ThemeScreen 差异仅新增一行 ThemeColorPreference，Settings 差异仅四个新配色键；默认壁纸与现有主题模式逻辑保留。下一步推送源码、只运行5项新 UI 检查和复用 Profile 的精简构建，并取消旧交互动画自动作业。
+
+- 源码已提交并推送 `f046f63438912c053b27c87565fa04bd3fddfd92`，来源分支 release-source-1.17.17 与 Draft 440348791 固定此 SHA；签名工作树也固定此 SHA。[精简 Build 42817938376](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/42817938376) 复用 1.17.16 的规则，[本轮5项 UI 42817858474](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/42817858474) 并行；重复 Build/旧动画作业 42817858460、42817858521 已取消。下一步核对编译、长按/Hover 与颜色截图，成功后签名、quick_release 发布。
