@@ -18,6 +18,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
@@ -161,7 +162,11 @@ class ThemeAndTooltipTest {
         }
         compose.mainClock.advanceTimeBy(300)
         compose.onNodeWithText("Action").assertIsDisplayed()
-        compose.onNodeWithContentDescription("Action").performMouseInput { exit() }
+        // Move out of the anchor while remaining inside the window. Android defers a synthetic
+        // HOVER_EXIT sent at the same in-window position to distinguish it from a mouse click.
+        compose.onNodeWithContentDescription("Action").performMouseInput {
+            moveTo(Offset(-12f, center.y))
+        }
         compose.mainClock.advanceTimeBy(300)
         compose.onNodeWithText("Action").assertDoesNotExist()
         assertEquals(0, clicks)

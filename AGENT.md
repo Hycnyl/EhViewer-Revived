@@ -104,3 +104,5 @@ UI 模块保留 `allWarningsAsErrors`，仅用 `-Xwarning-level=DEPRECATION:warn
 - 修正后的候选为 `c5473f5e8a90bf6a54a65edd9c9fe0df994942b6`，来源分支、Draft target 和签名工作树均同步此 SHA。[Build 42818460982](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/42818460982) 与 [5项UI 42818456069](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/42818456069) 已重启；旧 f046f63 的两轮产物不能发布，后续清理 obsoleteRuns=42817938376/42817858474 及取消的 42817858460/42817858521/42818438870。
 
 - c5473f5 的主代码/签名元数据编译与规则复用已通过，Build 正组装五包；UI 作业129837503759执行5项，4项通过，Hover显示断言未过。长按提示不触发点击、明暗选择、自定义确认/取消均通过。先修正夹具为显式鼠标中心 Enter+Move，原生源码确认是 Mouse Enter 触发展示；仅重跑同5项UI，暂不改应用或重构手势。APK候选仍c5473f5，若验证为夹具问题不重复原生构建。
+
+- 鼠标中心 Enter+Move 的检查已确认原生悬停能够显示 Tooltip；剩余失败位于窗口内原坐标发送合成 HOVER_EXIT 后的移除断言。改用真实的“指针移出锚点、仍留在窗口内”Mouse Move，避免 Android 为区分点击而延迟窗口级 Exit。仅夹具修正；应用继续使用原生输入/自动消失，无自定义手势或弹窗，APK源码仍c5473f5。明暗配色和调色对话框截图已查看，布局正常。
