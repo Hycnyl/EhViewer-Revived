@@ -100,3 +100,5 @@ UI 模块保留 `allWarningsAsErrors`，仅用 `-Xwarning-level=DEPRECATION:warn
 - 源码已提交并推送 `f046f63438912c053b27c87565fa04bd3fddfd92`，来源分支 release-source-1.17.17 与 Draft 440348791 固定此 SHA；签名工作树也固定此 SHA。[精简 Build 42817938376](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/42817938376) 复用 1.17.16 的规则，[本轮5项 UI 42817858474](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/42817858474) 并行；重复 Build/旧动画作业 42817858460、42817858521 已取消。下一步核对编译、长按/Hover 与颜色截图，成功后签名、quick_release 发布。
 
 - 首轮定向 UI 的主代码编译发现两个 EhIcons.GoTo FAB 调用缺少新增提示 label，导致重载及 suspend 回调连带错误；已为主页/收藏跳转入口补齐 go_to 描述。仅补标签不改回调，候选 f046f63 不发布；下一步将来源分支/Draft/签名工作树同步新 SHA，并重跑同一精简构建及5项UI。
+
+- 修正后的候选为 `c5473f5e8a90bf6a54a65edd9c9fe0df994942b6`，来源分支、Draft target 和签名工作树均同步此 SHA。[Build 42818460982](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/42818460982) 与 [5项UI 42818456069](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/42818456069) 已重启；旧 f046f63 的两轮产物不能发布，后续清理 obsoleteRuns=42817938376/42817858474 及取消的 42817858460/42817858521/42818438870。
