@@ -98,3 +98,5 @@ UI 模块保留 `allWarningsAsErrors`，仅用 `-Xwarning-level=DEPRECATION:warn
 - 必要格式整理已完成（app/core.ui spotlessApply），修正清理警示色时遗留的注释及包装表达式声明的格式问题；未运行本地软件/性能测试。ThemeScreen 差异仅新增一行 ThemeColorPreference，Settings 差异仅四个新配色键；默认壁纸与现有主题模式逻辑保留。下一步推送源码、只运行5项新 UI 检查和复用 Profile 的精简构建，并取消旧交互动画自动作业。
 
 - 源码已提交并推送 `f046f63438912c053b27c87565fa04bd3fddfd92`，来源分支 release-source-1.17.17 与 Draft 440348791 固定此 SHA；签名工作树也固定此 SHA。[精简 Build 42817938376](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/42817938376) 复用 1.17.16 的规则，[本轮5项 UI 42817858474](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/42817858474) 并行；重复 Build/旧动画作业 42817858460、42817858521 已取消。下一步核对编译、长按/Hover 与颜色截图，成功后签名、quick_release 发布。
+
+- 首轮定向 UI 的主代码编译发现两个 EhIcons.GoTo FAB 调用缺少新增提示 label，导致重载及 suspend 回调连带错误；已为主页/收藏跳转入口补齐 go_to 描述。仅补标签不改回调，候选 f046f63 不发布；下一步将来源分支/Draft/签名工作树同步新 SHA，并重跑同一精简构建及5项UI。

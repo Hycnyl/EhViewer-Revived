@@ -624,7 +624,7 @@ fun AnimatedVisibilityScope.GalleryListScreen(
             data.refresh()
         }
         if (urlBuilder.mode != MODE_WHATS_HOT) {
-            onClick(EhIcons.Default.GoTo) {
+            onClick(EhIcons.Default.GoTo, string(R.string.go_to)) {
                 if (isTopList) {
                     val hint = string(R.string.go_to_hint, urlBuilder.page, TOPLIST_PAGES)
                     val text = awaitInputText(title = gotoTitle, hint = hint, isNumber = true) { oriText ->
