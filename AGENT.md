@@ -9,7 +9,7 @@
 ## 基线与发布
 
 - 功能源自 `Hycnyl/EhViewer` 的 `v1.17.8`，对应清理后的提交 `92923877ef671e33aa56f69688daa46af6e59ec6`；新仓库独立起始，不继承旧 Git 历史。四种语言 README 继承旧仓库最新的用户文档与完整素材引用，保留 LICENSE、NOTICE 和源码版权说明。
-- 应用名保持 `EhViewer`，正式包名保持 `moe.hycnyl.ehviewer`。当前正式版本为 `1.17.16` / `180091`，上个正式版为 `1.17.15` / `180090`，接续旧版 `1.17.8` / `180083` 和 `1.17.9` / `180084`。后续沿用版本体系，版本码递增。
+- 应用名保持 `EhViewer`，正式包名保持 `moe.hycnyl.ehviewer`。当前正式版本为 `1.17.17` / `180092`，上个正式版为 `1.17.16` / `180091`，接续旧版 `1.17.8` / `180083` 和 `1.17.9` / `180084`。后续沿用版本体系，版本码递增。
 - 任何实际影响用户的改动完成后，除非维护者明确禁止，都须提升 versionName/versionCode，使用 GitHub Actions 发布正式 Release；提供 universal、arm64-v8a、armeabi-v7a、x86_64、x86 五种 APK，并附简短变更说明与 SHA-256 校验和。不得使用 `[skip ci]` 绕过这条规则。
 - README 保持简洁，变更通常只在“变更”章节简要记录；允许修正仓库链接、安装要求和迁移说明。不得随意重写其余内容或丢失截图、素材和致谢。
 - 单轮只改一个目标不是硬性限制。缓存导出、下载恢复和归档格式继承 1.17.8 的当前行为，维护者没有将其固化为不可修改的长期规则。
@@ -85,32 +85,3 @@ UI 模块保留 `allWarningsAsErrors`，仅用 `-Xwarning-level=DEPRECATION:warn
 发布验证按本轮改动选择场景。UI、签名和构建默认使用 API 26、33、36；Target 37 的候选将现代设备检查切换至 API 37.2。使用包含 WebView 的 google_apis 镜像，现代设备使用 google_apis_ps16k 并检查真实页大小；每次新建 AVD，分配 4096M RAM / 512M heap。验证设备端 APK SHA-256、文件式 universal/匹配 ABI 安装、上个正式版本覆盖安装和启动。UI 按改动选用 archive-ui 或 interaction-ui 工作流渲染实际组件，支持指定 APK 源码与更新验证夹具，避免测试修正触发重复原生构建。只有涉及相关业务功能的改动，才增加离线 CBZ、设置迁移等对应检查。临时数据不进入源码或 Release。
 
 本托管环境先执行 `source /workspace/.ehviewer-env/activate.sh`，其中设置已固定的 JDK、SDK、Gradle/Cargo 缓存与本地 GNU m4 1.4.20。m4 是 Nettle 汇编的构建依赖；CI 检查并安装它。本地无 sudo，m4 安装于私有工具目录。Nettle 的源码包含预生成文件，CMake 必须保留其解包时间戳（DOWNLOAD_EXTRACT_TIMESTAMP TRUE）。
-
-## 临时进度：1.17.17 Tooltip 与主题色彩
-
-- 基线 1.17.16 / 180091，main=fa66030，工作区干净。当前任务只做 UI：原生 Plain Tooltip（长按/悬停、无障碍、保留点击）、配额恢复全程主题色、主题色彩扩展动态/预设/自定义；主题模式及全部无关设置保持原行为。计划 1.17.17 /180092。
-- 已核对 FlClash v0.8.99（chen08209/FlClash，tag tree 68c71b8ef9b7486a224972eb371ff153c6b2de0f）的主题页、色板、预览与调色入口，仅参考预览/色板/自定义思路，用 Compose 实现，不移植 Flutter 代码或无关设置。已盘点约47处图标按钮及现有长按路径，下一步统一原生 Tooltip 包装与补齐简短本地化描述；保留画廊/阅读器既有长按手势。
-- 继续 CI 优先且按 UI 精简验证：只做本轮配色/Tooltip 定向交互渲染及构建签名/API33安装升级，复用正式 1.17.16 Build 42341393511 的 Profile；不跑无关软件功能或性能测试。每个关键阶段更新本章，完成后删整章并清临时文件/来源分支。
-
-- 实施完成：原生 IconTooltip（TooltipBox + PlainTooltip、非持久、非聚焦、原生上方/边缘定位），已覆盖36处图标按钮及动态 FAB/3处点击图标，补齐英/简繁/HK/日描述；保留原点击回调和图片/卡片长按区域，悬浮和行内按钮的父级对齐/偏移修饰符已移到提示锚点以保位置。配额移除警示色函数，保留真实用量与截断绘图，完全使用 Material 默认主题色。
-- 新增独立配色区域：动态/八个预设/自定义；五种 Material 配色风格；配色预览；原生对话框十六进制输入及 HCT 滑块，确认保存、取消不保存。仅四个新增设置键，默认路径保留原壁纸方案；主题模式、纯黑、分类协调与原有列表/阅读/语言等设置未改。已添加本轮5个定向 UI 检查（明暗选择、调色确认/取消、长按和Hover），不跑旧无关UI或业务/性能套件。版本1.17.17 /180092，下一步格式整理并交CI构建/渲染。
-
-- 必要格式整理已完成（app/core.ui spotlessApply），修正清理警示色时遗留的注释及包装表达式声明的格式问题；未运行本地软件/性能测试。ThemeScreen 差异仅新增一行 ThemeColorPreference，Settings 差异仅四个新配色键；默认壁纸与现有主题模式逻辑保留。下一步推送源码、只运行5项新 UI 检查和复用 Profile 的精简构建，并取消旧交互动画自动作业。
-
-- 源码已提交并推送 `f046f63438912c053b27c87565fa04bd3fddfd92`，来源分支 release-source-1.17.17 与 Draft 440348791 固定此 SHA；签名工作树也固定此 SHA。[精简 Build 42817938376](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/42817938376) 复用 1.17.16 的规则，[本轮5项 UI 42817858474](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/42817858474) 并行；重复 Build/旧动画作业 42817858460、42817858521 已取消。下一步核对编译、长按/Hover 与颜色截图，成功后签名、quick_release 发布。
-
-- 首轮定向 UI 的主代码编译发现两个 EhIcons.GoTo FAB 调用缺少新增提示 label，导致重载及 suspend 回调连带错误；已为主页/收藏跳转入口补齐 go_to 描述。仅补标签不改回调，候选 f046f63 不发布；下一步将来源分支/Draft/签名工作树同步新 SHA，并重跑同一精简构建及5项UI。
-
-- 修正后的候选为 `c5473f5e8a90bf6a54a65edd9c9fe0df994942b6`，来源分支、Draft target 和签名工作树均同步此 SHA。[Build 42818460982](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/42818460982) 与 [5项UI 42818456069](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/42818456069) 已重启；旧 f046f63 的两轮产物不能发布，后续清理 obsoleteRuns=42817938376/42817858474 及取消的 42817858460/42817858521/42818438870。
-
-- c5473f5 的主代码/签名元数据编译与规则复用已通过，Build 正组装五包；UI 作业129837503759执行5项，4项通过，Hover显示断言未过。长按提示不触发点击、明暗选择、自定义确认/取消均通过。先修正夹具为显式鼠标中心 Enter+Move，原生源码确认是 Mouse Enter 触发展示；仅重跑同5项UI，暂不改应用或重构手势。APK候选仍c5473f5，若验证为夹具问题不重复原生构建。
-
-- 鼠标中心 Enter+Move 的检查已确认原生悬停能够显示 Tooltip；剩余失败位于窗口内原坐标发送合成 HOVER_EXIT 后的移除断言。改用真实的“指针移出锚点、仍留在窗口内”Mouse Move，避免 Android 为区分点击而延迟窗口级 Exit。仅夹具修正；应用继续使用原生输入/自动消失，无自定义手势或弹窗，APK源码仍c5473f5。明暗配色和调色对话框截图已查看，布局正常。
-
-- 最终5项 UI [42820140116](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/42820140116) 全部通过，XML 5/0/0，Artifact13766496168 摘要已核对；Hover 中心进入/移出锚点正确触发显示/消失，长按不触发点击及自动消失、明暗配色和调色确认/取消通过。三张配色/调色截图已查看。Build 42818460982 全成功，最终五包13766570749经Artifact摘要取回，本地正式V2+V3签名、来源/SDK/ABI/CRC/16KiB/Kotlin/Profile/独立签名摘要校验已通过。应用源码仍c5473f5；UI夹具revision0bc8ebb，不重复已完成的原生构建。下一步公开ZIP交接并API33精简发布。
-
-- 已签名的公开七文件ZIP交接完成：manifest7e879604cd6c10d7675638536500aafda7d024e4，ZIP SHA-256=62f5640158f378d94d7dacb8a4033be113688e55a2c1560f9709f21608c9c0c2；私钥仅在vault。待清理旧Artifact3个：13765727497/13765943544/13765889127，最终Build/UI产物保留。下一步 quick_release=true API33 安装升级、ProfileInstaller及公开五包下载验证，成功后清理并更新正式基线。
-
-- [正式发布 42821420510](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/42821420510) 已启动，工作流revision3240f05，APK source=c5473f5，quick_release=true，仅API33。下一步确认prepare/verify(33)/publish均成功，补全Release实际结果，核对七附件摘要，删旧Artifact和临时来源分支、本地工作树/临时包及本章。
-
-- 发布prepare作业129847623984已成功：CI收取七公开文件、按c5473f5复核五包来源及Build Tools36/37正式V2+V3签名通过。API33作业129847969996执行安装/启动、1.17.16→1.17.17覆盖升级/数据标记、ProfileInstaller；随后publish公开并下载校验五包。当前无待修应用问题。
