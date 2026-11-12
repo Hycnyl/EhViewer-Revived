@@ -101,3 +101,5 @@ UI 模块保留 `allWarningsAsErrors`，仅用 `-Xwarning-level=DEPRECATION:warn
 - SliderState修正后的实际源码为`1e067831740434485bb3ad2056d7ed62dfa19121`，私有草稿442778805/临时来源分支/签名worktree均已同步。新快速[Build43199508199](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/43199508199)、定向[UI43199507454](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/43199507454)进行中；旧UI43198976640确认与旧Build同一接口编译错误，非功能失败。自动全量Build43199507589已取消。
 
 - 定向[UI43199507454](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/43199507454)已成功：5 tests、0 failures/errors/skipped。Artifact13935295367完整长度/SHA256已核对，已查看手机浅色、深色大字体、长按删除、渐变调色四张实际Compose截图。新版Build43199508199的Kotlin/格式/Profile复用已通过，正在组装五种ABI；下一步签名、API33安装升级、公开下载校验。
+
+- 五包[Build43199508199](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/43199508199)已全部成功（组装12m15s），unsigned Artifact13934679214、diagnostics13934828836。未签名ZIP 26,865,190字节及GitHub SHA256已验证，build-info确认实际源码`1e067831740434485bb3ad2056d7ed62dfa19121`与Build Run匹配。正在隔离的相同源码worktree中用既有私有证书签名；仅将五APK/公开元数据/校验和交给Release CI，之后执行API33精简安装/覆盖升级/公开下载复核。
