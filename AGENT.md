@@ -107,3 +107,5 @@ UI 模块保留 `allWarningsAsErrors`，仅用 `-Xwarning-level=DEPRECATION:warn
 - 五个APK本地签名及来源/SDK/CRC/对齐/Profile/Kotlin元数据/V2+V3证书检查通过。仅7个公开文件组成ZIP（9个Git blob分块，逐片长度/Git摘要及整体SHA256已核对）；未上传私钥。私有草稿442778805仍指实际源码`1e067831740434485bb3ad2056d7ed62dfa19121`。[Release43202188567](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/43202188567)已从流程提交`a8e89976dd442c9aaf3aec801024082dbb5d3986`启动quick_release=true，待BT36/37复核、API33安装覆盖升级、公开五包下载校验后再完成正式记录/清理。交付状态在私有临时目录delivery-state.json，公用分块可恢复，无凭据。
 
 - Release43202188567的prepare已成功，Actions独立使用BT36/37复核五包V2/V3签名与来源并上传7项草稿附件；API33 verify作业131128405978已进入全新AVD安装/覆盖升级阶段，仍待完成后才能发布验收结论。已列出本轮唯一废弃Artifact13933724144（旧接口编译失败诊断），正式成功Build/UI/安装证据保留。
+
+- 正式[v1.17.18](https://github.com/Hycnyl/EhViewer-Revived/releases/tag/v1.17.18)已发布；Release43202188567全部3作业成功。API33新装/启动、旧17 ABI/universal→新universal覆盖及数据保留、ProfileInstaller均通过；公开五APK下载SHA256通过，7个附件逐项长度/GitHub digest与本地签名文件一致，正式tag/target准确指向实际源码`1e067831740434485bb3ad2056d7ed62dfa19121`。Release已补全验证链接与模拟器边界。下一步删除废弃Artifact13933724144、来源临时分支/本地worktree及本轮临时文件/构建输出；更新正式版本并移除整个临时章节。
