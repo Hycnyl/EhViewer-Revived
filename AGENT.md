@@ -99,3 +99,5 @@ UI 模块保留 `allWarningsAsErrors`，仅用 `-Xwarning-level=DEPRECATION:warn
 - 首轮Build43198977194在定向Kotlin编译失败：新版M3自定义thumb/track仅提供SliderState重载；已参照现有core/ui Slider的trackRange/state用法局部修正，连续steps=0不变。旧源码草稿仅作暂存，待新Build通过前不签名/发布。
 
 - SliderState修正后的实际源码为`1e067831740434485bb3ad2056d7ed62dfa19121`，私有草稿442778805/临时来源分支/签名worktree均已同步。新快速[Build43199508199](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/43199508199)、定向[UI43199507454](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/43199507454)进行中；旧UI43198976640确认与旧Build同一接口编译错误，非功能失败。自动全量Build43199507589已取消。
+
+- 定向[UI43199507454](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/43199507454)已成功：5 tests、0 failures/errors/skipped。Artifact13935295367完整长度/SHA256已核对，已查看手机浅色、深色大字体、长按删除、渐变调色四张实际Compose截图。新版Build43199508199的Kotlin/格式/Profile复用已通过，正在组装五种ABI；下一步签名、API33安装升级、公开下载校验。
