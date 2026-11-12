@@ -93,3 +93,5 @@ UI 模块保留 `allWarningsAsErrors`，仅用 `-Xwarning-level=DEPRECATION:warn
 - 下一步核对FlClash渐变实现思路，用Compose原生Slider/Surface/手势构建统一色板和视觉滑轨，检查长按与Tooltip不冲突；关键节点更新本章，完成后删整章、临时产物和来源分支。
 
 - 实现阶段完成：核对FlClash v0.8.99的HCT轨道（固定明度色相/色度）后以原生Compose实现；统一色板含动态取色图标、长按二次确认删除、多自定义与恢复预设；延用旧种子键，新增两个列表键懒保存。保留十六进制精确输入与连续明度，删除说明/常驻输入提示。已准备5个定向界面用例（浅深色/大字体、删除恢复、多色与旧选择、渐变/精确输入），不跑无关Tooltip/阅读器/性能用例。下一步格式化、提交并启动Actions。
+
+- 源码已提交/推送`ff5c8b62309d6aca48ef30bdd75924ccf6312d3c`（1.17.18/180093）；本地仅格式化通过，阅读器/根主题及core/ui无改动。Actions快速[Build43198977194](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/43198977194)复用17版Profile，[UI43198976640](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/43198976640)执行5个定向用例；自动全量Build43198976076已由并发规则取消。私有草稿442778805及临时来源分支`release-source-1.17.18`均指向实际源码；待CI通过后本地V2/V3签名、仅回交公开文件并做API33精简安装/升级验证。
