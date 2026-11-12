@@ -38,6 +38,7 @@ import androidx.compose.material3.LinearWavyProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Slider
+import androidx.compose.material3.SliderState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -345,16 +346,16 @@ internal fun CustomThemeColorDialog(initial: Int, style: Int, dark: Boolean, amo
 private fun ColorSlider(label: String, value: Float, range: ClosedFloatingPointRange<Float>, colors: List<Color>, thumbColor: Color, onChange: (Float) -> Unit) {
     val rtl = LocalLayoutDirection.current == LayoutDirection.Rtl
     val stops = remember(colors, rtl) { if (rtl) colors.reversed() else colors }
+    val state = remember(range) { SliderState(value = value, steps = 0, trackRange = range) }
+    state.value = value.coerceIn(range)
     Column {
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
             Text(label, style = MaterialTheme.typography.labelMedium)
             Text("%.1f".format(value), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
         Slider(
-            value = value.coerceIn(range),
+            state = state,
             onValueChange = onChange,
-            valueRange = range,
-            steps = 0,
             modifier = Modifier.semantics { contentDescription = label },
             thumb = {
                 Box(Modifier.size(26.dp).shadow(2.dp, CircleShape).background(thumbColor, CircleShape).border(2.dp, MaterialTheme.colorScheme.surface, CircleShape))
