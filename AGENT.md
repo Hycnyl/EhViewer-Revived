@@ -105,3 +105,5 @@ UI 模块保留 `allWarningsAsErrors`，仅用 `-Xwarning-level=DEPRECATION:warn
 - 五包[Build43199508199](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/43199508199)已全部成功（组装12m15s），unsigned Artifact13934679214、diagnostics13934828836。未签名ZIP 26,865,190字节及GitHub SHA256已验证，build-info确认实际源码`1e067831740434485bb3ad2056d7ed62dfa19121`与Build Run匹配。正在隔离的相同源码worktree中用既有私有证书签名；仅将五APK/公开元数据/校验和交给Release CI，之后执行API33精简安装/覆盖升级/公开下载复核。
 
 - 五个APK本地签名及来源/SDK/CRC/对齐/Profile/Kotlin元数据/V2+V3证书检查通过。仅7个公开文件组成ZIP（9个Git blob分块，逐片长度/Git摘要及整体SHA256已核对）；未上传私钥。私有草稿442778805仍指实际源码`1e067831740434485bb3ad2056d7ed62dfa19121`。[Release43202188567](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/43202188567)已从流程提交`a8e89976dd442c9aaf3aec801024082dbb5d3986`启动quick_release=true，待BT36/37复核、API33安装覆盖升级、公开五包下载校验后再完成正式记录/清理。交付状态在私有临时目录delivery-state.json，公用分块可恢复，无凭据。
+
+- Release43202188567的prepare已成功，Actions独立使用BT36/37复核五包V2/V3签名与来源并上传7项草稿附件；API33 verify作业131128405978已进入全新AVD安装/覆盖升级阶段，仍待完成后才能发布验收结论。已列出本轮唯一废弃Artifact13933724144（旧接口编译失败诊断），正式成功Build/UI/安装证据保留。
