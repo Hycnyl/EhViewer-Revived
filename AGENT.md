@@ -97,3 +97,5 @@ UI 模块保留 `allWarningsAsErrors`，仅用 `-Xwarning-level=DEPRECATION:warn
 - 源码已提交/推送`ff5c8b62309d6aca48ef30bdd75924ccf6312d3c`（1.17.18/180093）；本地仅格式化通过，阅读器/根主题及core/ui无改动。Actions快速[Build43198977194](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/43198977194)复用17版Profile，[UI43198976640](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/43198976640)执行5个定向用例；自动全量Build43198976076已由并发规则取消。私有草稿442778805及临时来源分支`release-source-1.17.18`均指向实际源码；待CI通过后本地V2/V3签名、仅回交公开文件并做API33精简安装/升级验证。
 
 - 首轮Build43198977194在定向Kotlin编译失败：新版M3自定义thumb/track仅提供SliderState重载；已参照现有core/ui Slider的trackRange/state用法局部修正，连续steps=0不变。旧源码草稿仅作暂存，待新Build通过前不签名/发布。
+
+- SliderState修正后的实际源码为`1e067831740434485bb3ad2056d7ed62dfa19121`，私有草稿442778805/临时来源分支/签名worktree均已同步。新快速[Build43199508199](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/43199508199)、定向[UI43199507454](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/43199507454)进行中；旧UI43198976640确认与旧Build同一接口编译错误，非功能失败。自动全量Build43199507589已取消。
