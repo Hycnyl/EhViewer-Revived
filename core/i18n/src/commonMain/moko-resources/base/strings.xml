@@ -748,7 +748,6 @@
     <string name="image_info_square">Square</string>
     <string name="image_info_encoded_resolution">Encoded pixels</string>
     <string name="theme_colors">Theme colors</string>
-    <string name="theme_colors_summary">Choose a seed color to generate a coordinated Material palette.</string>
     <string name="theme_color_dynamic">Dynamic</string>
     <string name="theme_color_presets">Presets</string>
     <string name="theme_color_custom">Custom</string>
@@ -757,7 +756,6 @@
     <string name="theme_color_style">Palette style</string>
     <string name="theme_color_preview">Color preview</string>
     <string name="theme_color_hex">Color code</string>
-    <string name="theme_color_hex_hint">Enter six hexadecimal digits, e.g. #6750A4</string>
     <string name="theme_color_hue">Hue</string>
     <string name="theme_color_chroma">Chroma</string>
     <string name="theme_color_tone">Tone</string>
@@ -805,4 +803,10 @@
     <string name="tooltip_block_uploader">Block uploader</string>
     <string name="tooltip_retry">Retry</string>
     <string name="tooltip_remove_tag">Remove tag</string>
+    <string name="theme_color_add">Add color</string>
+    <string name="theme_color_restore">Restore presets</string>
+    <string name="theme_color_remove">Remove color</string>
+    <string name="theme_color_delete">Delete %1$s</string>
+    <string name="theme_color_custom_value">Custom %1$s</string>
+    <string name="theme_color_invalid_hex">Enter a six-digit color code</string>
 </resources>

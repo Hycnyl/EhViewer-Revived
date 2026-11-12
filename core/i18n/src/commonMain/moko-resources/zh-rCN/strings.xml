@@ -730,7 +730,6 @@
     <string name="image_info_square">正方形</string>
     <string name="image_info_encoded_resolution">文件像素</string>
     <string name="theme_colors">主题色彩</string>
-    <string name="theme_colors_summary">选择基准色，生成协调的 Material 配色。</string>
     <string name="theme_color_dynamic">动态取色</string>
     <string name="theme_color_presets">预设搭配</string>
     <string name="theme_color_custom">自定义</string>
@@ -739,7 +738,6 @@
     <string name="theme_color_style">配色风格</string>
     <string name="theme_color_preview">配色预览</string>
     <string name="theme_color_hex">颜色代码</string>
-    <string name="theme_color_hex_hint">输入六位十六进制颜色，如 #6750A4</string>
     <string name="theme_color_hue">色相</string>
     <string name="theme_color_chroma">色度</string>
     <string name="theme_color_tone">明度</string>
@@ -787,4 +785,10 @@
     <string name="tooltip_block_uploader">屏蔽上传者</string>
     <string name="tooltip_retry">重试</string>
     <string name="tooltip_remove_tag">移除标签</string>
+    <string name="theme_color_add">添加颜色</string>
+    <string name="theme_color_restore">恢复预设</string>
+    <string name="theme_color_remove">删除颜色</string>
+    <string name="theme_color_delete">删除%1$s</string>
+    <string name="theme_color_custom_value">自定义 %1$s</string>
+    <string name="theme_color_invalid_hex">请输入六位颜色代码</string>
 </resources>

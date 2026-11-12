@@ -141,6 +141,7 @@
 
 ## Other
 
+- Unified theme palette, multiple custom colors, and gradient color sliders.
 - Add native icon tooltips and selectable theme palettes; restore theme-colored quota progress.
 
 - Add gallery view toggles and refine warning colors, settings and adaptive image information.

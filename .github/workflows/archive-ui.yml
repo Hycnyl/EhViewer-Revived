@@ -17,6 +17,7 @@ on:
       - 'app/src/main/kotlin/com/hippo/ehviewer/ui/main/AvatarIcon.kt'
       - 'app/src/main/kotlin/com/hippo/ehviewer/ui/main/GalleryViewToggle.kt'
       - 'app/src/main/kotlin/com/hippo/ehviewer/ui/settings/ThemeColorPreference.kt'
+      - 'app/src/main/kotlin/com/hippo/ehviewer/ui/settings/ThemePalette.kt'
       - 'app/src/main/kotlin/com/hippo/ehviewer/ui/theme/**'
       - 'core/ui/src/commonMain/kotlin/com/ehviewer/core/ui/component/IconTooltip.kt'
       - '.github/workflows/archive-ui.yml'
@@ -48,7 +49,7 @@ jobs:
           cp "$RUNNER_TEMP/ThemeAndTooltipTest.kt" app/src/test/kotlin/com/hippo/ehviewer/ui/settings/ThemeAndTooltipTest.kt
           git diff --exit-code -- app/src/main core
           git rev-parse HEAD
-      - name: Check only theme choices and native tooltip interactions
+      - name: Check only unified palette and gradient picker
         run: ./gradlew :app:testDefaultDebugUnitTest --tests '*ThemeAndTooltipTest' --no-configuration-cache --max-workers=2 -Pkotlin.compiler.execution.strategy=in-process --stacktrace
       - uses: actions/upload-artifact@v7.0.2
         if: always()

@@ -1,7 +1,11 @@
 package com.hippo.ehviewer.ui.settings
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -9,24 +13,29 @@ import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Colorize
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Restore
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearWavyProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Surface
@@ -42,14 +51,20 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.ehviewer.core.i18n.R
 import com.ehviewer.core.ui.component.IconTooltip
@@ -60,16 +75,6 @@ import com.hippo.ehviewer.ui.theme.seedColorScheme
 import com.hippo.ehviewer.ui.theme.wallpaperColorScheme
 import com.materialkolor.hct.Hct
 
-internal val themePresetColors = listOf(
-    0xFF6750A4.toInt() to R.string.theme_color_purple,
-    0xFF0061A4.toInt() to R.string.theme_color_blue,
-    0xFF006A60.toInt() to R.string.theme_color_teal,
-    0xFF386A20.toInt() to R.string.theme_color_green,
-    0xFF7E5700.toInt() to R.string.theme_color_amber,
-    0xFF964900.toInt() to R.string.theme_color_orange,
-    0xFF984061.toInt() to R.string.theme_color_rose,
-    0xFF5C5F62.toInt() to R.string.theme_color_slate,
-)
 private val themeStyleLabels = listOf(R.string.theme_style_tonal, R.string.theme_style_vibrant, R.string.theme_style_expressive, R.string.theme_style_neutral, R.string.theme_style_monochrome)
 
 @Composable
@@ -78,117 +83,179 @@ internal fun ThemeColorPreference(dark: Boolean) {
     var preset by Settings.themePresetColor.asMutableState()
     var custom by Settings.themeCustomColor.asMutableState()
     var style by Settings.themePaletteStyle.asMutableState()
+    var savedColors by Settings.themeCustomPalette.asMutableState()
+    var hiddenPresets by Settings.themeHiddenPresets.asMutableState()
     val amoled by Settings.blackDarkTheme.collectAsState()
-    var editing by rememberSaveable { mutableStateOf(false) }
+    val palette = remember(source, preset, custom, savedColors, hiddenPresets) { loadThemePalette(source, preset, custom, savedColors, hiddenPresets) }
+    fun apply(next: ThemePalette) {
+        if (savedColors == null || next.customColors != palette.customColors) savedColors = encodeThemeColors(next.customColors)
+        if (next.hiddenPresets != palette.hiddenPresets) hiddenPresets = encodeThemeColors(next.hiddenPresets)
+        if (next.preset != preset) preset = next.preset
+        if (next.custom != custom) custom = next.custom
+        if (next.source != source) source = next.source
+    }
+    var adding by rememberSaveable { mutableStateOf(false) }
     val wallpaper = wallpaperColorScheme(dark, amoled)
-    ThemeColorControls(
-        source = source,
-        preset = preset,
-        custom = custom,
-        style = style,
-        dark = dark,
-        wallpaper = wallpaper,
-        onSource = { source = it },
-        onPreset = { preset = it },
-        onStyle = { style = it },
-        onEdit = { editing = true },
-        amoled = amoled,
-    )
-    if (editing) {
-        CustomThemeColorDialog(custom, style, dark, amoled = amoled, onDismiss = { editing = false }) {
-            custom = it
-            source = 2
-            editing = false
+    ThemeColorControls(palette, style, dark, wallpaper, ::apply, { style = it }, { adding = true }, amoled)
+    if (adding) {
+        CustomThemeColorDialog(palette.selectedColor ?: wallpaper.primary.toArgb(), style, dark, amoled, onDismiss = { adding = false }) {
+            apply(palette.add(it))
+            adding = false
         }
     }
 }
 
 @Composable
 internal fun ThemeColorControls(
-    source: Int,
-    preset: Int,
-    custom: Int,
+    palette: ThemePalette,
     style: Int,
     dark: Boolean,
     wallpaper: ColorScheme,
-    onSource: (Int) -> Unit,
-    onPreset: (Int) -> Unit,
+    onChange: (ThemePalette) -> Unit,
     onStyle: (Int) -> Unit,
-    onEdit: () -> Unit,
+    onAdd: () -> Unit,
     amoled: Boolean = false,
 ) {
-    val selectedSource = source.takeIf { it in 0..2 } ?: 0
     val selectedStyle = style.takeIf { it in themeStyleLabels.indices } ?: 0
-    val seed = if (selectedSource == 1) preset else custom
-    val colors = if (selectedSource == 0 && selectedStyle == 0) {
-        wallpaper
-    } else if (selectedSource == 0) {
-        // The system primary carries the wallpaper hue without requesting wallpaper access.
-        seedColorScheme(wallpaper.primary.toArgb(), dark, selectedStyle, amoled)
-    } else {
-        remember(seed, dark, selectedStyle, amoled) { seedColorScheme(seed, dark, selectedStyle, amoled) }
-    }
-    Column(Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        Text(stringResource(R.string.theme_colors), style = MaterialTheme.typography.titleMedium)
-        Text(stringResource(R.string.theme_colors_summary), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-        val sources = listOf(R.string.theme_color_dynamic, R.string.theme_color_presets, R.string.theme_color_custom)
-        FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            sources.forEachIndexed { index, title ->
-                FilterChip(selected = selectedSource == index, onClick = { onSource(index) }, label = { Text(stringResource(title)) })
-            }
-        }
-        when (selectedSource) {
-            0 -> Text(stringResource(R.string.theme_color_wallpaper), style = MaterialTheme.typography.bodySmall)
-            1 -> FlowRow(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                themePresetColors.forEach { (color, title) ->
-                    val palette = remember(color, dark, selectedStyle) { seedColorScheme(color, dark, selectedStyle) }
-                    val label = stringResource(title)
-                    IconTooltip(label) {
-                        Surface(
-                            onClick = { onPreset(color) },
-                            modifier = Modifier.size(52.dp).semantics {
-                                contentDescription = label
-                                selected = preset == color
-                            },
-                            shape = CircleShape,
-                            border = BorderStroke(if (preset == color) 2.dp else 1.dp, if (preset == color) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant),
-                        ) {
-                            Box(Modifier.padding(5.dp), contentAlignment = Alignment.Center) {
-                                Canvas(Modifier.fillMaxSize().clip(CircleShape)) {
-                                    drawRect(palette.primary, size = Size(size.width / 2, size.height))
-                                    drawRect(palette.secondary, topLeft = Offset(size.width / 2, 0f), size = Size(size.width / 2, size.height / 2))
-                                    drawRect(palette.tertiary, topLeft = Offset(size.width / 2, size.height / 2), size = Size(size.width / 2, size.height / 2))
-                                }
-                                if (preset == color) Icon(Icons.Default.Check, contentDescription = null, tint = palette.onPrimary)
-                            }
+    val dynamic = if (selectedStyle == 0) wallpaper else remember(wallpaper.primary, dark, selectedStyle, amoled) { seedColorScheme(wallpaper.primary.toArgb(), dark, selectedStyle, amoled) }
+    val colors = palette.selectedColor?.let { seed -> remember(seed, dark, selectedStyle, amoled) { seedColorScheme(seed, dark, selectedStyle, amoled) } } ?: dynamic
+    var removable by rememberSaveable { mutableStateOf<Int?>(null) }
+    BackHandler(removable != null) { removable = null }
+    Column(Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+        FlowRow(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+            itemVerticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(stringResource(R.string.theme_colors), style = MaterialTheme.typography.titleMedium)
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                if (removable != null) {
+                    TextButton(onClick = { removable = null }) { Text(stringResource(android.R.string.cancel)) }
+                } else {
+                    StylePicker(selectedStyle, onStyle)
+                    if (palette.hiddenPresets.isNotEmpty()) {
+                        val restore = stringResource(R.string.theme_color_restore)
+                        IconTooltip(restore) {
+                            IconButton(onClick = { onChange(palette.restorePresets()) }) { Icon(Icons.Default.Restore, contentDescription = restore) }
                         }
                     }
                 }
             }
-            2 -> OutlinedButton(onClick = onEdit) {
-                Icon(Icons.Default.Edit, contentDescription = null, Modifier.padding(end = 8.dp))
-                Text(stringResource(R.string.theme_color_edit) + " · " + colorHex(custom))
-            }
         }
-        var stylesExpanded by remember { mutableStateOf(false) }
-        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            Text(stringResource(R.string.theme_color_style), Modifier.weight(1f), style = MaterialTheme.typography.bodyMedium)
-            Box {
-                OutlinedButton(onClick = { stylesExpanded = true }) {
-                    Text(stringResource(themeStyleLabels[selectedStyle]))
-                    Icon(Icons.Default.ArrowDropDown, contentDescription = null)
-                }
-                DropdownMenu(expanded = stylesExpanded, onDismissRequest = { stylesExpanded = false }) {
-                    themeStyleLabels.forEachIndexed { index, title ->
-                        DropdownMenuItem(text = { Text(stringResource(title)) }, onClick = {
-                            onStyle(index)
-                            stylesExpanded = false
-                        })
-                    }
+        FlowRow(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            val dynamicLabel = stringResource(R.string.theme_color_dynamic)
+            IconTooltip(dynamicLabel) {
+                PaletteColor(dynamic, dynamicLabel, palette.selectedColor == null, dynamic = true, onClick = {
+                    removable = null
+                    onChange(palette.select(null))
+                })
+            }
+            val removeLabel = stringResource(R.string.theme_color_remove)
+            palette.visiblePresets.forEach { (color, title) ->
+                val label = stringResource(title)
+                val deleting = removable == color
+                PaletteColor(
+                    remember(color, dark, selectedStyle) { seedColorScheme(color, dark, selectedStyle) },
+                    if (deleting) stringResource(R.string.theme_color_delete, label) else label,
+                    selected = palette.selectedColor == color,
+                    deleting = deleting,
+                    onClick = {
+                        if (deleting) onChange(palette.remove(color)) else onChange(palette.select(color))
+                        removable = null
+                    },
+                    onLongClick = { removable = color },
+                    longClickLabel = removeLabel,
+                )
+            }
+            palette.visibleCustomColors.forEach { color ->
+                val label = stringResource(R.string.theme_color_custom_value, colorHex(color))
+                val deleting = removable == color
+                PaletteColor(
+                    remember(color, dark, selectedStyle) { seedColorScheme(color, dark, selectedStyle) },
+                    if (deleting) stringResource(R.string.theme_color_delete, label) else label,
+                    selected = palette.selectedColor == color,
+                    deleting = deleting,
+                    onClick = {
+                        if (deleting) onChange(palette.remove(color)) else onChange(palette.select(color))
+                        removable = null
+                    },
+                    onLongClick = { removable = color },
+                    longClickLabel = removeLabel,
+                )
+            }
+            val add = stringResource(R.string.theme_color_add)
+            IconTooltip(add) {
+                FilledTonalIconButton(onClick = {
+                    removable = null
+                    onAdd()
+                }, modifier = Modifier.size(52.dp)) {
+                    Icon(Icons.Default.Add, contentDescription = add)
                 }
             }
         }
         ThemeColorPreview(colors)
+    }
+}
+
+@Composable
+private fun PaletteColor(
+    colors: ColorScheme,
+    label: String,
+    selected: Boolean,
+    dynamic: Boolean = false,
+    deleting: Boolean = false,
+    onClick: () -> Unit,
+    onLongClick: (() -> Unit)? = null,
+    longClickLabel: String? = null,
+) {
+    // Color cells have their own long-press edit action, so a touch Tooltip must not intercept it.
+    Surface(
+        modifier = Modifier.size(52.dp).clip(CircleShape).combinedClickable(onClick = onClick, onLongClick = onLongClick, onLongClickLabel = longClickLabel).semantics {
+            contentDescription = label
+            this.selected = selected
+            role = if (deleting) Role.Button else Role.RadioButton
+        },
+        shape = CircleShape,
+        color = if (deleting) MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.9f) else MaterialTheme.colorScheme.surface,
+        border = BorderStroke(if (selected) 2.dp else 1.dp, if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant),
+    ) {
+        Box(Modifier.padding(5.dp), contentAlignment = Alignment.Center) {
+            if (deleting) {
+                Icon(Icons.Default.Delete, contentDescription = null, tint = MaterialTheme.colorScheme.onErrorContainer)
+            } else {
+                Canvas(Modifier.fillMaxSize().clip(CircleShape)) {
+                    drawRect(colors.primary, size = Size(size.width / 2, size.height))
+                    drawRect(colors.secondary, topLeft = Offset(size.width / 2, 0f), size = Size(size.width / 2, size.height / 2))
+                    drawRect(colors.tertiary, topLeft = Offset(size.width / 2, size.height / 2), size = Size(size.width / 2, size.height / 2))
+                }
+                if (selected) Icon(Icons.Default.Check, contentDescription = null, tint = colors.onPrimary)
+                if (dynamic) {
+                    Surface(Modifier.align(Alignment.BottomEnd).size(20.dp), shape = CircleShape, color = MaterialTheme.colorScheme.surfaceContainerHighest.copy(alpha = 0.8f)) {
+                        Icon(Icons.Default.Colorize, contentDescription = null, modifier = Modifier.padding(3.dp), tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f))
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun StylePicker(selected: Int, onSelect: (Int) -> Unit) {
+    var expanded by remember { mutableStateOf(false) }
+    Box {
+        FilledTonalButton(onClick = { expanded = true }) {
+            Text(stringResource(themeStyleLabels[selected]))
+            Icon(Icons.Default.ArrowDropDown, contentDescription = null)
+        }
+        DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+            themeStyleLabels.forEachIndexed { index, title ->
+                DropdownMenuItem(text = { Text(stringResource(title)) }, onClick = {
+                    onSelect(index)
+                    expanded = false
+                })
+            }
+        }
     }
 }
 
@@ -235,7 +302,7 @@ internal fun CustomThemeColorDialog(initial: Int, style: Int, dark: Boolean, amo
     }
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(stringResource(R.string.theme_color_edit)) },
+        title = { Text(stringResource(R.string.theme_color_add)) },
         confirmButton = { TextButton(onClick = { parsed?.let(onConfirm) }, enabled = parsed != null) { Text(stringResource(android.R.string.ok)) } },
         dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(android.R.string.cancel)) } },
         text = {
@@ -254,22 +321,49 @@ internal fun CustomThemeColorDialog(initial: Int, style: Int, dark: Boolean, amo
                     },
                     modifier = Modifier.fillMaxWidth(),
                     label = { Text(stringResource(R.string.theme_color_hex)) },
-                    supportingText = { Text(stringResource(R.string.theme_color_hex_hint)) },
+                    placeholder = { Text("#RRGGBB") },
+                    supportingText = if (parsed == null) {
+                        { Text(stringResource(R.string.theme_color_invalid_hex)) }
+                    } else {
+                        null
+                    },
                     singleLine = true,
                     isError = parsed == null,
                 )
-                ColorSlider(stringResource(R.string.theme_color_hue), hue, 0f..360f) { update(h = it) }
-                ColorSlider(stringResource(R.string.theme_color_chroma), chroma, 0f..120f) { update(c = it) }
-                ColorSlider(stringResource(R.string.theme_color_tone), tone, 0f..100f) { update(t = it) }
+                val hueColors = remember { (0..36).map { Color(Hct.from(it * 10.0, 100.0, 60.0).toInt()) } }
+                val chromaColors = remember(hue) { (0..24).map { Color(Hct.from(hue.toDouble(), it * 5.0, 60.0).toInt()) } }
+                val toneColors = remember(hue, chroma) { (0..20).map { Color(Hct.from(hue.toDouble(), chroma.toDouble(), it * 5.0).toInt()) } }
+                ColorSlider(stringResource(R.string.theme_color_hue), hue, 0f..360f, hueColors, Color(Hct.from(hue.toDouble(), 100.0, 60.0).toInt())) { update(h = it) }
+                ColorSlider(stringResource(R.string.theme_color_chroma), chroma, 0f..120f, chromaColors, Color(Hct.from(hue.toDouble(), chroma.toDouble(), 60.0).toInt())) { update(c = it) }
+                ColorSlider(stringResource(R.string.theme_color_tone), tone, 0f..100f, toneColors, Color(seed)) { update(t = it) }
             }
         },
     )
 }
 
 @Composable
-private fun ColorSlider(label: String, value: Float, range: ClosedFloatingPointRange<Float>, onChange: (Float) -> Unit) {
+private fun ColorSlider(label: String, value: Float, range: ClosedFloatingPointRange<Float>, colors: List<Color>, thumbColor: Color, onChange: (Float) -> Unit) {
+    val rtl = LocalLayoutDirection.current == LayoutDirection.Rtl
+    val stops = remember(colors, rtl) { if (rtl) colors.reversed() else colors }
     Column {
-        Text("$label · ${value.toInt()}", style = MaterialTheme.typography.labelMedium)
-        Slider(value = value.coerceIn(range), onValueChange = onChange, valueRange = range, modifier = Modifier.semantics { contentDescription = label })
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+            Text(label, style = MaterialTheme.typography.labelMedium)
+            Text("%.1f".format(value), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        }
+        Slider(
+            value = value.coerceIn(range),
+            onValueChange = onChange,
+            valueRange = range,
+            steps = 0,
+            modifier = Modifier.semantics { contentDescription = label },
+            thumb = {
+                Box(Modifier.size(26.dp).shadow(2.dp, CircleShape).background(thumbColor, CircleShape).border(2.dp, MaterialTheme.colorScheme.surface, CircleShape))
+            },
+            track = {
+                Canvas(Modifier.fillMaxWidth().height(20.dp).clip(CircleShape).border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.4f), CircleShape)) {
+                    drawRect(Brush.horizontalGradient(stops))
+                }
+            },
+        )
     }
 }

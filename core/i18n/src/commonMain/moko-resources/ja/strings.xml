@@ -682,7 +682,6 @@
     <string name="image_info_square">正方形</string>
     <string name="image_info_encoded_resolution">ファイルの画素</string>
     <string name="theme_colors">テーマカラー</string>
-    <string name="theme_colors_summary">基準色から調和のとれた Material 配色を生成します。</string>
     <string name="theme_color_dynamic">ダイナミック</string>
     <string name="theme_color_presets">プリセット</string>
     <string name="theme_color_custom">カスタム</string>
@@ -691,7 +690,6 @@
     <string name="theme_color_style">配色スタイル</string>
     <string name="theme_color_preview">配色プレビュー</string>
     <string name="theme_color_hex">カラーコード</string>
-    <string name="theme_color_hex_hint">例：#6750A4（16進数6桁）</string>
     <string name="theme_color_hue">色相</string>
     <string name="theme_color_chroma">彩度</string>
     <string name="theme_color_tone">明度</string>
@@ -739,4 +737,10 @@
     <string name="tooltip_block_uploader">投稿者をブロック</string>
     <string name="tooltip_retry">再試行</string>
     <string name="tooltip_remove_tag">タグを外す</string>
+    <string name="theme_color_add">色を追加</string>
+    <string name="theme_color_restore">プリセットを復元</string>
+    <string name="theme_color_remove">色を削除</string>
+    <string name="theme_color_delete">%1$sを削除</string>
+    <string name="theme_color_custom_value">カスタム %1$s</string>
+    <string name="theme_color_invalid_hex">6桁のカラーコードを入力</string>
 </resources>

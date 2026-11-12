@@ -79,6 +79,8 @@ object Settings : DataStorePreferences(null) {
     val themePresetColor = intPref("theme_preset_color", 0xFF6750A4.toInt())
     val themeCustomColor = intPref("theme_custom_color", 0xFF006A60.toInt())
     val themePaletteStyle = intPref("theme_palette_style", 0)
+    val themeCustomPalette = stringOrNullPref("theme_custom_palette")
+    val themeHiddenPresets = stringPref("theme_hidden_presets", "")
     val harmonizeCategoryColor = boolPref("harmonize_category_color", true)
     val launchPage = intPref("launch_page_2", 0)
     val listMode = intPref("list_mode_2", 0)
