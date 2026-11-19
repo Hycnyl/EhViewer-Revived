@@ -94,3 +94,4 @@ UI 模块保留 `allWarningsAsErrors`，仅用 `-Xwarning-level=DEPRECATION:warn
 - 候选源码 00287e1ce12655902d17a4f0c1370069158d59db 已推送；定向 UI 44580788774 与旧版 FAB 对照 44580533165 均已开跑，五包构建 44580788664。共享工作环境仍在启动，签名按原流程留在本地。
 - 同一组4个 FAB 测试在旧版对照 44580533165 有3个断言失败，候选 44580788774 全部通过。旧版收起过渡144毫秒、主按钮上边缘外2像素的触摸实际触发末页，另有恢复时重叠、收起时无障碍节点残留。候选定向主题与下载按钮检查也已通过，正式构建已通过编译与格式检查。
 - 签名环境 ERS 启动超时；截至此节点 GitHub 构建继续执行，原私有 vault 尚不可读取。请在原环境可用后对构建 44580788664 的 unsigned 产物用 tools/release.py sign 和既有 V2/V3 证书完成签名，之后执行 quick_release 安装升级及公开校验。临时来源分支 release-source-1.17.19 与私有草稿准备流程 44583181515 指向实际 APK 源码 00287e1ce12655902d17a4f0c1370069158d59db。
+- 私有草稿 ID 451721454，准备分支已清除。构建 44580788664 第一次已生成 Profile，但 Maven Central 获取 compose-group-mapping 2.4.21 时 HTTP 429，未产出 APK。同源码第二次执行已启动（https://github.com/Hycnyl/EhViewer-Revived/actions/runs/44580788664/attempts/2），仍等待签名环境恢复。候选11项定向检查全部通过的对照报告为 44582015145。
