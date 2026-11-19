@@ -141,6 +141,8 @@
 
 ## Other
 
+- Four theme styles, clearer gallery view settings, and improved gallery download and floating menu controls.
+
 - Unified theme palette, multiple custom colors, and gradient color sliders.
 - Add native icon tooltips and selectable theme palettes; restore theme-colored quota progress.
 

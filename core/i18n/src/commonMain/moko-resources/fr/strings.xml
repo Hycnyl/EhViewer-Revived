@@ -277,12 +277,12 @@
     <string name="settings_my_tags_summary">Gérer les tags suivis sur le site Web EHentai</string>
     <string name="settings_eh_gallery_site">Site de galerie</string>
     <string name="settings_eh_launch_page">Écran par défaut après le lancement</string>
-    <string name="settings_eh_list_mode">Mode de liste</string>
-    <string name="settings_eh_list_mode_detail">Avec détails</string>
-    <string name="settings_eh_list_mode_thumb">Miniatures uniquement</string>
-    <string name="settings_eh_detail_size">Taille des détails</string>
-    <string name="settings_eh_detail_size_long">Long</string>
-    <string name="settings_eh_detail_size_short">Court</string>
+    <string name="settings_eh_list_mode">Vue partagée des galeries</string>
+    <string name="settings_eh_list_mode_detail">Détails</string>
+    <string name="settings_eh_list_mode_thumb">Miniatures</string>
+    <string name="settings_eh_detail_size">Largeur des fiches</string>
+    <string name="settings_eh_detail_size_long">Large</string>
+    <string name="settings_eh_detail_size_short">Étroite</string>
     <string name="settings_eh_show_jpn_title">Montrer les titres japonais</string>
     <string name="settings_eh_filter">Bloqueur des galeries</string>
     <string name="settings_eh_filter_summary">Filtrer les galerie par les titres, les uploaders ou les tags</string>
@@ -450,4 +450,6 @@
     <string name="gallery_version_loading">Chargement des versions…</string>
     <string name="gallery_info_copy_field">Copier %1$s</string>
     <string name="gallery_version_expunged">Expunged</string>
+    <string name="settings_eh_list_mode_scope">%1$s · Télécharg. à part</string>
+    <string name="list_tile_thumb_size">Taille des couvertures en vue détaillée</string>
 </resources>

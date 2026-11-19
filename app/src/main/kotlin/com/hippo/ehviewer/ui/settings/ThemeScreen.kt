@@ -87,6 +87,10 @@ fun AnimatedVisibilityScope.ThemeScreen(navigator: DestinationsNavigator) = Scre
             val listMode = Settings.listMode.asMutableState()
             SimpleMenuPreferenceInt(
                 title = stringResource(id = R.string.settings_eh_list_mode),
+                summary = stringResource(
+                    R.string.settings_eh_list_mode_scope,
+                    stringResource(if (listMode.value == 0) R.string.settings_eh_list_mode_detail else R.string.settings_eh_list_mode_thumb),
+                ),
                 entry = com.hippo.ehviewer.R.array.list_mode_entries,
                 entryValueRes = com.hippo.ehviewer.R.array.list_mode_entry_values,
                 state = listMode,

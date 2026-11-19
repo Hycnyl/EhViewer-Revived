@@ -242,12 +242,12 @@
     <string name="settings_my_tags_summary">Ver página de etiquetas en EHentai</string>
     <string name="settings_eh_launch_page">Página al iniciar aplicación</string>
     <string name="settings_eh_gallery_site">Seleccionar galería</string>
-    <string name="settings_eh_list_mode">Modo lista</string>
+    <string name="settings_eh_list_mode">Vista compartida de galerías</string>
     <string name="settings_eh_list_mode_detail">Con detalles</string>
     <string name="settings_eh_list_mode_thumb">Solo portada</string>
-    <string name="settings_eh_detail_size">Tamaño del detalle</string>
-    <string name="settings_eh_detail_size_long">Largo</string>
-    <string name="settings_eh_detail_size_short">Corto</string>
+    <string name="settings_eh_detail_size">Ancho de las tarjetas</string>
+    <string name="settings_eh_detail_size_long">Ancho</string>
+    <string name="settings_eh_detail_size_short">Estrecho</string>
     <string name="settings_eh_show_jpn_title">Mostrar títulos en japonés</string>
     <string name="settings_eh_show_jpn_title_summary">Es necesario habilitar los títulos en japonés en la propia página de EHentai</string>
     <string name="settings_eh_show_gallery_pages">Mostrar número de páginas de la galería</string>
@@ -426,4 +426,6 @@
     <string name="gallery_version_loading">Cargando información de versiones…</string>
     <string name="gallery_info_copy_field">Copiar %1$s</string>
     <string name="gallery_version_expunged">Expunged</string>
+    <string name="settings_eh_list_mode_scope">%1$s · Descarga aparte</string>
+    <string name="list_tile_thumb_size">Tamaño de portadas en la vista detallada</string>
 </resources>

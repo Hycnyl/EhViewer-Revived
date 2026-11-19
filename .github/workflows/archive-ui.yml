@@ -7,15 +7,24 @@ on:
         description: 'APK source to render; fixture follows this workflow revision'
         required: false
         type: string
+      fab_only:
+        description: 'Run the same FAB hit tests against the selected source for comparison'
+        type: boolean
+        default: false
   push:
     branches: [main]
     paths:
       - 'app/src/main/kotlin/com/hippo/ehviewer/ui/main/ArchiveList.kt'
       - 'app/src/main/kotlin/com/hippo/ehviewer/ui/main/FundsItem.kt'
       - 'app/src/test/kotlin/com/hippo/ehviewer/ui/settings/ThemeAndTooltipTest.kt'
+      - 'app/src/test/kotlin/com/hippo/ehviewer/ui/motion/FabLayoutHitTest.kt'
+      - 'app/src/test/kotlin/com/hippo/ehviewer/ui/screen/GalleryDownloadButtonTest.kt'
       - 'app/src/main/kotlin/com/hippo/ehviewer/ui/reader/ImageInfoContent.kt'
       - 'app/src/main/kotlin/com/hippo/ehviewer/ui/main/AvatarIcon.kt'
       - 'app/src/main/kotlin/com/hippo/ehviewer/ui/main/GalleryViewToggle.kt'
+      - 'app/src/main/kotlin/com/hippo/ehviewer/ui/screen/GalleryDetailScreen.kt'
+      - 'app/src/main/kotlin/com/hippo/ehviewer/ui/screen/GalleryDetailContent.kt'
+      - 'core/ui/src/commonMain/kotlin/com/ehviewer/core/ui/component/FabLayout.kt'
       - 'app/src/main/kotlin/com/hippo/ehviewer/ui/settings/ThemeColorPreference.kt'
       - 'app/src/main/kotlin/com/hippo/ehviewer/ui/settings/ThemePalette.kt'
       - 'app/src/main/kotlin/com/hippo/ehviewer/ui/theme/**'
@@ -42,15 +51,31 @@ jobs:
         with:
           packages: 'platform-tools platforms;android-37.2 build-tools;37.0.0'
       - uses: gradle/actions/setup-gradle@v6.4.1
-      - name: Load the UI fixture for this verification revision
+      - name: Load the focused UI fixtures for this workflow revision
+        env:
+          FAB_ONLY: ${{ inputs.fab_only }}
         run: |
           git fetch --no-tags --depth=1 origin "$GITHUB_SHA"
-          git show "$GITHUB_SHA:app/src/test/kotlin/com/hippo/ehviewer/ui/settings/ThemeAndTooltipTest.kt" > "$RUNNER_TEMP/ThemeAndTooltipTest.kt"
-          cp "$RUNNER_TEMP/ThemeAndTooltipTest.kt" app/src/test/kotlin/com/hippo/ehviewer/ui/settings/ThemeAndTooltipTest.kt
+          suite_root=app/src/test/kotlin/com/hippo/ehviewer/ui
+          fixtures=(motion/FabLayoutHitTest.kt)
+          if [[ "$FAB_ONLY" != "true" ]]; then
+            fixtures+=(settings/ThemeAndTooltipTest.kt screen/GalleryDownloadButtonTest.kt)
+          fi
+          for fixture in "${fixtures[@]}"; do
+            mkdir -p "$suite_root/$(dirname "$fixture")"
+            git show "$GITHUB_SHA:$suite_root/$fixture" > "$suite_root/$fixture"
+          done
           git diff --exit-code -- app/src/main core
           git rev-parse HEAD
-      - name: Check only unified palette and gradient picker
-        run: ./gradlew :app:testDefaultDebugUnitTest --tests '*ThemeAndTooltipTest' --no-configuration-cache --max-workers=2 -Pkotlin.compiler.execution.strategy=in-process --stacktrace
+      - name: Check FAB hit targets and the selected UI changes
+        env:
+          FAB_ONLY: ${{ inputs.fab_only }}
+        run: |
+          filters=(--tests '*FabLayoutHitTest')
+          if [[ "$FAB_ONLY" != "true" ]]; then
+            filters+=(--tests '*ThemeAndTooltipTest' --tests '*GalleryDownloadButtonTest')
+          fi
+          ./gradlew :app:testDefaultDebugUnitTest "${filters[@]}" --no-configuration-cache --max-workers=2 -Pkotlin.compiler.execution.strategy=in-process --stacktrace
       - uses: actions/upload-artifact@v7.0.2
         if: always()
         with:

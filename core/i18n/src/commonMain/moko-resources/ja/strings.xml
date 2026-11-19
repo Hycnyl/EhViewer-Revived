@@ -292,12 +292,12 @@
     <string name="settings_my_tags_summary">E-Hentai のウェブサイトでタグを管理します</string>
     <string name="settings_eh_gallery_site">ギャラリーサイト</string>
     <string name="settings_eh_launch_page">起動ページ</string>
-    <string name="settings_eh_list_mode">リストモード</string>
+    <string name="settings_eh_list_mode">ギャラリー一覧の表示</string>
     <string name="settings_eh_list_mode_detail">詳細</string>
     <string name="settings_eh_list_mode_thumb">サムネイル</string>
-    <string name="settings_eh_detail_size">詳細情報の幅</string>
-    <string name="settings_eh_detail_size_long">長い</string>
-    <string name="settings_eh_detail_size_short">短い</string>
+    <string name="settings_eh_detail_size">詳細カードの幅</string>
+    <string name="settings_eh_detail_size_long">広い</string>
+    <string name="settings_eh_detail_size_short">狭い</string>
     <string name="settings_eh_thumb_columns">サムネイルのカラム数</string>
     <string name="settings_eh_show_jpn_title">日本語のタイトルを表示</string>
     <string name="settings_eh_show_jpn_title_summary">E-Hentai ウェブサイトの設定で日本語のタイトルを有効化する必要があります</string>
@@ -495,7 +495,7 @@
     <string name="archive_need_passwd">アーカイブにはパスワードが必要です</string>
     <string name="passwd_wrong">パスワードが違います</string>
     <string name="passwd_cannot_be_empty">パスワードは空欄にできません</string>
-    <string name="list_tile_thumb_size">詳細モードのサムネイルの大きさ</string>
+    <string name="list_tile_thumb_size">詳細表示の表紙サイズ</string>
     <string name="account_name">アカウント</string>
     <string name="preload_thumb_aggressively">サムネイルを積極的にプリロードする</string>
     <string name="animate_items">リスト項目のアニメーション</string>
@@ -701,10 +701,9 @@
     <string name="theme_color_orange">オレンジ</string>
     <string name="theme_color_rose">ローズ</string>
     <string name="theme_color_slate">グレー</string>
-    <string name="theme_style_tonal">トーナルスポット</string>
-    <string name="theme_style_vibrant">ビブラント</string>
-    <string name="theme_style_expressive">エクスプレッシブ</string>
-    <string name="theme_style_neutral">ニュートラル</string>
+    <string name="theme_style_vivid">ビビッド</string>
+    <string name="theme_style_tinted">ティント</string>
+    <string name="theme_style_soft">ソフト</string>
     <string name="theme_style_monochrome">モノクローム</string>
     <string name="tooltip_help">ヘルプ</string>
     <string name="tooltip_apply">適用</string>
@@ -743,4 +742,5 @@
     <string name="theme_color_delete">%1$sを削除</string>
     <string name="theme_color_custom_value">カスタム %1$s</string>
     <string name="theme_color_invalid_hex">6桁のカラーコードを入力</string>
+    <string name="settings_eh_list_mode_scope">%1$s · ダウンロードのみ個別設定</string>
 </resources>

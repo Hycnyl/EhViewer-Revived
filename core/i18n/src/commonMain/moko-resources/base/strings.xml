@@ -306,12 +306,12 @@
     <string name="settings_my_tags_summary">My tags on EHentai website</string>
     <string name="settings_eh_gallery_site">Gallery site</string>
     <string name="settings_eh_launch_page">Launch page</string>
-    <string name="settings_eh_list_mode">List mode</string>
+    <string name="settings_eh_list_mode">Shared gallery view</string>
     <string name="settings_eh_list_mode_detail">Detail</string>
     <string name="settings_eh_list_mode_thumb">Thumb</string>
-    <string name="settings_eh_detail_size">Detail width</string>
-    <string name="settings_eh_detail_size_long">Long</string>
-    <string name="settings_eh_detail_size_short">Short</string>
+    <string name="settings_eh_detail_size">Detail card width</string>
+    <string name="settings_eh_detail_size_long">Wide</string>
+    <string name="settings_eh_detail_size_short">Narrow</string>
     <string name="settings_eh_thumb_columns">Thumb columns</string>
     <string name="settings_eh_show_jpn_title">Show Japanese title</string>
     <string name="settings_eh_show_jpn_title_summary">Require enabling Japanese Title in Settings on EHentai website</string>
@@ -514,7 +514,7 @@
     <string name="archive_need_passwd">Archive need password</string>
     <string name="passwd_wrong">Password Wrong</string>
     <string name="passwd_cannot_be_empty">Password can\'t be empty</string>
-    <string name="list_tile_thumb_size">Thumb size in detail mode</string>
+    <string name="list_tile_thumb_size">Detail cover size</string>
     <string name="account_name">Account</string>
     <string name="preload_thumb_aggressively">Preload thumbs aggressively</string>
     <string name="animate_items">List item animations</string>
@@ -767,10 +767,9 @@
     <string name="theme_color_orange">Orange</string>
     <string name="theme_color_rose">Rose</string>
     <string name="theme_color_slate">Slate</string>
-    <string name="theme_style_tonal">Tonal Spot</string>
-    <string name="theme_style_vibrant">Vibrant</string>
-    <string name="theme_style_expressive">Expressive</string>
-    <string name="theme_style_neutral">Neutral</string>
+    <string name="theme_style_vivid">Vivid</string>
+    <string name="theme_style_tinted">Tinted</string>
+    <string name="theme_style_soft">Soft</string>
     <string name="theme_style_monochrome">Monochrome</string>
     <string name="tooltip_help">Help</string>
     <string name="tooltip_apply">Apply</string>
@@ -809,4 +808,5 @@
     <string name="theme_color_delete">Delete %1$s</string>
     <string name="theme_color_custom_value">Custom %1$s</string>
     <string name="theme_color_invalid_hex">Enter a six-digit color code</string>
+    <string name="settings_eh_list_mode_scope">%1$s · Downloads separate</string>
 </resources>

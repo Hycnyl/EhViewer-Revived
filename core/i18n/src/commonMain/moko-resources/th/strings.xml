@@ -264,12 +264,12 @@
     <string name="settings_u_config">การตั้งค่า EHentai</string>
     <string name="settings_u_config_summary">การตั้งค่าบนเว็บไซต์ EHentai</string>
     <string name="settings_eh_gallery_site">เว็บไซต์หลักของแกลเลอรี่</string>
-    <string name="settings_eh_list_mode">มุมองแบบรายการ</string>
+    <string name="settings_eh_list_mode">มุมมองแกลเลอรีร่วมกัน</string>
     <string name="settings_eh_list_mode_detail">แสดงรายละเอียด</string>
     <string name="settings_eh_list_mode_thumb">ภาพตัวอย่าง</string>
-    <string name="settings_eh_detail_size">ขนาดของรายละเอียด</string>
-    <string name="settings_eh_detail_size_long">อย่างยาว</string>
-    <string name="settings_eh_detail_size_short">อย่างสั้น</string>
+    <string name="settings_eh_detail_size">ความกว้างของการ์ดรายละเอียด</string>
+    <string name="settings_eh_detail_size_long">กว้าง</string>
+    <string name="settings_eh_detail_size_short">แคบ</string>
     <string name="settings_eh_show_jpn_title">แสดงชื่อเรื่องญี่ปุ่น</string>
     <string name="settings_eh_show_gallery_pages">แสดงจำนวนหน้าของแกลเลอรี่</string>
     <string name="settings_eh_show_gallery_pages_summary">แสดงจำนวนหน้าที่มีอยู่ในแต่ละแกลเลอรี่</string>
@@ -431,4 +431,6 @@
     <string name="gallery_version_loading">กำลังโหลดข้อมูลเวอร์ชัน…</string>
     <string name="gallery_info_copy_field">คัดลอก %1$s</string>
     <string name="gallery_version_expunged">Expunged</string>
+    <string name="settings_eh_list_mode_scope">%1$s · แยกดาวน์โหลด</string>
+    <string name="list_tile_thumb_size">ขนาดปกในมุมมองรายละเอียด</string>
 </resources>

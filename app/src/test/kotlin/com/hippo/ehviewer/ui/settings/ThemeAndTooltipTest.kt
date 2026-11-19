@@ -12,6 +12,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asAndroidBitmap
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.SemanticsActions
@@ -33,6 +34,7 @@ import androidx.compose.ui.test.performTextReplacement
 import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
+import com.hippo.ehviewer.ui.theme.ThemePaletteStyle
 import com.hippo.ehviewer.ui.theme.seedColorScheme
 import java.io.File
 import org.junit.Assert.assertEquals
@@ -72,8 +74,10 @@ class ThemeAndTooltipTest {
         }
         compose.onNodeWithContentDescription("Blue").performClick().assertIsSelected()
         assertEquals(themePresetColors[1].first, palette.selectedColor)
-        compose.onNodeWithText("Tonal Spot").performClick()
-        compose.onNodeWithText("Vibrant").performClick()
+        compose.onNodeWithText("Soft").performClick()
+        compose.onNodeWithText("Tinted").assertIsDisplayed()
+        compose.onNodeWithText("Monochrome").assertIsDisplayed()
+        compose.onNodeWithText("Vivid").performClick()
         assertEquals(1, style)
         compose.onNodeWithContentDescription("Custom #2468AC").performClick().assertIsSelected()
         assertEquals(2, palette.source)
@@ -87,6 +91,21 @@ class ThemeAndTooltipTest {
         screenshot("theme", if (dark) "dark-large-palette" else "light-phone-palette")
         compose.onNodeWithContentDescription("Add color").performClick()
         assertEquals(1, adds)
+    }
+
+    @Test
+    fun oldStyleIdsResolveToFourDistinctSchemes() {
+        val seed = 0xFF008398.toInt()
+        assertEquals(ThemePaletteStyle.Soft, ThemePaletteStyle.fromPreference(3))
+        assertEquals(ThemePaletteStyle.Monochrome, ThemePaletteStyle.fromPreference(4))
+        for (dark in listOf(false, true)) {
+            val schemes = ThemePaletteStyle.entries.map { seedColorScheme(seed, dark, it.id) }
+            assertEquals(4, schemes.map { it.primary.toArgb() to it.surfaceContainer.toArgb() }.distinct().size)
+            val vivid = seedColorScheme(seed, dark, ThemePaletteStyle.Vivid.id)
+            val tinted = seedColorScheme(seed, dark, ThemePaletteStyle.Tinted.id)
+            assertEquals(vivid.primary, tinted.primary)
+            assertTrue(vivid.surfaceContainer != tinted.surfaceContainer)
+        }
     }
 
     @Test

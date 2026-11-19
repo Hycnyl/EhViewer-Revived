@@ -249,12 +249,12 @@
     <string name="settings_u_config">E-Hentai 설정</string>
     <string name="settings_u_config_summary">E-Hentai 사이트의 설정 페이지를 엽니다.</string>
     <string name="settings_eh_gallery_site">갤러리 사이트</string>
-    <string name="settings_eh_list_mode">목록 모드</string>
+    <string name="settings_eh_list_mode">갤러리 목록 보기</string>
     <string name="settings_eh_list_mode_detail">자세히</string>
     <string name="settings_eh_list_mode_thumb">섬네일</string>
-    <string name="settings_eh_detail_size">상세 정보 크기</string>
-    <string name="settings_eh_detail_size_long">길게</string>
-    <string name="settings_eh_detail_size_short">짧게</string>
+    <string name="settings_eh_detail_size">상세 카드 너비</string>
+    <string name="settings_eh_detail_size_long">넓게</string>
+    <string name="settings_eh_detail_size_short">좁게</string>
     <string name="settings_eh_show_jpn_title">일본어 제목 표시</string>
     <string name="settings_eh_show_gallery_pages">갤러리 페이지 수 표시</string>
     <string name="settings_eh_show_gallery_pages_summary">갤러리 목록에 해당 갤러리의 페이지 수를 표시합니다</string>
@@ -420,4 +420,6 @@
     <string name="gallery_version_loading">버전 정보 불러오는 중…</string>
     <string name="gallery_info_copy_field">%1$s 복사</string>
     <string name="gallery_version_expunged">Expunged</string>
+    <string name="settings_eh_list_mode_scope">%1$s · 다운로드는 별도</string>
+    <string name="list_tile_thumb_size">상세 보기 표지 크기</string>
 </resources>

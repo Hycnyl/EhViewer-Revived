@@ -6,6 +6,7 @@ import androidx.compose.animation.core.AnimationSpec
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.MutatePriority
 import androidx.compose.foundation.MutatorMutex
+import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Spacer
@@ -13,19 +14,25 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.SmallFloatingActionButton
+import androidx.compose.material3.contentColorFor
+import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Stable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.pointerInput
@@ -39,11 +46,11 @@ import com.ehviewer.core.ui.util.PredictiveBackEasing
 import com.ehviewer.core.ui.util.asyncState
 import com.ehviewer.core.ui.util.snackBarPadding
 import com.ehviewer.core.util.launch
-import com.ehviewer.core.util.onEachLatest
 import kotlin.time.Duration.Companion.microseconds
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.onEach
 
 @Stable
 enum class FabLayoutValue { Hidden, Primary, Expand }
@@ -130,10 +137,19 @@ fun FabLayout(
         }
     }
     val builder by rememberUpdatedState(fabBuilder)
+    val changeExpansion by rememberUpdatedState(onExpandChanged)
 
     val secondaryFab by asyncState(
         produce = { buildFab(builder) },
-        transform = { onEachLatest { state.collapse(MutatePriority.PreventUserInput) } },
+        transform = {
+            var initial = true
+            onEach {
+                // Preserve restored expansion on the initial emission. Later action changes close
+                // through the owner so the toggle, accessibility label and motion stay in sync.
+                if (!initial && updatedExpanded) changeExpansion(false)
+                initial = false
+            }
+        },
     )
 
     val density = LocalDensity.current
@@ -149,6 +165,8 @@ fun FabLayout(
     }
 
     val animatedProgress by state.expandProgress.asState()
+    val showSecondary by remember(state) { derivedStateOf { state.expandProgress.value > 0f } }
+    val secondarySettled by remember(state) { derivedStateOf { state.expandProgress.value == 1f } }
     PredictiveBackHandler(updatedExpanded) { flow ->
         try {
             state.mutatorMutex.mutate(MutatePriority.UserInput) {
@@ -166,29 +184,41 @@ fun FabLayout(
         modifier = Modifier.fillMaxSize().navigationBarsPadding().snackBarPadding(),
         contentAlignment = Alignment.BottomEnd,
     ) {
-        if (!state.appearProgress.isRunning && !updatedHidden) {
+        if (!state.appearProgress.isRunning && !updatedHidden && showSecondary) {
             Box(
                 modifier = Modifier.fillMaxSize().graphicsLayer { alpha = animatedProgress },
                 contentAlignment = Alignment.BottomEnd,
             ) {
                 with(secondaryFab) {
                     forEachIndexed { index, (imageVector, label, autoClose, onClick) ->
-                        IconTooltip(
-                            label,
-                            modifier = Modifier.padding(20.dp).offset {
-                                val distance = lerp(0, interval * (size - index) + padding, animatedProgress)
-                                IntOffset(0, -distance)
-                            },
-                        ) {
-                            SmallFloatingActionButton(
-                                onClick = {
-                                    launch(Dispatchers.Default) {
-                                        onClick()
-                                        if (autoClose) onExpandChanged(false)
-                                    }
-                                },
+                        val position = Modifier.padding(20.dp).offset {
+                            val distance = lerp(0, interval * (size - index) + padding, animatedProgress)
+                            IntOffset(0, -distance)
+                        }
+                        if (updatedExpanded && secondarySettled) {
+                            IconTooltip(label, modifier = position) {
+                                SmallFloatingActionButton(
+                                    onClick = {
+                                        launch(Dispatchers.Default) {
+                                            onClick()
+                                            if (autoClose) onExpandChanged(false)
+                                        }
+                                    },
+                                ) {
+                                    Icon(imageVector = imageVector, contentDescription = label)
+                                }
+                            }
+                        } else {
+                            // The moving icon crosses the main FAB. Only a settled menu owns input.
+                            val color = FloatingActionButtonDefaults.containerColor
+                            Box(
+                                position.minimumInteractiveComponentSize()
+                                    .size(40.dp)
+                                    .shadow(6.dp, FloatingActionButtonDefaults.smallShape)
+                                    .background(color),
+                                contentAlignment = Alignment.Center,
                             ) {
-                                Icon(imageVector = imageVector, contentDescription = label)
+                                Icon(imageVector = imageVector, contentDescription = null, tint = contentColorFor(color))
                             }
                         }
                     }

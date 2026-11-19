@@ -72,11 +72,10 @@ import com.ehviewer.core.ui.component.IconTooltip
 import com.hippo.ehviewer.Settings
 import com.hippo.ehviewer.asMutableState
 import com.hippo.ehviewer.collectAsState
+import com.hippo.ehviewer.ui.theme.ThemePaletteStyle
 import com.hippo.ehviewer.ui.theme.seedColorScheme
 import com.hippo.ehviewer.ui.theme.wallpaperColorScheme
 import com.materialkolor.hct.Hct
-
-private val themeStyleLabels = listOf(R.string.theme_style_tonal, R.string.theme_style_vibrant, R.string.theme_style_expressive, R.string.theme_style_neutral, R.string.theme_style_monochrome)
 
 @Composable
 internal fun ThemeColorPreference(dark: Boolean) {
@@ -117,9 +116,9 @@ internal fun ThemeColorControls(
     onAdd: () -> Unit,
     amoled: Boolean = false,
 ) {
-    val selectedStyle = style.takeIf { it in themeStyleLabels.indices } ?: 0
-    val dynamic = if (selectedStyle == 0) wallpaper else remember(wallpaper.primary, dark, selectedStyle, amoled) { seedColorScheme(wallpaper.primary.toArgb(), dark, selectedStyle, amoled) }
-    val colors = palette.selectedColor?.let { seed -> remember(seed, dark, selectedStyle, amoled) { seedColorScheme(seed, dark, selectedStyle, amoled) } } ?: dynamic
+    val selectedStyle = ThemePaletteStyle.fromPreference(style)
+    val dynamic = remember(wallpaper.primary, dark, selectedStyle.id, amoled) { seedColorScheme(wallpaper.primary.toArgb(), dark, selectedStyle.id, amoled) }
+    val colors = palette.selectedColor?.let { seed -> remember(seed, dark, selectedStyle.id, amoled) { seedColorScheme(seed, dark, selectedStyle.id, amoled) } } ?: dynamic
     var removable by rememberSaveable { mutableStateOf<Int?>(null) }
     BackHandler(removable != null) { removable = null }
     Column(Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
@@ -157,7 +156,7 @@ internal fun ThemeColorControls(
                 val label = stringResource(title)
                 val deleting = removable == color
                 PaletteColor(
-                    remember(color, dark, selectedStyle) { seedColorScheme(color, dark, selectedStyle) },
+                    remember(color, dark, selectedStyle) { seedColorScheme(color, dark, selectedStyle.id) },
                     if (deleting) stringResource(R.string.theme_color_delete, label) else label,
                     selected = palette.selectedColor == color,
                     deleting = deleting,
@@ -173,7 +172,7 @@ internal fun ThemeColorControls(
                 val label = stringResource(R.string.theme_color_custom_value, colorHex(color))
                 val deleting = removable == color
                 PaletteColor(
-                    remember(color, dark, selectedStyle) { seedColorScheme(color, dark, selectedStyle) },
+                    remember(color, dark, selectedStyle) { seedColorScheme(color, dark, selectedStyle.id) },
                     if (deleting) stringResource(R.string.theme_color_delete, label) else label,
                     selected = palette.selectedColor == color,
                     deleting = deleting,
@@ -242,17 +241,17 @@ private fun PaletteColor(
 }
 
 @Composable
-private fun StylePicker(selected: Int, onSelect: (Int) -> Unit) {
+private fun StylePicker(selected: ThemePaletteStyle, onSelect: (Int) -> Unit) {
     var expanded by remember { mutableStateOf(false) }
     Box {
         FilledTonalButton(onClick = { expanded = true }) {
-            Text(stringResource(themeStyleLabels[selected]))
+            Text(stringResource(selected.label))
             Icon(Icons.Default.ArrowDropDown, contentDescription = null)
         }
         DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-            themeStyleLabels.forEachIndexed { index, title ->
-                DropdownMenuItem(text = { Text(stringResource(title)) }, onClick = {
-                    onSelect(index)
+            ThemePaletteStyle.entries.forEach { style ->
+                DropdownMenuItem(text = { Text(stringResource(style.label)) }, onClick = {
+                    onSelect(style.id)
                     expanded = false
                 })
             }

@@ -134,4 +134,10 @@
     <string name="gallery_version_loading">Sürüm bilgileri yükleniyor…</string>
     <string name="gallery_info_copy_field">%1$s kopyala</string>
     <string name="gallery_version_expunged">Expunged</string>
+    <string name="settings_eh_list_mode">Ortak galeri görünümü</string>
+    <string name="settings_eh_list_mode_scope">%1$s · İndirilenler ayrı</string>
+    <string name="list_tile_thumb_size">Ayrıntı görünümünde kapak boyutu</string>
+    <string name="settings_eh_detail_size">Ayrıntı kartı genişliği</string>
+    <string name="settings_eh_detail_size_long">Geniş</string>
+    <string name="settings_eh_detail_size_short">Dar</string>
 </resources>

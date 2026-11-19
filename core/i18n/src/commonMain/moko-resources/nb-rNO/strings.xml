@@ -92,7 +92,7 @@
     <string name="rating1">Utolererbar</string>
     <string name="rating0">Katastrofe</string>
     <string name="gallery_info">Galleri-info</string>
-    <string name="settings_eh_list_mode">Listemodus</string>
+    <string name="settings_eh_list_mode">Felles gallerivisning</string>
     <string name="copied_to_clipboard">Kopiert til utklippstavlen</string>
     <string name="key_title">Navn</string>
     <string name="stat_download_action_stop_all">Stopp alle</string>
@@ -245,4 +245,9 @@
     <string name="gallery_version_loading">Laster versjonsinformasjon…</string>
     <string name="gallery_info_copy_field">Kopier %1$s</string>
     <string name="gallery_version_expunged">Expunged</string>
+    <string name="settings_eh_list_mode_scope">%1$s · Nedlastinger separat</string>
+    <string name="list_tile_thumb_size">Omslagsstørrelse i detaljvisning</string>
+    <string name="settings_eh_detail_size">Bredde på detaljkort</string>
+    <string name="settings_eh_detail_size_long">Bred</string>
+    <string name="settings_eh_detail_size_short">Smal</string>
 </resources>

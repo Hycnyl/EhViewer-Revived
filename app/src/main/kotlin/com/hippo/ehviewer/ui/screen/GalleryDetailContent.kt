@@ -32,7 +32,6 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularWavyProgressIndicator
-import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
@@ -117,6 +116,7 @@ import com.hippo.ehviewer.coil.PrefetchAround
 import com.hippo.ehviewer.coil.justDownload
 import com.hippo.ehviewer.collectAsState
 import com.hippo.ehviewer.download.DownloadManager
+import com.hippo.ehviewer.download.DownloadService
 import com.hippo.ehviewer.ktbuilder.executeIn
 import com.hippo.ehviewer.ktbuilder.imageRequest
 import com.hippo.ehviewer.ui.GalleryInfoBottomSheet
@@ -189,15 +189,6 @@ fun GalleryDetailContent(
         stringResource(R.string.read_from, startPage + 1)
     }
     val downloadState by DownloadManager.collectDownloadState(galleryInfo.gid)
-    val downloadButtonText = when (downloadState) {
-        DownloadInfo.STATE_INVALID -> stringResource(R.string.download)
-        DownloadInfo.STATE_NONE -> stringResource(R.string.download_state_none)
-        DownloadInfo.STATE_WAIT -> stringResource(R.string.download_state_wait)
-        DownloadInfo.STATE_DOWNLOAD -> stringResource(R.string.download_state_downloading)
-        DownloadInfo.STATE_FINISH -> stringResource(R.string.download_state_downloaded)
-        DownloadInfo.STATE_FAILED -> stringResource(R.string.download_state_failed)
-        else -> error("Invalid DownloadState!!!")
-    }
     fun onReadButtonClick() {
         if (galleryDetail != null || downloadState != DownloadInfo.STATE_INVALID) {
             navToReader(galleryInfo.findBaseInfo(), startPage)
@@ -256,13 +247,23 @@ fun GalleryDetailContent(
             snackbar(filterAdded)
         }
     }
-    fun onDownloadButtonClick() {
-        galleryDetail ?: return
-        if (DownloadManager.getDownloadState(galleryDetail.gid) == DownloadInfo.STATE_INVALID) {
-            launchUI { startDownload(false, galleryDetail.galleryInfo) }
-        } else {
-            launch { confirmRemoveDownload(galleryDetail) }
-        }
+    val downloadButton: @Composable (Modifier) -> Unit = { buttonModifier ->
+        GalleryDownloadButton(
+            state = downloadState,
+            canAdd = galleryDetail != null,
+            onAdd = { galleryDetail?.let { launchUI { startDownload(false, it.galleryInfo) } } },
+            onResume = {
+                DownloadManager.getDownloadInfo(galleryInfo.gid)?.let { DownloadService.startDownload(it.galleryInfo) }
+            },
+            onPause = { launchIO { DownloadManager.stopDownload(galleryInfo.gid) } },
+            onRead = ::onReadButtonClick,
+            onRemove = {
+                if (DownloadManager.containDownloadInfo(galleryInfo.gid)) {
+                    launch { confirmRemoveDownload(galleryInfo) }
+                }
+            },
+            modifier = buttonModifier,
+        )
     }
 
     val previews = galleryDetail?.collectPreviewItems()
@@ -296,13 +297,7 @@ fun GalleryDetailContent(
                 LocalPinnableContainer.current!!.run { remember { pin() } }
                 Column {
                     Row {
-                        FilledTonalButton(
-                            onClick = ::onDownloadButtonClick,
-                            shapes = ButtonDefaults.shapes(),
-                            modifier = Modifier.padding(horizontal = 4.dp).weight(1F),
-                        ) {
-                            Text(text = downloadButtonText, overflow = TextOverflow.Ellipsis, maxLines = 1)
-                        }
+                        downloadButton(Modifier.padding(horizontal = 4.dp).weight(1F))
                         Button(
                             onClick = ::onReadButtonClick,
                             shapes = ButtonDefaults.shapes(),
@@ -363,13 +358,7 @@ fun GalleryDetailContent(
                             Text(text = readButtonText, overflow = TextOverflow.Ellipsis, maxLines = 1)
                         }
                         Spacer(modifier = modifier.height(24.dp))
-                        FilledTonalButton(
-                            onClick = ::onDownloadButtonClick,
-                            shapes = ButtonDefaults.shapes(),
-                            modifier = Modifier.height(56.dp).padding(horizontal = 16.dp).width(192.dp),
-                        ) {
-                            Text(text = downloadButtonText, overflow = TextOverflow.Ellipsis, maxLines = 1)
-                        }
+                        downloadButton(Modifier.height(56.dp).padding(horizontal = 16.dp).width(192.dp))
                     }
                 }
             }

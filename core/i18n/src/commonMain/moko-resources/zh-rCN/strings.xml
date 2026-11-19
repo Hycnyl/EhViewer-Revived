@@ -290,12 +290,12 @@
     <string name="settings_my_tags_summary">EHentai 网站上的我的标签</string>
     <string name="settings_eh_gallery_site">画廊站点</string>
     <string name="settings_eh_launch_page">启动页</string>
-    <string name="settings_eh_list_mode">列表模式</string>
+    <string name="settings_eh_list_mode">画廊列表视图</string>
     <string name="settings_eh_list_mode_detail">详情</string>
     <string name="settings_eh_list_mode_thumb">缩略图</string>
-    <string name="settings_eh_detail_size">详情宽度</string>
-    <string name="settings_eh_detail_size_long">长</string>
-    <string name="settings_eh_detail_size_short">短</string>
+    <string name="settings_eh_detail_size">详情卡片宽度</string>
+    <string name="settings_eh_detail_size_long">宽</string>
+    <string name="settings_eh_detail_size_short">窄</string>
     <string name="settings_eh_thumb_columns">缩略图列数</string>
     <string name="settings_eh_show_jpn_title">显示日文标题</string>
     <string name="settings_eh_show_jpn_title_summary">需同时在 EHentai 网站设置中启用 Japanese Title</string>
@@ -495,7 +495,7 @@
     <string name="archive_need_passwd">归档文件需要密码</string>
     <string name="passwd_wrong">密码错误</string>
     <string name="passwd_cannot_be_empty">密码不能为空</string>
-    <string name="list_tile_thumb_size">详情模式下缩略图大小</string>
+    <string name="list_tile_thumb_size">详情封面大小</string>
     <string name="account_name">账户</string>
     <string name="preload_thumb_aggressively">激进地预载缩略图</string>
     <string name="animate_items">列表项目动画</string>
@@ -749,10 +749,9 @@
     <string name="theme_color_orange">橙色</string>
     <string name="theme_color_rose">玫瑰色</string>
     <string name="theme_color_slate">灰色</string>
-    <string name="theme_style_tonal">柔和</string>
-    <string name="theme_style_vibrant">活力</string>
-    <string name="theme_style_expressive">表现力</string>
-    <string name="theme_style_neutral">素雅</string>
+    <string name="theme_style_vivid">鲜明</string>
+    <string name="theme_style_tinted">氛围</string>
+    <string name="theme_style_soft">柔和</string>
     <string name="theme_style_monochrome">单色</string>
     <string name="tooltip_help">帮助</string>
     <string name="tooltip_apply">应用</string>
@@ -791,4 +790,5 @@
     <string name="theme_color_delete">删除%1$s</string>
     <string name="theme_color_custom_value">自定义 %1$s</string>
     <string name="theme_color_invalid_hex">请输入六位颜色代码</string>
+    <string name="settings_eh_list_mode_scope">%1$s · 浏览、收藏、历史同步，下载页独立</string>
 </resources>

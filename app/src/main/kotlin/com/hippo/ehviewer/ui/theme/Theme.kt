@@ -52,11 +52,7 @@ fun EhTheme(useDarkTheme: Boolean, content: @Composable () -> Unit) {
         2 -> custom
         else -> wallpaper!!.primary.toArgb()
     }
-    val colors = if (wallpaper != null && style !in 1 until themePaletteStyles.size) {
-        wallpaper
-    } else {
-        remember(seed, useDarkTheme, style, amoled) { seedColorScheme(seed, useDarkTheme, style, amoled) }
-    }
+    val colors = remember(seed, useDarkTheme, style, amoled) { seedColorScheme(seed, useDarkTheme, style, amoled) }
 
     MaterialTheme(colorScheme = colors, motionScheme = CustomMotionScheme) {
         val scrollbarStyle = scrollbarStyle(color = MaterialTheme.colorScheme.primary)

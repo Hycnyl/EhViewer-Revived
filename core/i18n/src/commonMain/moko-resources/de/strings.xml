@@ -222,12 +222,12 @@
     <string name="settings_my_tags_summary">Die gefolgten Etiketten in EHentai-Webseite verwalten.</string>
     <string name="settings_eh_gallery_site">Galerie-Seite</string>
     <string name="settings_eh_launch_page">Standard-Bildschirm nach App-Start</string>
-    <string name="settings_eh_list_mode">Liste-Ansicht</string>
+    <string name="settings_eh_list_mode">Gemeinsame Galerieansicht</string>
     <string name="settings_eh_list_mode_detail">Details</string>
     <string name="settings_eh_list_mode_thumb">Miniaturbild</string>
-    <string name="settings_eh_detail_size">Größe der Details</string>
-    <string name="settings_eh_detail_size_long">Lange</string>
-    <string name="settings_eh_detail_size_short">Kurz</string>
+    <string name="settings_eh_detail_size">Breite der Detailkarten</string>
+    <string name="settings_eh_detail_size_long">Breit</string>
+    <string name="settings_eh_detail_size_short">Schmal</string>
     <string name="settings_advanced_app_language_title">Sprache der App (Language)</string>
     <string name="torrent_count">Torrent (%d)</string>
     <string name="settings_eh_show_jpn_title">Japanische Titel anzeigen</string>
@@ -378,4 +378,6 @@
     <string name="gallery_version_loading">Versionsinformationen werden geladen…</string>
     <string name="gallery_info_copy_field">%1$s kopieren</string>
     <string name="gallery_version_expunged">Expunged</string>
+    <string name="settings_eh_list_mode_scope">%1$s · Downloads separat</string>
+    <string name="list_tile_thumb_size">Covergröße in der Detailansicht</string>
 </resources>
