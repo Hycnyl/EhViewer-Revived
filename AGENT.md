@@ -91,3 +91,4 @@ UI 模块保留 `allWarningsAsErrors`，仅用 `-Xwarning-level=DEPRECATION:warn
 - 已核对 FlClash main 9f2759e 和列表设置的持久化范围。维护者选择保留共享模式并精简说明。
 - 下载按钮按状态复用启停操作，长按移除。右下菜单用同一触摸夹具比较正式 1.17.18 和本次修改。旧版定向对照 https://github.com/Hycnyl/EhViewer-Revived/actions/runs/44580533165 。
 - 正式 1.17.18 构建的 Profile 文本 Artifact 已过期，本轮随标准 Release 构建重新生成。只执行相关交互检查和精简 API 33 安装升级。
+- 候选源码 00287e1ce12655902d17a4f0c1370069158d59db 已推送；定向 UI 44580788774 与旧版 FAB 对照 44580533165 均已开跑，五包构建 44580788664。共享工作环境仍在启动，签名按原流程留在本地。
