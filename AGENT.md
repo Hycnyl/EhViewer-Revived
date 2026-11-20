@@ -6,6 +6,9 @@
 
 验证优先放到 GitHub Actions 或同类 CI；本地仅执行必要的开发操作、私钥签名和难以交由 CI 的定向诊断。按本轮改动选择检查范围，UI、签名和构建变更优先验证布局、构建、签名及安装，不重复运行无关功能或业务逻辑检查。历史发布验证流程不构成每轮必须重跑全部场景的要求。
 
+- 由主代理负责核心任务。减少不必要的子代理调用，仅在分工有明确收益时使用。不得将核心任务交给能力较低的模型。
+- 以任务的验收目标为准。遇阻先调查原因，尝试可行的修复或替代路径，并继续可独立推进的工作。只有确认无法独立完成剩余步骤时，才暂停并说明已尝试的方法及所需帮助，例如请维护者恢复签名密钥。
+
 ## 基线与发布
 
 - 功能源自 `Hycnyl/EhViewer` 的 `v1.17.8`，对应清理后的提交 `92923877ef671e33aa56f69688daa46af6e59ec6`；新仓库独立起始，不继承旧 Git 历史。四种语言 README 继承旧仓库最新的用户文档与完整素材引用，保留 LICENSE、NOTICE 和源码版权说明。
@@ -32,13 +35,18 @@
 
 - 正式证书 SHA-256：`67afb9dab5d2234ed83bc3dd8c13faaeadf4940be0a6749e0aafb9ae9e8e143f`。正式包使用这张证书的 V2 和 V3 签名；不使用旧公开私钥，不携带旧轮换链。不生成临时替代证书，密钥缺失时恢复维护者备份。
 - 密钥、密码与备份不得进入 Git、日志、Artifact 或 Release。当前本地保管目录为 `/workspace/.ehviewer-revived-signing`，目录权限 0700，文件 0600；工作区或环境删除前必须由维护者保有独立备份。
-- 维护者已恢复原证书备份至仓库 Actions Secrets：EHVIEWER_KEYSTORE_B64 保存 release.p12 的 Base64；EHVIEWER_STORE_PASSWORD 当前保存 credentials.json 的 Base64，解析后取得 storePassword、keyPassword 和 keyAlias。连接器管理 Secrets 曾返回 HTTP 403，Secret 由维护者通过 GitHub 设置维护。解码后的私有目录使用 0700、文件使用 0600，内容不得写入日志或公开产物。
-- Actions 构建未签名 APK；使用 tools/release.py sign 和上述固定证书签名。可在原本地私有目录操作，执行器不可用时在临时 runner 的 RUNNER_TEMP 私有目录恢复仓库 Secrets；签名及复核完成后必须清理临时密钥文件。仅回交五个已签名 APK、校验和及公开构建信息，由 release.yml 验证安装升级后发布。
-- 本地 CLI 凭据失效时，可使用已授权的 GitHub 连接器完成源码提交；受限的远程收尾可交由最小权限临时 Actions，完成后删除流程文件。不得打印或转存访问令牌。
-- 当前连接本地上传 Release 附件返回 HTTP 401。将上述七个公开文件打包成 ZIP，通过 Git Data blobs API 交接（不创建分支或提交），以 `signed_blob` 和 `bundle_sha256` 输入启动 `release.yml`；Actions 先校验包内容、来源与签名，再上传草稿。APK 的 `source_commit` 固定为实际构建提交，工作流本身可以在其后的提交中修正。
-- 连接器限制单次请求大小时，将公开 ZIP 按每片不超过 3 MiB 原始数据分块，使用 `ehviewer-release-parts-v1` 清单交接；`signed_blob` 为清单 Git SHA，`bundle_sha256` 仍是原 ZIP 的 SHA-256。Release CI 逐片核对长度和 Git SHA，组合后复核完整 ZIP 的两种摘要及七文件集合，继续执行来源和签名验证。
+- 本地 CLI 凭据失效时，可从已授权的 GitHub 连接器提交源码，将受限的远程操作交给最小权限的一次性 Actions，完成后删除临时分支和流程文件。不得打印或转存访问令牌。
 - CI 为已构建的历史 SHA 创建新草稿时，可先保留一个指向该 SHA 的临时来源分支头，避免 GitHub 对非分支顶端目标的 403；发布后删除该分支，正式标签始终指向真实 APK 构建提交。
 - 旧 1.17.9 已使用同一张新证书，可以直接覆盖安装。旧 1.17.8 及更早版本使用不同签名：Android 13+ 可先安装旧仓库的 1.17.9，再升级 Revived；Android 8–12 须先导出备份、卸载旧版、再安装并导入。设置/数据库备份不包含全部图片；卸载前，须把备份、下载和缓存导出文件复制到应用私有目录（如 Android/data/moe.hycnyl.ehviewer）之外，确认后再卸载。新装后重新授权下载目录并导入备份。
+
+### 使用 Actions Secrets 签名和发布
+
+1. 从成功的 `build.yml` 运行取得 `unsigned-release-<源码 SHA>`。核对运行所属仓库、源码提交、Artifact ID 与下载文件的 SHA-256。以该源码提交作为 `source_commit`，准备同一提交的版本草稿。
+2. 在受信任的签名作业中设置 `umask 077`，在 `RUNNER_TEMP` 建立 0700 私有目录。将 **`EHVIEWER_KEYSTORE_B64`** 解码为 `release.p12`，将 **`EHVIEWER_STORE_PASSWORD`** 按 Base64 解码并解析为完整的 `credentials.json`。从 JSON 读取 `storePassword` 和 `keyPassword`，用上面的证书指纹在密钥库中确认私钥条目，将实际别名填入签名工具所读的 `keyAlias`。两个文件均为 0600。维护者在 GitHub 仓库设置中管理这两个 Secret。
+3. 在实际构建提交上运行 `python3 tools/release.py sign --input <未签名目录> --output <新输出目录> --vault <私有目录>`。该命令核对证书并签出五个 V2/V3 APK。用 `python3 tools/release.py verify --input <已签名目录>` 和 Build Tools 36 的 `apksigner verify` 复核。私有目录在 `if: always()` 步骤中删除。
+4. 仅打包五个 APK、`release-info.json` 和 `SHA256SUMS.txt`。将公开 ZIP 作为 Git blob 交接，需要分片时每片最多 3 MiB，并使用 `ehviewer-release-parts-v1` 清单。手动触发 `main` 的 `release.yml`，传入 `tag`、`source_commit`、`signed_blob`（ZIP 或清单的 Git SHA）和 `bundle_sha256`（完整 ZIP 的 SHA-256）。该工作流接收已签名文件，核验后上传草稿、验证安装和覆盖升级、发布并校验公开下载。
+
+1.17.19 的签名作业在一次性分支运行。下次用 Secrets 签名时，可参照固定提交中的实现，替换版本、构建运行、Artifact、摘要和草稿等本次发布参数。主分支的常设入口是 `build.yml` 和 `release.yml`。本地私有目录可用时，也可用同一签名命令交接七个公开文件。[签名实现](https://github.com/Hycnyl/EhViewer-Revived/blob/f4921448e9c8c6b44eb34b50c6ffe4932e268b26/.github/workflows/recover-release-1.17.19.yml) · [签名运行](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/44671841242) · [正式发布运行](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/44671922847)
 
 ## 构建入口
 
