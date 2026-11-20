@@ -455,7 +455,7 @@ object DownloadManager : OnSpiderListener, CoroutineScope {
             }
             val inserted = restoreDownload(gallery, dirname)
             if (inserted) {
-                runSuspendCatching { SpiderDen(gallery, dirname).writeComicInfo(false) }.onFailure { logcat(it) }
+                runSuspendCatching { SpiderDen(gallery, directory).writeComicInfo(false) }.onFailure { logcat(it) }
             }
             inserted
         }
