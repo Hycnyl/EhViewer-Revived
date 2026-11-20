@@ -30,12 +30,20 @@ import org.junit.Assert.assertNull
 import org.junit.Assert.assertSame
 import org.junit.Assert.assertThrows
 import org.junit.Assert.assertTrue
+import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import splitties.init.appCtx
 
 @RunWith(AndroidJUnit4::class)
 class DownloadProtectionTest {
+    @Before
+    fun prepareDownloadsOnFreshInstallation() {
+        val root = File(requireNotNull(appCtx.getExternalFilesDir(null)), "download")
+        check(root.isDirectory || root.mkdirs()) { "Cannot create fixture download root: $root" }
+        assertEquals(root.toOkioPath(), downloadLocation)
+    }
+
     private fun gallery() = BaseGalleryInfo(System.nanoTime(), "abcdef1234", title = "Local fixture", pages = 2)
 
     @Test

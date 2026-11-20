@@ -60,6 +60,17 @@ jobs:
             adb shell svc wifi disable
             adb shell svc data disable
             ./gradlew :app:connectedDefaultDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=com.hippo.ehviewer.spider.DownloadProtectionTest --no-configuration-cache --max-workers=2 -PbuildAbis=x86_64 -Pkotlin.compiler.execution.strategy=in-process --stacktrace
+      - name: Show device assertions on failure
+        if: failure()
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import xml.etree.ElementTree as ET
+          for report in Path('app/build/outputs/androidTest-results').rglob('*.xml'):
+              for case in ET.parse(report).iter('testcase'):
+                  for failure in list(case.findall('failure')) + list(case.findall('error')):
+                      print(case.get('name'), failure.get('message', ''), (failure.text or '')[:4000])
+          PY
       - name: Require all targeted device tests to pass
         run: |
           python3 - <<'PY'
