@@ -37,7 +37,9 @@ import com.ehviewer.core.database.model.DownloadArtist
 import com.ehviewer.core.database.model.DownloadInfo
 import com.ehviewer.core.database.model.DownloadLabel
 import com.ehviewer.core.files.delete
+import com.ehviewer.core.files.exists
 import com.ehviewer.core.files.find
+import com.ehviewer.core.files.isDirectory
 import com.ehviewer.core.files.toOkioPath
 import com.ehviewer.core.files.toUri
 import com.ehviewer.core.i18n.R
@@ -391,6 +393,54 @@ object DownloadManager : OnSpiderListener, CoroutineScope {
             if (!containLabel(label.label)) {
                 label.position = index + offset
                 labelList.add(EhDB.addDownloadLabel(label))
+            }
+        }
+    }
+
+    // The same objects are referenced by the list, GID index, and selected-item UI.
+    internal suspend fun reattachDownloadDirectory(root: Path, gallery: GalleryInfo, directory: Path): Boolean =
+        withCachedPageExport(gallery.gid, "Download is in use") {
+            val info = sortMutex.withLock {
+                val item = getDownloadInfo(gallery.gid) ?: return@withLock null
+                if (root != downloadLocation || directory.parent != root || item.token != gallery.token ||
+                    readDirectoryIdentity(directory)?.let { it.gid == gallery.gid && it.token == gallery.token } != true
+                ) return@withLock null
+                val name = directory.name
+                val persisted = EhDB.getDownloadDirname(item.gid)
+                if (persisted == name && item.dirname == name) return@withLock null
+                if (listOfNotNull(item.dirname, persisted).any { it != name && (root / it).exists() }) return@withLock null
+                if (allInfoList.any { it.gid != item.gid && it.dirname == name } || EhDB.directoryOwnedByAnotherDownload(name, item.gid)) return@withLock null
+                EhDB.putDownloadDirname(item.gid, name)
+                item.dirname = name
+                item
+            } ?: return@withCachedPageExport false
+            mutableNotifyFlow.emit(info)
+            true
+        }
+
+    internal suspend fun isRedundantDirectory(root: Path, file: Path): Boolean = sortMutex.withLock {
+        isUnclaimedDirectory(root, file)
+    }
+
+    private suspend fun isUnclaimedDirectory(root: Path, file: Path): Boolean {
+        val gid = file.name.substringBefore('-').toLongOrNull() ?: return false
+        if (root != downloadLocation || file.parent != root || !file.isDirectory) return false
+        if (allInfoList.any { it.dirname == file.name } || EhDB.directoryOwnedByAnotherDownload(file.name, null)) return false
+        val currentDir = getDownloadInfo(gid)?.dirname
+        if (containDownloadInfo(gid) && (currentDir == null || !(root / currentDir).isDirectory)) return false
+        val identity = readDirectoryIdentity(file)
+        if (identity == null && (file.find(SPIDER_INFO_FILENAME) != null || file.find(COMIC_INFO_FILE) != null)) return false
+        if (identity != null && (identity.gid != gid || containDownloadInfo(identity.gid))) return false
+        return true
+    }
+
+    internal suspend fun deleteRedundantDirectory(root: Path, file: Path): Boolean {
+        val gid = file.name.substringBefore('-').toLongOrNull() ?: return false
+        return withCachedPageExport(gid, "Download is in use") {
+            sortMutex.withLock {
+                if (!isUnclaimedDirectory(root, file)) return@withLock false
+                file.delete()
+                !file.exists()
             }
         }
     }

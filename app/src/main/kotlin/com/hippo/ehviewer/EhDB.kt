@@ -96,6 +96,8 @@ object EhDB {
         }
     }
 
+    suspend fun directoryOwnedByAnotherDownload(dirname: String, exceptGid: Long?) = db.downloadsDao().directoryOwnedByAnotherDownload(dirname, exceptGid)
+
     suspend fun getDownloadDirname(gid: Long): String? {
         val dao = db.downloadDirnameDao()
         val raw = dao.load(gid)

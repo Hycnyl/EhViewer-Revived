@@ -96,4 +96,4 @@ UI 模块保留 `allWarningsAsErrors`，仅用 `-Xwarning-level=DEPRECATION:warn
 
 ## 本轮临时进度
 
-1.17.22 的 A1 已提交独立审查。普通归档逐项检查读写、暂存校验并标记提交，清理只删除此次归档中仍相符的源页。下一步为 A3 与定向回归验证。
+1.17.22 的 A1 与 A3 均已完成初步实现，独立审计已修正打包重试、缓存导出与收尾并发问题。候选分支 fix/verified-archives-and-restored-directories；下一步运行定向回归、构建、签名和发布。
