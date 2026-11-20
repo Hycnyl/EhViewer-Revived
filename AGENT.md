@@ -92,3 +92,5 @@ UI 模块保留 `allWarningsAsErrors`，仅用 `-Xwarning-level=DEPRECATION:warn
 - 五包[构建](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/44580788664/attempts/2)和[签名前校验](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/44596587673)已通过。未签名 Artifact 14566880160（26,897,897 字节，SHA-256 `254f426e775a147385a99b09ace80ae33e4cdf811695dcecce0c08992077c613`，2026-11-26 19:15 UTC 到期）；成功诊断及 Profile 为 14566216192。首次失败诊断和临时测试分支均已清理。
 - 11 月 20 日再次等待托管环境启动，执行器连接在 ERS readiness 恢复阶段超时，平台随后报告 failed，shell 不可用。环境诊断目录无可读记录。现有发布流程使用原环境私有签名目录；私有草稿 451721454 和来源分支 `release-source-1.17.19` 均指向上述源码。正式版仍为 1.17.18。
 - 恢复可访问原存储卷或维护者密钥备份的执行器后，在上述源码工作树用 `tools/release.py sign` 签署五包；用 `release.yml` 的 `quick_release=true` 完成 API 33 覆盖升级、发布和公开下载校验。完成后删除来源分支、本地临时产物及本章节，更新正式版本记录。
+
+- 维护者要求试行本地构建、签名及验证，仅将正式发布委托 Actions。候选分支 [local-release-pilot](https://github.com/Hycnyl/EhViewer-Revived/tree/local-release-pilot) 已备好。当前环境无法执行本地命令，候选尚未经过实际构建、签名或设备验证。接入带有已固定工具链及原密钥的本地执行器后，使用候选分支的 tools/local_delivery.py 对上述产品源码进行试跑；成功公开发布并核对产物后再替换默认流程。本条仅用于本轮恢复。
