@@ -9,7 +9,7 @@
 ## 基线与发布
 
 - 功能源自 `Hycnyl/EhViewer` 的 `v1.17.8`，对应清理后的提交 `92923877ef671e33aa56f69688daa46af6e59ec6`；新仓库独立起始，不继承旧 Git 历史。四种语言 README 继承旧仓库最新的用户文档与完整素材引用，保留 LICENSE、NOTICE 和源码版权说明。
-- 应用名保持 `EhViewer`，正式包名保持 `moe.hycnyl.ehviewer`。当前正式版本为 `1.17.18` / `180093`，上个正式版为 `1.17.17` / `180092`，接续旧版 `1.17.8` / `180083` 和 `1.17.9` / `180084`。后续沿用版本体系，版本码递增。
+- 应用名保持 `EhViewer`，正式包名保持 `moe.hycnyl.ehviewer`。当前正式版本为 `1.17.19` / `180094`，上个正式版为 `1.17.18` / `180093`，接续旧版 `1.17.8` / `180083` 和 `1.17.9` / `180084`。后续沿用版本体系，版本码递增。
 - 任何实际影响用户的改动完成后，除非维护者明确禁止，都须提升 versionName/versionCode，使用 GitHub Actions 发布正式 Release；提供 universal、arm64-v8a、armeabi-v7a、x86_64、x86 五种 APK，并附简短变更说明与 SHA-256 校验和。不得使用 `[skip ci]` 绕过这条规则。
 - README 保持简洁，变更通常只在“变更”章节简要记录；允许修正仓库链接、安装要求和迁移说明。不得随意重写其余内容或丢失截图、素材和致谢。
 - 单轮只改一个目标不是硬性限制。缓存导出、下载恢复和归档格式继承 1.17.8 的当前行为，维护者没有将其固化为不可修改的长期规则。
@@ -32,8 +32,8 @@
 
 - 正式证书 SHA-256：`67afb9dab5d2234ed83bc3dd8c13faaeadf4940be0a6749e0aafb9ae9e8e143f`。正式包使用这张证书的 V2 和 V3 签名；不使用旧公开私钥，不携带旧轮换链。不生成临时替代证书，密钥缺失时恢复维护者备份。
 - 密钥、密码与备份不得进入 Git、日志、Artifact 或 Release。当前本地保管目录为 `/workspace/.ehviewer-revived-signing`，目录权限 0700，文件 0600；工作区或环境删除前必须由维护者保有独立备份。
-- 维护者允许在连接具备 Actions Secrets 权限时将密钥存入 Secrets；当前连接实测管理 Secrets 返回 HTTP 403，因此当前流程只能本地签名，不上传私钥。
-- Actions 构建未签名 APK；用 `tools/release.py sign` 在本地校验构建来源、证书与文件后签名。仅回交签好的 APK、校验和及公开构建信息到私有 Release 草稿，Actions 再验证并公开发布。
+- 维护者已恢复原证书备份至仓库 Actions Secrets：EHVIEWER_KEYSTORE_B64 保存 release.p12 的 Base64；EHVIEWER_STORE_PASSWORD 当前保存 credentials.json 的 Base64，解析后取得 storePassword、keyPassword 和 keyAlias。连接器管理 Secrets 曾返回 HTTP 403，Secret 由维护者通过 GitHub 设置维护。解码后的私有目录使用 0700、文件使用 0600，内容不得写入日志或公开产物。
+- Actions 构建未签名 APK；使用 tools/release.py sign 和上述固定证书签名。可在原本地私有目录操作，执行器不可用时在临时 runner 的 RUNNER_TEMP 私有目录恢复仓库 Secrets；签名及复核完成后必须清理临时密钥文件。仅回交五个已签名 APK、校验和及公开构建信息，由 release.yml 验证安装升级后发布。
 - 本地 CLI 凭据失效时，可使用已授权的 GitHub 连接器完成源码提交；受限的远程收尾可交由最小权限临时 Actions，完成后删除流程文件。不得打印或转存访问令牌。
 - 当前连接本地上传 Release 附件返回 HTTP 401。将上述七个公开文件打包成 ZIP，通过 Git Data blobs API 交接（不创建分支或提交），以 `signed_blob` 和 `bundle_sha256` 输入启动 `release.yml`；Actions 先校验包内容、来源与签名，再上传草稿。APK 的 `source_commit` 固定为实际构建提交，工作流本身可以在其后的提交中修正。
 - 连接器限制单次请求大小时，将公开 ZIP 按每片不超过 3 MiB 原始数据分块，使用 `ehviewer-release-parts-v1` 清单交接；`signed_blob` 为清单 Git SHA，`bundle_sha256` 仍是原 ZIP 的 SHA-256。Release CI 逐片核对长度和 Git SHA，组合后复核完整 ZIP 的两种摘要及七文件集合，继续执行来源和签名验证。
@@ -85,18 +85,3 @@ UI 模块保留 `allWarningsAsErrors`，仅用 `-Xwarning-level=DEPRECATION:warn
 发布验证按本轮改动选择场景。UI、签名和构建默认使用 API 26、33、36；Target 37 的候选将现代设备检查切换至 API 37.2。使用包含 WebView 的 google_apis 镜像，现代设备使用 google_apis_ps16k 并检查真实页大小；每次新建 AVD，分配 4096M RAM / 512M heap。验证设备端 APK SHA-256、文件式 universal/匹配 ABI 安装、上个正式版本覆盖安装和启动。UI 按改动选用 archive-ui 或 interaction-ui 工作流渲染实际组件，支持指定 APK 源码与更新验证夹具，避免测试修正触发重复原生构建。只有涉及相关业务功能的改动，才增加离线 CBZ、设置迁移等对应检查。临时数据不进入源码或 Release。
 
 本托管环境先执行 `source /workspace/.ehviewer-env/activate.sh`，其中设置已固定的 JDK、SDK、Gradle/Cargo 缓存与本地 GNU m4 1.4.20。m4 是 Nettle 汇编的构建依赖；CI 检查并安装它。本地无 sudo，m4 安装于私有工具目录。Nettle 的源码包含预生成文件，CMake 必须保留其解包时间戳（DOWNLOAD_EXTRACT_TIMESTAMP TRUE）。
-
-## 临时进度：1.17.19 主题与画廊操作
-
-- 源码 `00287e1ce12655902d17a4f0c1370069158d59db`，版本 1.17.19 / 180094。11 项定向检查通过（包括 1.17.18 与候选版的 FAB 同触点对照）。[交互对照](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/44582015145)
-- 五包[构建](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/44580788664/attempts/2)和[签名前校验](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/44596587673)已通过。未签名 Artifact 14566880160（26,897,897 字节，SHA-256 `254f426e775a147385a99b09ace80ae33e4cdf811695dcecce0c08992077c613`，2026-11-26 19:15 UTC 到期）；成功诊断及 Profile 为 14566216192。首次失败诊断和临时测试分支均已清理。
-- 11 月 20 日再次等待托管环境启动，执行器连接在 ERS readiness 恢复阶段超时，平台随后报告 failed，shell 不可用。环境诊断目录无可读记录。现有发布流程使用原环境私有签名目录；私有草稿 451721454 和来源分支 `release-source-1.17.19` 均指向上述源码。正式版仍为 1.17.18。
-- 恢复可访问原存储卷或维护者密钥备份的执行器后，在上述源码工作树用 `tools/release.py sign` 签署五包；用 `release.yml` 的 `quick_release=true` 完成 API 33 覆盖升级、发布和公开下载校验。完成后删除来源分支、本地临时产物及本章节，更新正式版本记录。
-
-- 维护者要求试行本地构建、签名及验证，仅将正式发布委托 Actions。候选分支 [local-release-pilot](https://github.com/Hycnyl/EhViewer-Revived/tree/local-release-pilot) 已备好。当前环境无法执行本地命令，候选尚未经过实际构建、签名或设备验证。接入带有已固定工具链及原密钥的本地执行器后，使用候选分支的 tools/local_delivery.py 对上述产品源码进行试跑；成功公开发布并核对产物后再替换默认流程。本条仅用于本轮恢复。
-
-- 维护者授权采用可行方式完成正式发布，并表示有密钥备份。原执行器仍不可用，当前可运行的恢复入口为临时分支 recover-release-1.17.19（提交 9d385b1a35b2613a383784c25e16ddb88d8533cc）。[签名预检44667574147](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/44667574147)已明确缺少仓库 Secrets EHVIEWER_KEYSTORE_B64 和 EHVIEWER_STORE_PASSWORD；可选 EHVIEWER_KEY_PASSWORD 用于不同私钥密码。恢复入口只在临时runner恢复原证书，核对固定指纹后签署现有五包并触发原 release.yml 的API33验证/发布；结束即删除runner私钥文件。用户准备好Secrets后重跑该恢复作业即可，不需要重建已验证五包。最终正式发布后移除恢复分支和本临时章节。
-
-- 恢复入口的5段Python及Java证书辅助程序已在[44667798891](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/44667798891)通过语法/编译检查，检查临时分支已删除。现等待维护者恢复Secrets中的原密钥库及密码，正式草稿仍无附件。签名备份不得写入Git或日志；恢复作业只在RUNNER_TEMP私有目录使用，并在always清理步骤删除。
-
-- 签名恢复已成功：[44671841242](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/44671841242)。维护者在EHVIEWER_STORE_PASSWORD提供credentials.json的Base64，入口自动读取两种密码，从EHVIEWER_KEYSTORE_B64恢复release.p12，固定证书指纹核对成功；五包V2/V3及BT36/37验证通过，runner私钥目录已清理。公开分块清单9083eb27b9e4311b0dad286f14905af74eacaa4d，ZIP SHA256 df2b093920ef09d685dfac5f5f257e0dbd80875529bc6146ffd149abc4546907，签后公开产物Artifact14600062506。原[发布工作流44671922847](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/44671922847)prepare已通过，API33安装升级进行中。正式公开校验通过后清理恢复分支/来源分支和本章。
