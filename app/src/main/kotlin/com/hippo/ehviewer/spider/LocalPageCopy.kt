@@ -74,6 +74,8 @@ internal fun commitLocalFile(openSource: () -> InputStream, destination: Path, c
 
 private fun downloadMarker(name: String) = ".$name.download-incomplete"
 
+internal fun Path.hasIncompleteDownloadArchive() = (parent!! / downloadMarker(name)).exists()
+
 internal fun Path.completedArchive(name: String): Path? =
     (this / name).takeIf { it.isFile && !(this / downloadMarker(name)).exists() && !(this / rescueMarkerName(name)).exists() }
 

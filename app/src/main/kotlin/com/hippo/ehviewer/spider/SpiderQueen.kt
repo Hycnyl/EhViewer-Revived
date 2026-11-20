@@ -269,27 +269,30 @@ class SpiderQueen private constructor(val galleryInfo: GalleryInfo) : CoroutineS
 
     suspend fun awaitReady() = prepareJob.await()
 
-    private fun stop(): Job {
+    private fun stop() {
         val queenScope = this
-        return launch {
-            if (archiveJob.isActive) {
-                archiveJob.join()
-            }
-            if (!spiderDen.postArchive()) {
-                if (mWorkerScope.isDownloadMode) {
+        launch {
+            try {
+                if (archiveJob.isActive) {
+                    archiveJob.join()
+                }
+                if (!spiderDen.postArchive()) {
+                    if (mWorkerScope.isDownloadMode) {
+                        runCatching {
+                            spiderDen.writeComicInfo()
+                        }.onFailure {
+                            logcat(it)
+                        }
+                    }
                     runCatching {
-                        spiderDen.writeComicInfo()
+                        writeSpiderInfoToLocal()
                     }.onFailure {
                         logcat(it)
                     }
                 }
-                runCatching {
-                    writeSpiderInfoToLocal()
-                }.onFailure {
-                    logcat(it)
-                }
+            } finally {
+                queenScope.cancel()
             }
-            queenScope.cancel()
         }
     }
 
@@ -437,9 +440,9 @@ class SpiderQueen private constructor(val galleryInfo: GalleryInfo) : CoroutineS
         } else if (state == STATE_FINISHED) {
             notifyPageSuccess(index)
         }
-        if (mDownloadedPages.load() == size) {
+        if (downloadStarted && spiderDen.mode == MODE_DOWNLOAD && mDownloadedPages.load() == size) {
             if (mFinishedPages.load() == size) {
-                if (downloadStarted && spiderDen.mode == MODE_DOWNLOAD) archiveJob.start()
+                archiveJob.start()
             } else {
                 notifyAllPageDownloaded(failed = true)
             }
@@ -512,7 +515,8 @@ class SpiderQueen private constructor(val galleryInfo: GalleryInfo) : CoroutineS
                 clearMode(mode)
                 if (mReadReference == 0 && mDownloadReference == 0) {
                     val gid = galleryInfo.gid
-                    val cleanup = stop()
+                    val cleanup = coroutineContext.job
+                    stop()
                     retiring[gid] = cleanup
                     cleanup.invokeOnCompletion {
                         synchronized(sQueenMap) { retiring.remove(gid, cleanup) }

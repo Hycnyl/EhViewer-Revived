@@ -18,6 +18,7 @@ internal class CachedPageOutput(private val checkpoint: () -> Unit, private val 
 
     suspend fun write(source: File, destination: Path): Boolean {
         checkpoint()
+        check(!destination.hasIncompleteDownloadArchive()) { "Download archive is incomplete: ${destination.name}" }
         if (!destination.exists()) {
             // An orphaned marker has no page to protect. Allow a fresh export to recover.
             (destination.parent!! / rescueMarkerName(destination.name)).delete()
