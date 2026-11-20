@@ -54,7 +54,5 @@ private class FacetColor(color: Color) : VectorConfig {
     private val brush = SolidColor(color)
 
     @Suppress("UNCHECKED_CAST")
-    override fun <T> getOrDefault(property: VectorProperty<T>, defaultValue: T): T {
-        return if (property == VectorProperty.Fill && defaultValue is SolidColor) brush as T else defaultValue
-    }
+    override fun <T> getOrDefault(property: VectorProperty<T>, defaultValue: T): T = if (property == VectorProperty.Fill && defaultValue is SolidColor) brush as T else defaultValue
 }
