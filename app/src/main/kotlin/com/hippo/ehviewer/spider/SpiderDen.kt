@@ -306,14 +306,14 @@ class SpiderDen(val info: GalleryInfo) {
         }
         if (mode == SpiderQueen.MODE_DOWNLOAD) check(ensureImageInDownloadDir(index)) { "Source $index is not available in the download target" }
         val source = requireNotNull(findImageFile(index, directory = imageDir.takeIf { mode == SpiderQueen.MODE_DOWNLOAD })) { "Source $index not found!" }
-        return object : PathSource {
-            override val source = source
-            override val type by lazy {
-                FileUtils.getExtensionFromFilename(source.name)!!
-            }
+        return localImageSource(source)
+    }
 
-            override fun close() = Unit
-        }
+    private fun localImageSource(file: Path): PathSource = object : PathSource {
+        override val source = file
+        override val type by lazy { FileUtils.getExtensionFromFilename(file.name)!! }
+
+        override fun close() = Unit
     }
 
     private data class CommittedArchive(val file: Path, val fingerprint: RescueFingerprint, val pages: Map<Path, RescueFingerprint>)
@@ -328,7 +328,10 @@ class SpiderDen(val info: GalleryInfo) {
             val checkpoint = { context.ensureActive() }
             val staging = File(appCtx.cacheDir, "managed-cbz-$gid.tmp")
             try {
-                val sources = archiveTo(staging.toOkioPath(), pageCount)
+                val pageDir = checkNotNull(imageDir)
+                val sources = archiveTo(staging.toOkioPath(), pageCount) { index ->
+                    localImageSource(checkNotNull(findImageFile(index, directory = pageDir)))
+                }
                 val entries = verifyRescueZip(staging, sources.keys + COMIC_INFO_FILE, checkpoint)
                 val fingerprint = publishDownloadArchive(staging, destination, checkpoint)
                 committedArchive = CommittedArchive(destination, fingerprint, sources.entries.associate { (name, source) -> source to entries.getValue(name) })
@@ -344,6 +347,7 @@ class SpiderDen(val info: GalleryInfo) {
         if (committed.file.parent!!.completedArchive(committed.file.name) == null) return false
         if (runCatching { committed.file.withRescueInput { readRescueBytes(it) } }.getOrNull() != committed.fingerprint) return false
         for ((source, expected) in committed.pages) {
+            if (source.parent != committed.file.parent && source.parent != tempDownloadDir) continue
             runCatching {
                 if (source.withRescueInput { readRescueBytes(it) } == expected) SystemFileSystem.delete(source)
             }.onFailure { logcat(it) }
@@ -358,7 +362,7 @@ class SpiderDen(val info: GalleryInfo) {
         if (existing != null) existing sendTo file else archiveTo(file)
     }
 
-    private suspend fun archiveTo(file: Path, pageCount: Int? = null): Map<String, Path> = resourceScope {
+    private suspend fun archiveTo(file: Path, pageCount: Int? = null, sourceFor: (Int) -> PathSource = ::getImageSource): Map<String, Path> = resourceScope {
         val comicInfo = closeable {
             val f = downloadDir!! / COMIC_INFO_FILE
             if (!f.exists()) {
@@ -371,7 +375,7 @@ class SpiderDen(val info: GalleryInfo) {
         val pages = pageCount ?: info.pages
         check(pages > 0)
         val sources = (0 until pages).parMap { idx ->
-            val image = autoCloseable { getImageSource(idx) }
+            val image = autoCloseable { sourceFor(idx) }
             Triple(closeable { image.source.openFileDescriptor("r") }.fd, perFilename(idx, image.type), image.source)
         }
         val descriptors = sources.map { it.first } + comicInfo.fd

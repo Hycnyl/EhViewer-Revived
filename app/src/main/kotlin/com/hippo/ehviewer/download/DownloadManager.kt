@@ -218,6 +218,7 @@ object DownloadManager : OnSpiderListener, CoroutineScope {
                 mDownloadListener?.onStart(info)
                 // Notify state update
                 mutableNotifyFlow.emit(info)
+                spider.startDownload()
             }
         }
     }

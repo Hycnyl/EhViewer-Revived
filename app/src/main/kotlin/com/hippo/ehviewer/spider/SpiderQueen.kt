@@ -164,10 +164,18 @@ class SpiderQueen private constructor(val galleryInfo: GalleryInfo) : CoroutineS
 
     private val updateLock = Mutex()
 
+    @Volatile
+    private var downloadStarted = false
+
+    fun startDownload() {
+        downloadStarted = true
+        launch { updateMode() }
+    }
+
     private suspend fun updateMode() = runSuspendCatching {
         awaitReady()
         updateLock.withLock {
-            val mode: Int = if (mDownloadReference > 0) {
+            val mode: Int = if (mDownloadReference > 0 && downloadStarted) {
                 MODE_DOWNLOAD
             } else {
                 MODE_READ
@@ -221,7 +229,10 @@ class SpiderQueen private constructor(val galleryInfo: GalleryInfo) : CoroutineS
     private fun clearMode(@Mode mode: Int) {
         when (mode) {
             MODE_READ -> mReadReference--
-            MODE_DOWNLOAD -> mDownloadReference--
+            MODE_DOWNLOAD -> {
+                downloadStarted = false
+                mDownloadReference--
+            }
         }
         check(!(mReadReference < 0 || mDownloadReference < 0)) { "Mode reference < 0" }
     }
@@ -428,7 +439,7 @@ class SpiderQueen private constructor(val galleryInfo: GalleryInfo) : CoroutineS
         }
         if (mDownloadedPages.load() == size) {
             if (mFinishedPages.load() == size) {
-                if (spiderDen.mode == MODE_DOWNLOAD) archiveJob.start()
+                if (downloadStarted && spiderDen.mode == MODE_DOWNLOAD) archiveJob.start()
             } else {
                 notifyAllPageDownloaded(failed = true)
             }
@@ -492,7 +503,7 @@ class SpiderQueen private constructor(val galleryInfo: GalleryInfo) : CoroutineS
                 // map. Cancellation is not completion: its final file writes must finish.
                 galleryWorkGate.observe(gid, coroutineContext.job)
                 setMode(mode)
-                launch { updateMode() }
+                if (mode == MODE_READ) launch { updateMode() }
             }
         }
 
