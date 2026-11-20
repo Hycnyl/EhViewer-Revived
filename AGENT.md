@@ -94,3 +94,5 @@ UI 模块保留 `allWarningsAsErrors`，仅用 `-Xwarning-level=DEPRECATION:warn
 - 恢复可访问原存储卷或维护者密钥备份的执行器后，在上述源码工作树用 `tools/release.py sign` 签署五包；用 `release.yml` 的 `quick_release=true` 完成 API 33 覆盖升级、发布和公开下载校验。完成后删除来源分支、本地临时产物及本章节，更新正式版本记录。
 
 - 维护者要求试行本地构建、签名及验证，仅将正式发布委托 Actions。候选分支 [local-release-pilot](https://github.com/Hycnyl/EhViewer-Revived/tree/local-release-pilot) 已备好。当前环境无法执行本地命令，候选尚未经过实际构建、签名或设备验证。接入带有已固定工具链及原密钥的本地执行器后，使用候选分支的 tools/local_delivery.py 对上述产品源码进行试跑；成功公开发布并核对产物后再替换默认流程。本条仅用于本轮恢复。
+
+- 维护者授权采用可行方式完成正式发布，并表示有密钥备份。原执行器仍不可用，当前可运行的恢复入口为临时分支 recover-release-1.17.19（提交 9d385b1a35b2613a383784c25e16ddb88d8533cc）。[签名预检44667574147](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/44667574147)已明确缺少仓库 Secrets EHVIEWER_KEYSTORE_B64 和 EHVIEWER_STORE_PASSWORD；可选 EHVIEWER_KEY_PASSWORD 用于不同私钥密码。恢复入口只在临时runner恢复原证书，核对固定指纹后签署现有五包并触发原 release.yml 的API33验证/发布；结束即删除runner私钥文件。用户准备好Secrets后重跑该恢复作业即可，不需要重建已验证五包。最终正式发布后移除恢复分支和本临时章节。
