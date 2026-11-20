@@ -98,4 +98,4 @@ UI 模块保留 `allWarningsAsErrors`，仅用 `-Xwarning-level=DEPRECATION:warn
 
 - 回滚备份 [backup/pre-panda-vector-1.17.20](https://github.com/Hycnyl/EhViewer-Revived/tree/backup/pre-panda-vector-1.17.20) 已核对至 5182b938bdb13913a4bc9ce5203a224003a4f683。
 - 四档 WebP 已重绘为矢量，接入主题开关，默认保留经典配色。折面使用早期无损原图，还原当前透明轮廓。[几何比对](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/44683756469)
-- 候选源码 `0ab2eae35dc9a16a0c4aece2b6ac6c2c4c191d42`，版本 1.17.20（180095）。[五包构建](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/44684105335) 与[定向渲染](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/44684144592)进行中。成功后签名、验证升级和公开下载，最后删除备份及临时分支。
+- 首次 Compose 渲染通过，原图轮廓重合 99.445%，主题切换和恢复通过。已修正一处 Kotlin 格式问题。正式候选 `e8b11dcd47a6151e79af753379261deab00d2454`（1.17.20 / 180095）的[快速构建](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/44684449633)及[渲染复核](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/44684449491)运行中。通过后签名发布并清理备份。
