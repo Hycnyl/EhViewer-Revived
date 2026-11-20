@@ -79,6 +79,8 @@
 
 ## Adjusted
 
+- Completed CBZ archives are verified before loose pages are removed. Restored download directories are protected during cleanup.
+
 ### Custom reading cache size
 
 - Location: Settings → Advanced → Reading cache size → Custom.
