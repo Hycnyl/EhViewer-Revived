@@ -2,8 +2,10 @@
 package com.hippo.ehviewer.spider
 
 import android.os.ParcelFileDescriptor
+import com.ehviewer.core.files.SystemFileSystem
 import com.ehviewer.core.files.delete
 import com.ehviewer.core.files.exists
+import com.ehviewer.core.files.isFile
 import com.ehviewer.core.files.moveTo
 import com.ehviewer.core.files.openFileDescriptor
 import java.io.File
@@ -66,9 +68,35 @@ internal fun copyLocalPageSafely(source: Path, destination: Path) = commitLocalF
 )
 
 internal fun commitLocalFile(openSource: () -> InputStream, destination: Path, checkpoint: () -> Unit) {
-    val marker = destination.parent!! / rescueMarkerName(destination.name)
-    check(!destination.exists() && !marker.exists()) { "Destination already exists: $destination" }
-    val temporary = destination.parent!! / ".${destination.name}.${UUID.randomUUID()}.tmp"
+    val parent = destination.parent!!
+    commitLocalFile(openSource, destination, parent / rescueMarkerName(destination.name), parent / ".${destination.name}.${UUID.randomUUID()}.tmp", checkpoint)
+}
+
+private fun downloadMarker(name: String) = ".$name.download-incomplete"
+
+internal fun Path.hasIncompleteDownloadArchive() = (parent!! / downloadMarker(name)).exists()
+
+internal fun Path.completedArchive(name: String): Path? = (this / name).takeIf { it.isFile && !(this / downloadMarker(name)).exists() && !(this / rescueMarkerName(name)).exists() }
+
+internal fun publishDownloadArchive(source: File, destination: Path, checkpoint: () -> Unit): RescueFingerprint {
+    val parent = destination.parent!!
+    val marker = parent / downloadMarker(destination.name)
+    val temporary = parent / ".${destination.name}.download-staging"
+    check(!(parent / rescueMarkerName(destination.name)).exists()) { "A cache export is incomplete" }
+    // A freshly verified private CBZ is available before recovering this writer's reserved paths.
+    if (marker.isFile) {
+        if (destination.exists()) {
+            check(destination.isFile)
+            SystemFileSystem.delete(destination)
+        }
+        SystemFileSystem.delete(marker)
+    }
+    if (temporary.isFile) SystemFileSystem.delete(temporary)
+    return commitLocalFile({ source.inputStream() }, destination, marker, temporary, checkpoint)
+}
+
+private fun commitLocalFile(openSource: () -> InputStream, destination: Path, marker: Path, temporary: Path, checkpoint: () -> Unit): RescueFingerprint {
+    check(!destination.exists() && !marker.exists() && !temporary.exists()) { "Destination already exists: $destination" }
     val expected = openSource().use { readRescueBytes(it, checkpoint = checkpoint) }
     var ownsDestination = false
     var ownsMarker = false
@@ -99,4 +127,5 @@ internal fun commitLocalFile(openSource: () -> InputStream, destination: Path, c
         // If cleanup cannot remove the incomplete destination, retain its reader guard.
         if (!committed && ownsMarker && !destination.exists()) runCatching { marker.delete() }
     }
+    return expected
 }

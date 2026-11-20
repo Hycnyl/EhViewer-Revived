@@ -31,8 +31,6 @@ import androidx.compose.ui.unit.dp
 import arrow.fx.coroutines.parMap
 import arrow.fx.coroutines.parMapNotNull
 import com.ehviewer.core.database.model.DownloadInfo
-import com.ehviewer.core.files.delete
-import com.ehviewer.core.files.find
 import com.ehviewer.core.files.isDirectory
 import com.ehviewer.core.files.list
 import com.ehviewer.core.files.metadataOrNull
@@ -51,17 +49,14 @@ import com.hippo.ehviewer.Settings
 import com.hippo.ehviewer.asMutableState
 import com.hippo.ehviewer.client.EhEngine.fillGalleryListByApi
 import com.hippo.ehviewer.client.EhUrl
-import com.hippo.ehviewer.client.parser.GalleryDetailUrlParser
 import com.hippo.ehviewer.client.parser.ParserUtils
 import com.hippo.ehviewer.download.DownloadManager
 import com.hippo.ehviewer.download.downloadDir
 import com.hippo.ehviewer.download.downloadLocation
+import com.hippo.ehviewer.download.readDirectoryIdentity
 import com.hippo.ehviewer.spider.COMIC_INFO_FILE
 import com.hippo.ehviewer.spider.MIN_SPEED_LEVEL
 import com.hippo.ehviewer.spider.SpiderDen
-import com.hippo.ehviewer.spider.SpiderQueen.Companion.SPIDER_INFO_FILENAME
-import com.hippo.ehviewer.spider.readComicInfo
-import com.hippo.ehviewer.spider.readCompatFromPath
 import com.hippo.ehviewer.spider.speedLevelToSpeed
 import com.hippo.ehviewer.ui.Screen
 import com.hippo.ehviewer.ui.keepNoMediaFileStatus
@@ -256,48 +251,37 @@ fun AnimatedVisibilityScope.DownloadScreen(navigator: DestinationsNavigator) = S
                 title = stringResource(id = R.string.settings_download_restore_download_items),
                 summary = stringResource(id = R.string.settings_download_restore_download_items_summary),
             ) {
-                var restoreDirCount = 0
+                val root = downloadLocation
                 suspend fun getRestoreItem(file: Path): RestoreItem? {
                     if (!file.isDirectory) return null
-                    return runSuspendCatching {
-                        val (gid, token) = file.find(SPIDER_INFO_FILENAME)?.let {
-                            readCompatFromPath(it)?.run {
-                                GalleryDetailUrlParser.Result(gid, token)
-                            }
-                        } ?: file.find(COMIC_INFO_FILE)?.let {
-                            readComicInfo(it)?.run {
-                                GalleryDetailUrlParser.parse(web)
-                            }
-                        } ?: return null
-                        val dirname = file.name
-                        if (DownloadManager.containDownloadInfo(gid)) {
-                            // Restore download dir to avoid redownload
-                            val dbdirname = EhDB.getDownloadDirname(gid)
-                            if (null == dbdirname || dirname != dbdirname) {
-                                EhDB.putDownloadDirname(gid, dirname)
-                                restoreDirCount++
-                            }
-                            return null
-                        }
-                        RestoreItem(dirname, gid, token)
-                    }.onFailure {
-                        logcat(it)
-                    }.getOrNull()
+                    val identity = readDirectoryIdentity(file) ?: return null
+                    return RestoreItem(file.name, identity.gid, identity.token)
                 }
                 runSuspendCatching {
-                    val result = downloadLocation.list().parMapNotNull { getRestoreItem(it) }.also {
-                        fillGalleryListByApi(it, EhUrl.referer)
+                    var restoreDirCount = 0
+                    val result = mutableListOf<RestoreItem>()
+                    val candidates = root.list().parMapNotNull { file -> runSuspendCatching { getRestoreItem(file) }.getOrNull() }
+                    for (matches in candidates.groupBy { it.gid }.values) {
+                        val item = matches.singleOrNull() ?: continue
+                        check(downloadLocation == root)
+                        if (DownloadManager.containDownloadInfo(item.gid)) {
+                            if (runSuspendCatching { DownloadManager.reattachDownloadDirectory(root, item, root / item.dirname) }.onFailure { logcat(it) }.getOrDefault(false)) {
+                                restoreDirCount++
+                            }
+                        } else {
+                            result += item
+                        }
                     }
+                    fillGalleryListByApi(result, EhUrl.referer)
+                    check(downloadLocation == root)
                     if (result.isEmpty()) {
                         launchSnackbar(RESTORE_COUNT_MSG(restoreDirCount))
                     } else {
-                        val count = result.parMap {
-                            if (it.pages != 0) {
-                                EhDB.putDownloadDirname(it.gid, it.dirname)
-                                DownloadManager.restoreDownload(it.galleryInfo, it.dirname)
-                                SpiderDen(it.galleryInfo, it.dirname).writeComicInfo(false)
-                            }
-                        }.size
+                        val count = result.parMap { item ->
+                            item.pages != 0 && runSuspendCatching {
+                                DownloadManager.restoreFromDirectory(root, item.galleryInfo, item.dirname)
+                            }.onFailure { logcat(it) }.getOrDefault(false)
+                        }.count { it }
                         launchSnackbar(RESTORE_COUNT_MSG(count + restoreDirCount))
                     }
                 }.onFailure {
@@ -309,13 +293,10 @@ fun AnimatedVisibilityScope.DownloadScreen(navigator: DestinationsNavigator) = S
                 title = stringResource(id = R.string.settings_download_clean_redundancy),
                 summary = stringResource(id = R.string.settings_download_clean_redundancy_summary),
             ) {
-                fun isRedundant(file: Path): Boolean {
-                    if (!file.isDirectory) return false
-                    val name = file.name
-                    val gid = name.substringBefore('-').toLongOrNull() ?: return false
-                    return name != DownloadManager.getDownloadInfo(gid)?.dirname
+                val root = downloadLocation
+                val list = root.list().filter { file ->
+                    runSuspendCatching { DownloadManager.isRedundantDirectory(root, file) }.getOrDefault(false)
                 }
-                val list = downloadLocation.list().filter(::isRedundant)
                 if (list.isNotEmpty()) {
                     awaitConfirmationOrCancel(
                         confirmText = R.string.delete,
@@ -328,7 +309,9 @@ fun AnimatedVisibilityScope.DownloadScreen(navigator: DestinationsNavigator) = S
                         }
                     }
                 }
-                val cnt = list.count { runCatching { it.delete() }.getOrNull() != null }
+                val cnt = list.count { file ->
+                    runSuspendCatching { DownloadManager.deleteRedundantDirectory(root, file) }.onFailure { logcat(it) }.getOrDefault(false)
+                }
                 launchSnackbar(FINAL_CLEAR_REDUNDANCY_MSG(cnt))
             }
         }

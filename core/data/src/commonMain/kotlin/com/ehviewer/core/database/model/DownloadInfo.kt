@@ -73,7 +73,7 @@ data class DownloadInfo(
     val galleryInfo: GalleryEntity,
 
     @ColumnInfo(name = "DIRNAME")
-    val dirname: String?,
+    var dirname: String?,
 
     @Relation(parentColumn = "GID", entityColumn = "GID")
     var artistInfoList: List<DownloadArtist> = emptyList(),

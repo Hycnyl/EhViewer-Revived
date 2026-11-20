@@ -31,6 +31,9 @@ interface DownloadsDao {
     @Query("SELECT * FROM DOWNLOADS LEFT JOIN DOWNLOAD_DIRNAME USING(GID) ORDER BY TIME DESC")
     suspend fun joinList(): List<DownloadInfo>
 
+    @Query("SELECT EXISTS(SELECT 1 FROM DOWNLOAD_DIRNAME JOIN DOWNLOADS USING(GID) WHERE DIRNAME = :dirname AND (:exceptGid IS NULL OR GID != :exceptGid))")
+    suspend fun directoryOwnedByAnotherDownload(dirname: String, exceptGid: Long?): Boolean
+
     @Update
     suspend fun update(downloadInfo: List<DownloadEntity>)
 

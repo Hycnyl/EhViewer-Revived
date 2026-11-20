@@ -164,10 +164,18 @@ class SpiderQueen private constructor(val galleryInfo: GalleryInfo) : CoroutineS
 
     private val updateLock = Mutex()
 
+    @Volatile
+    private var downloadStarted = false
+
+    fun startDownload() {
+        downloadStarted = true
+        launch { updateMode() }
+    }
+
     private suspend fun updateMode() = runSuspendCatching {
         awaitReady()
         updateLock.withLock {
-            val mode: Int = if (mDownloadReference > 0) {
+            val mode: Int = if (mDownloadReference > 0 && downloadStarted) {
                 MODE_DOWNLOAD
             } else {
                 MODE_READ
@@ -176,6 +184,15 @@ class SpiderQueen private constructor(val galleryInfo: GalleryInfo) : CoroutineS
 
             // Update download page
             val intoDownloadMode = mode == MODE_DOWNLOAD
+            if (intoDownloadMode && retryArchive) {
+                retryArchive = false
+                archiveJob = newArchiveJob()
+                if (mFinishedPages.load() == size) {
+                    downloadMode = true
+                    archiveJob.start()
+                    return@withLock
+                }
+            }
             if (intoDownloadMode && !downloadMode) {
                 // Clear download state
                 synchronized(mPageStateLock) {
@@ -201,7 +218,10 @@ class SpiderQueen private constructor(val galleryInfo: GalleryInfo) : CoroutineS
     private fun setMode(@Mode mode: Int) {
         when (mode) {
             MODE_READ -> mReadReference++
-            MODE_DOWNLOAD -> mDownloadReference++
+            MODE_DOWNLOAD -> {
+                mDownloadReference++
+                retryArchive = archiveFailed
+            }
         }
         check(mDownloadReference <= 1) { "mDownloadReference can't more than 1" }
     }
@@ -209,17 +229,30 @@ class SpiderQueen private constructor(val galleryInfo: GalleryInfo) : CoroutineS
     private fun clearMode(@Mode mode: Int) {
         when (mode) {
             MODE_READ -> mReadReference--
-            MODE_DOWNLOAD -> mDownloadReference--
+            MODE_DOWNLOAD -> {
+                downloadStarted = false
+                mDownloadReference--
+            }
         }
         check(!(mReadReference < 0 || mDownloadReference < 0)) { "Mode reference < 0" }
     }
 
     private val prepareScope = CoroutineScope(coroutineContext + SupervisorJob())
     private val prepareJob = prepareScope.async { doPrepare() }
-    private val archiveJob = launch(start = CoroutineStart.LAZY) {
-        val failed = spiderDen.archive()
-        notifyAllPageDownloaded(failed)
+
+    @Volatile
+    private var archiveFailed = false
+
+    @Volatile
+    private var retryArchive = false
+
+    private fun newArchiveJob() = launch(start = CoroutineStart.LAZY) {
+        archiveFailed = spiderDen.archive(size)
+        notifyAllPageDownloaded(archiveFailed)
     }
+
+    @Volatile
+    private var archiveJob = newArchiveJob()
 
     private suspend fun doPrepare() {
         spiderDen.initDownloadDirIfExist()
@@ -240,24 +273,27 @@ class SpiderQueen private constructor(val galleryInfo: GalleryInfo) : CoroutineS
     private fun stop() {
         val queenScope = this
         launch {
-            if (archiveJob.isActive) {
-                archiveJob.join()
-            }
-            if (!spiderDen.postArchive()) {
-                if (mWorkerScope.isDownloadMode) {
+            try {
+                if (archiveJob.isActive) {
+                    archiveJob.join()
+                }
+                if (!spiderDen.postArchive()) {
+                    if (mWorkerScope.isDownloadMode) {
+                        runCatching {
+                            spiderDen.writeComicInfo()
+                        }.onFailure {
+                            logcat(it)
+                        }
+                    }
                     runCatching {
-                        spiderDen.writeComicInfo()
+                        writeSpiderInfoToLocal()
                     }.onFailure {
                         logcat(it)
                     }
                 }
-                runCatching {
-                    writeSpiderInfoToLocal()
-                }.onFailure {
-                    logcat(it)
-                }
+            } finally {
+                queenScope.cancel()
             }
-            queenScope.cancel()
         }
     }
 
@@ -405,7 +441,7 @@ class SpiderQueen private constructor(val galleryInfo: GalleryInfo) : CoroutineS
         } else if (state == STATE_FINISHED) {
             notifyPageSuccess(index)
         }
-        if (mDownloadedPages.load() == size) {
+        if (downloadStarted && spiderDen.mode == MODE_DOWNLOAD && mDownloadedPages.load() == size) {
             if (mFinishedPages.load() == size) {
                 archiveJob.start()
             } else {
@@ -441,20 +477,37 @@ class SpiderQueen private constructor(val galleryInfo: GalleryInfo) : CoroutineS
         const val SPIDER_INFO_FILENAME = ".ehviewer"
         private val sQueenMap = mutableMapOf<Long, SpiderQueen>()
 
-        suspend fun obtainSpiderQueen(galleryInfo: GalleryInfo, @Mode mode: Int): SpiderQueen = if (mode == MODE_READ) {
-            galleryWorkGate.withReader(galleryInfo.gid) { obtain(galleryInfo, mode) }
-        } else {
-            obtain(galleryInfo, mode)
+        private val retiring = mutableMapOf<Long, Job>()
+
+        suspend fun obtainSpiderQueen(galleryInfo: GalleryInfo, @Mode mode: Int): SpiderQueen {
+            while (true) {
+                var waiting: Job? = null
+                val acquire = {
+                    synchronized(sQueenMap) {
+                        val previous = retiring[galleryInfo.gid]
+                        if (previous != null && !previous.isCompleted) {
+                            waiting = previous
+                            null
+                        } else {
+                            obtain(galleryInfo, mode)
+                        }
+                    }
+                }
+                val queen = if (mode == MODE_READ) galleryWorkGate.withReader(galleryInfo.gid, acquire) else acquire()
+                if (queen != null) return queen
+                checkNotNull(waiting).join()
+            }
         }
 
-        private fun obtain(galleryInfo: GalleryInfo, @Mode mode: Int): SpiderQueen = synchronized(sQueenMap) {
+        // Caller holds sQueenMap. A retiring instance must finish file I/O before reuse of this GID.
+        private fun obtain(galleryInfo: GalleryInfo, @Mode mode: Int): SpiderQueen {
             val gid = galleryInfo.gid
-            (sQueenMap.getOrPut(gid) { SpiderQueen(galleryInfo) }).apply {
+            return (sQueenMap.getOrPut(gid) { SpiderQueen(galleryInfo) }).apply {
                 // Keep the job registered even after release removes this queen from the
                 // map. Cancellation is not completion: its final file writes must finish.
                 galleryWorkGate.observe(gid, coroutineContext.job)
                 setMode(mode)
-                launch { updateMode() }
+                if (mode == MODE_READ) launch { updateMode() }
             }
         }
 
@@ -462,8 +515,14 @@ class SpiderQueen private constructor(val galleryInfo: GalleryInfo) : CoroutineS
             queen.run {
                 clearMode(mode)
                 if (mReadReference == 0 && mDownloadReference == 0) {
+                    val gid = galleryInfo.gid
+                    val cleanup = coroutineContext.job
                     stop()
-                    sQueenMap.remove(galleryInfo.gid)
+                    retiring[gid] = cleanup
+                    cleanup.invokeOnCompletion {
+                        synchronized(sQueenMap) { retiring.remove(gid, cleanup) }
+                    }
+                    sQueenMap.remove(gid)
                 } else {
                     launch { updateMode() }
                 }
