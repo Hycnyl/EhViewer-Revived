@@ -22,6 +22,7 @@ import arrow.fx.coroutines.closeable
 import arrow.fx.coroutines.parMap
 import arrow.fx.coroutines.resourceScope
 import com.ehviewer.core.database.model.DownloadArtist
+import com.ehviewer.core.files.SystemFileSystem
 import com.ehviewer.core.files.delete
 import com.ehviewer.core.files.exists
 import com.ehviewer.core.files.find
@@ -55,11 +56,16 @@ import com.hippo.ehviewer.util.sha1
 import io.ktor.client.statement.HttpResponse
 import io.ktor.client.statement.bodyAsChannel
 import io.ktor.client.statement.request
+import java.io.File
 import java.util.concurrent.locks.ReentrantReadWriteLock
 import kotlin.concurrent.read
 import kotlin.concurrent.write
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.ensureActive
 import moe.tarsin.coroutines.runSuspendCatching
 import okio.Path
+import okio.Path.Companion.toOkioPath
+import splitties.init.appCtx
 
 class SpiderDen(val info: GalleryInfo) {
     private val gid = info.gid
@@ -310,36 +316,49 @@ class SpiderDen(val info: GalleryInfo) {
         }
     }
 
-    suspend fun archive() = saveAsCbz && downloadDir?.run {
-        resolve(archiveName).let { file ->
-            runCatching {
-                archiveTo(file)
-            }.onFailure {
-                file.delete()
-                logcat(it)
-            }.isFailure
-        }
-    } == true
+    private data class CommittedArchive(val file: Path, val fingerprint: RescueFingerprint, val pages: Map<Path, RescueFingerprint>)
+    private var committedArchive: CommittedArchive? = null
 
-    // Postpone this to `SpiderQueen.stop` because files may still be in use by reader
-    suspend fun postArchive(): Boolean {
-        val dir = downloadDir
-        val archived = saveAsCbz && dir?.find(archiveName) != null
-        if (archived) {
-            dir.list().parMap(concurrency = 10) {
-                if (it.name.matches(FileNameRegex)) {
-                    it.delete()
-                }
+    suspend fun archive(pageCount: Int): Boolean {
+        if (!saveAsCbz || mode != SpiderQueen.MODE_DOWNLOAD) return false
+        return runSuspendCatching {
+            val dir = checkNotNull(downloadDir)
+            val destination = dir / archiveName
+            val context = currentCoroutineContext()
+            val checkpoint = { context.ensureActive() }
+            val staging = File(appCtx.cacheDir, "managed-cbz-$gid.tmp")
+            try {
+                val sources = archiveTo(staging.toOkioPath(), pageCount)
+                val entries = verifyRescueZip(staging, sources.keys + COMIC_INFO_FILE, checkpoint)
+                val fingerprint = publishDownloadArchive(staging, destination, checkpoint)
+                committedArchive = CommittedArchive(destination, fingerprint, sources.entries.associate { (name, source) -> source to entries.getValue(name) })
+            } finally {
+                staging.delete()
             }
-            (dir / SpiderQueen.SPIDER_INFO_FILENAME).delete()
-            tempDownloadDir?.delete()
-        }
-        return archived
+        }.onFailure { logcat(it) }.isFailure
     }
 
-    suspend fun exportAsCbz(file: Path) = downloadDir!!.find(archiveName)?.sendTo(file) ?: archiveTo(file)
+    // This queen has released its readers. Delete only the loose files it actually archived.
+    fun postArchive(): Boolean {
+        val committed = committedArchive ?: return false
+        if (committed.file.parent!!.completedArchive(committed.file.name) == null) return false
+        if (runCatching { committed.file.withRescueInput { readRescueBytes(it) } }.getOrNull() != committed.fingerprint) return false
+        for ((source, expected) in committed.pages) {
+            runCatching {
+                if (source.withRescueInput { readRescueBytes(it) } == expected) SystemFileSystem.delete(source)
+            }.onFailure { logcat(it) }
+        }
+        // The temporary download directory is a physical app directory. File.delete only removes an empty directory.
+        tempDownloadDir?.toFile()?.delete()
+        return true
+    }
 
-    private suspend fun archiveTo(file: Path) = resourceScope {
+    suspend fun exportAsCbz(file: Path) {
+        val existing = downloadDir!!.completedArchive(archiveName)
+        if (existing != null) existing sendTo file else archiveTo(file)
+    }
+
+    private suspend fun archiveTo(file: Path, pageCount: Int? = null): Map<String, Path> = resourceScope {
         val comicInfo = closeable {
             val f = downloadDir!! / COMIC_INFO_FILE
             if (!f.exists()) {
@@ -349,13 +368,17 @@ class SpiderDen(val info: GalleryInfo) {
             }
             f.openFileDescriptor("r")
         }
-        val pages = info.pages
-        val (fdBatch, names) = (0 until pages).parMap { idx ->
-            val f = autoCloseable { getImageSource(idx) }
-            closeable { f.source.openFileDescriptor("r") }.fd to perFilename(idx, f.type)
-        }.run { plus(comicInfo.fd to COMIC_INFO_FILE) }.unzip()
-        val arcFd = closeable { file.openFileDescriptor("rw") }
-        archiveFdBatch(fdBatch.toIntArray(), names.toTypedArray(), arcFd.fd, pages + 1)
+        val pages = pageCount ?: info.pages
+        check(pages > 0)
+        val sources = (0 until pages).parMap { idx ->
+            val image = autoCloseable { getImageSource(idx) }
+            Triple(closeable { image.source.openFileDescriptor("r") }.fd, perFilename(idx, image.type), image.source)
+        }
+        val descriptors = sources.map { it.first } + comicInfo.fd
+        val names = sources.map { it.second } + COMIC_INFO_FILE
+        val arcFd = closeable { file.openFileDescriptor("wt") }
+        archiveFdBatch(descriptors.toIntArray(), names.toTypedArray(), arcFd.fd, names.size)
+        sources.associate { it.second to it.third }
     }
 
     suspend fun initDownloadDirIfExist() {
@@ -386,7 +409,6 @@ class SpiderDen(val info: GalleryInfo) {
 }
 
 private const val TEMP_SUFFIX = ".tmp"
-private val FileNameRegex = Regex("^\\d{8}\\.\\w{3,4}")
 private val FileHashRegex = Regex("/h/([0-9a-f]{40})")
 
 fun perFilename(index: Int, extension: String = ""): String = "%08d.%s".format(index + 1, extension)

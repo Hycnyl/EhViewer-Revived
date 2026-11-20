@@ -23,6 +23,9 @@
 #include <errno.h>
 #include <pthread.h>
 #include <sys/mman.h>
+#include <sys/stat.h>
+#include <unistd.h>
+#include <stdint.h>
 
 #include <jni.h>
 #include <android/log.h>
@@ -454,37 +457,58 @@ Java_com_hippo_ehviewer_jni_ArchiveKt_releaseByteBuffer(JNIEnv *env, jclass thiz
     }
 }
 
+static bool write_fd_entry(struct archive *arc, struct archive_entry *entry, int fd) {
+    struct stat st;
+    if (fstat(fd, &st) != 0) return false;
+    archive_entry_set_filetype(entry, AE_IFREG);
+    archive_entry_set_perm(entry, 0644);
+    archive_entry_set_mtime(entry, st.st_mtime, 0);
+    if (S_ISREG(st.st_mode)) archive_entry_set_size(entry, st.st_size);
+    if (archive_write_header(arc, entry) != ARCHIVE_OK) return false;
+
+    char buffer[32768];
+    int64_t total = 0;
+    for (;;) {
+        ssize_t count = read(fd, buffer, sizeof(buffer));
+        if (count < 0 && errno == EINTR) continue;
+        if (count < 0) return false;
+        if (count == 0) break;
+        if (archive_write_data(arc, buffer, (size_t)count) != count) return false;
+        total += count;
+    }
+    return total > 0 && (!S_ISREG(st.st_mode) || total == st.st_size) &&
+           archive_write_finish_entry(arc) == ARCHIVE_OK;
+}
+
 JNIEXPORT void JNICALL
 Java_com_hippo_ehviewer_jni_ArchiveKt_archiveFdBatch(JNIEnv *env, jclass clazz, jintArray fd_batch, jobjectArray names, jint arc_fd, jint size) {
     EH_UNUSED(clazz);
     struct archive *arc = archive_write_new();
-    struct stat st;
-    char buff[8192];
-    jint fdBatch[size];
-    (*env)->GetIntArrayRegion(env, fd_batch, 0, size, fdBatch);
-    archive_write_set_format_zip(arc);
-    archive_write_zip_set_compression_store(arc);
-    archive_write_open_fd(arc, arc_fd);
     struct archive_entry *entry = archive_entry_new();
-    for (int i = 0; i < size; i++) {
-        int fd = fdBatch[i];
-        jobject name = (*env)->GetObjectArrayElement(env, names, i);
-        const char *cname = (*env)->GetStringUTFChars(env, name, false);
-        archive_entry_set_pathname(entry, cname);
-        (*env)->ReleaseStringUTFChars(env, name, cname);
-        fstat(fd, &st);
-        archive_entry_copy_stat(entry, &st);
-        archive_entry_set_perm(entry, 0644);
-        archive_write_header(arc, entry);
-        size_t len;
-        do {
-            len = read(fd, buff, sizeof(buff));
-            archive_write_data(arc, buff, len);
-        } while (len > 0);
-        archive_write_finish_entry(arc);
+    bool ok = arc && entry && size > 0 &&
+              size == (*env)->GetArrayLength(env, fd_batch) && size == (*env)->GetArrayLength(env, names) &&
+              archive_write_set_format_zip(arc) == ARCHIVE_OK &&
+              archive_write_zip_set_compression_store(arc) == ARCHIVE_OK &&
+              archive_write_open_fd(arc, arc_fd) == ARCHIVE_OK;
+    bool opened = ok;
+    for (int i = 0; ok && i < size; i++) {
+        jint fd;
+        (*env)->GetIntArrayRegion(env, fd_batch, i, 1, &fd);
+        if ((*env)->ExceptionCheck(env)) { ok = false; break; }
+        jstring name = (*env)->GetObjectArrayElement(env, names, i);
+        const char *text = name ? (*env)->GetStringUTFChars(env, name, NULL) : NULL;
+        if (!text) { ok = false; break; }
         archive_entry_clear(entry);
+        archive_entry_set_pathname(entry, text);
+        (*env)->ReleaseStringUTFChars(env, name, text);
+        (*env)->DeleteLocalRef(env, name);
+        ok = write_fd_entry(arc, entry, fd);
     }
+    if (opened && archive_write_close(arc) != ARCHIVE_OK) ok = false;
     archive_entry_free(entry);
-    archive_write_close(arc);
-    archive_write_free(arc);
+    if (arc && archive_write_free(arc) != ARCHIVE_OK) ok = false;
+    if (!ok && !(*env)->ExceptionCheck(env)) {
+        jclass exception = (*env)->FindClass(env, "java/io/IOException");
+        if (exception) (*env)->ThrowNew(env, exception, "Could not completely read or write the CBZ archive");
+    }
 }

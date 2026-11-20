@@ -54,6 +54,7 @@ import com.hippo.ehviewer.spider.SpeedTracker
 import com.hippo.ehviewer.spider.SpiderQueen
 import com.hippo.ehviewer.spider.SpiderQueen.Companion.SPIDER_INFO_FILENAME
 import com.hippo.ehviewer.spider.SpiderQueen.OnSpiderListener
+import com.hippo.ehviewer.spider.completedArchive
 import com.hippo.ehviewer.spider.downloadDirname
 import com.hippo.ehviewer.spider.matchesIdentity
 import com.hippo.ehviewer.spider.readComicInfo
@@ -923,5 +924,5 @@ var downloadLocation: Path
     }
 
 val DownloadInfo.downloadDir get() = dirname?.let { downloadLocation / it }
-val DownloadInfo.archiveFile get() = downloadDir?.run { find("$gid.cbz") ?: find("$gid.zip") }
+val DownloadInfo.archiveFile get() = downloadDir?.run { completedArchive("$gid.cbz") ?: completedArchive("$gid.zip") }
 val GalleryInfo.tempDownloadDir get() = AppConfig.externalTempPersistDir?.let { it / "$gid" }
