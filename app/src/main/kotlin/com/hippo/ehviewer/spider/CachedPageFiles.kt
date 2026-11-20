@@ -79,17 +79,16 @@ internal fun readRescueBytes(
     return RescueFingerprint(size, crc.value)
 }
 
-internal fun verifyRescueZip(file: File, expectedNames: Set<String>, checkpoint: () -> Unit = {}): Map<String, RescueFingerprint> =
-    ZipFile(file).use { zip ->
-        val seen = mutableMapOf<String, RescueFingerprint>()
-        zip.entries().asSequence().forEach { entry ->
-            checkpoint()
-            check(entry.name in expectedNames && entry.name !in seen) { "Unexpected or duplicate ZIP entry: ${entry.name}" }
-            check(!entry.isDirectory && entry.method in setOf(ZipEntry.DEFLATED, ZipEntry.STORED))
-            val fingerprint = zip.getInputStream(entry).use { readRescueBytes(it, checkpoint = checkpoint) }
-            check(fingerprint.size == entry.size && fingerprint.crc == entry.crc) { "ZIP integrity check failed: ${entry.name}" }
-            seen[entry.name] = fingerprint
-        }
-        check(seen.keys == expectedNames) { "Missing ZIP entries" }
-        seen
+internal fun verifyRescueZip(file: File, expectedNames: Set<String>, checkpoint: () -> Unit = {}): Map<String, RescueFingerprint> = ZipFile(file).use { zip ->
+    val seen = mutableMapOf<String, RescueFingerprint>()
+    zip.entries().asSequence().forEach { entry ->
+        checkpoint()
+        check(entry.name in expectedNames && entry.name !in seen) { "Unexpected or duplicate ZIP entry: ${entry.name}" }
+        check(!entry.isDirectory && entry.method in setOf(ZipEntry.DEFLATED, ZipEntry.STORED))
+        val fingerprint = zip.getInputStream(entry).use { readRescueBytes(it, checkpoint = checkpoint) }
+        check(fingerprint.size == entry.size && fingerprint.crc == entry.crc) { "ZIP integrity check failed: ${entry.name}" }
+        seen[entry.name] = fingerprint
     }
+    check(seen.keys == expectedNames) { "Missing ZIP entries" }
+    seen
+}

@@ -400,25 +400,26 @@ object DownloadManager : OnSpiderListener, CoroutineScope {
     }
 
     // The same objects are referenced by the list, GID index, and selected-item UI.
-    internal suspend fun reattachDownloadDirectory(root: Path, gallery: GalleryInfo, directory: Path): Boolean =
-        withCachedPageExport(gallery.gid, "Download is in use") {
-            val info = sortMutex.withLock {
-                val item = getDownloadInfo(gallery.gid) ?: return@withLock null
-                if (root != downloadLocation || directory.parent != root || item.token != gallery.token ||
-                    readDirectoryIdentity(directory)?.let { it.gid == gallery.gid && it.token == gallery.token } != true
-                ) return@withLock null
-                val name = directory.name
-                val persisted = EhDB.getDownloadDirname(item.gid)
-                if (persisted == name && item.dirname == name) return@withLock null
-                if (listOfNotNull(item.dirname, persisted).any { it != name && (root / it).exists() }) return@withLock null
-                if (allInfoList.any { it.gid != item.gid && it.dirname == name } || EhDB.directoryOwnedByAnotherDownload(name, item.gid)) return@withLock null
-                EhDB.putDownloadDirname(item.gid, name)
-                item.dirname = name
-                item
-            } ?: return@withCachedPageExport false
-            mutableNotifyFlow.emit(info)
-            true
-        }
+    internal suspend fun reattachDownloadDirectory(root: Path, gallery: GalleryInfo, directory: Path): Boolean = withCachedPageExport(gallery.gid, "Download is in use") {
+        val info = sortMutex.withLock {
+            val item = getDownloadInfo(gallery.gid) ?: return@withLock null
+            if (root != downloadLocation || directory.parent != root || item.token != gallery.token ||
+                readDirectoryIdentity(directory)?.let { it.gid == gallery.gid && it.token == gallery.token } != true
+            ) {
+                return@withLock null
+            }
+            val name = directory.name
+            val persisted = EhDB.getDownloadDirname(item.gid)
+            if (persisted == name && item.dirname == name) return@withLock null
+            if (listOfNotNull(item.dirname, persisted).any { it != name && (root / it).exists() }) return@withLock null
+            if (allInfoList.any { it.gid != item.gid && it.dirname == name } || EhDB.directoryOwnedByAnotherDownload(name, item.gid)) return@withLock null
+            EhDB.putDownloadDirname(item.gid, name)
+            item.dirname = name
+            item
+        } ?: return@withCachedPageExport false
+        mutableNotifyFlow.emit(info)
+        true
+    }
 
     internal suspend fun isRedundantDirectory(root: Path, file: Path): Boolean = sortMutex.withLock {
         isUnclaimedDirectory(root, file)
@@ -447,24 +448,25 @@ object DownloadManager : OnSpiderListener, CoroutineScope {
         }
     }
 
-    internal suspend fun restoreFromDirectory(root: Path, gallery: BaseGalleryInfo, dirname: String): Boolean =
-        withCachedPageExport(gallery.gid, "Download is in use") {
-            val directory = root / dirname
-            if (downloadLocation != root || readDirectoryIdentity(directory)?.let { it.gid == gallery.gid && it.token == gallery.token } != true) {
-                return@withCachedPageExport false
-            }
-            val inserted = restoreDownload(gallery, dirname)
-            if (inserted) {
-                runSuspendCatching { SpiderDen(gallery, directory).writeComicInfo(false) }.onFailure { logcat(it) }
-            }
-            inserted
+    internal suspend fun restoreFromDirectory(root: Path, gallery: BaseGalleryInfo, dirname: String): Boolean = withCachedPageExport(gallery.gid, "Download is in use") {
+        val directory = root / dirname
+        if (downloadLocation != root || readDirectoryIdentity(directory)?.let { it.gid == gallery.gid && it.token == gallery.token } != true) {
+            return@withCachedPageExport false
         }
+        val inserted = restoreDownload(gallery, dirname)
+        if (inserted) {
+            runSuspendCatching { SpiderDen(gallery, directory).writeComicInfo(false) }.onFailure { logcat(it) }
+        }
+        inserted
+    }
 
     suspend fun restoreDownload(galleryInfo: BaseGalleryInfo, dirname: String): Boolean {
         val info = sortMutex.withLock {
             if (containDownloadInfo(galleryInfo.gid) || allInfoList.any { it.dirname == dirname } ||
                 EhDB.directoryOwnedByAnotherDownload(dirname, galleryInfo.gid)
-            ) return@withLock null
+            ) {
+                return@withLock null
+            }
             DownloadInfo(galleryInfo.asEntity(), dirname).also {
                 it.state = DownloadInfo.STATE_NONE
                 EhDB.putRestoredDownload(it, dirname)
