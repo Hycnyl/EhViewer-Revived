@@ -422,4 +422,5 @@
     <string name="gallery_version_expunged">Expunged</string>
     <string name="settings_eh_list_mode_scope">%1$s · 다운로드는 별도</string>
     <string name="list_tile_thumb_size">상세 보기 표지 크기</string>
+    <string name="drawer_panda_theme_color">사이드바 판다에 테마 색상 적용</string>
 </resources>

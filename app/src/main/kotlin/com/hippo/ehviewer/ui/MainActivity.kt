@@ -28,7 +28,6 @@ import android.widget.Toast
 import androidx.compose.animation.SharedTransitionLayout
 import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.animation.core.animateDpAsState
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
@@ -83,11 +82,9 @@ import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
@@ -382,11 +379,9 @@ class MainActivity : EhActivity() {
                                     modifier = Modifier.verticalScroll(scrollState)
                                         .windowInsetsPadding(WindowInsets.systemBars.only(WindowInsetsSides.Bottom)),
                                 ) {
-                                    Image(
-                                        painter = painterResource(id = com.hippo.ehviewer.R.drawable.sadpanda_low_poly),
-                                        contentDescription = null,
+                                    DrawerPanda(
+                                        followTheme = Settings.drawerPandaThemeColor.collectAsState().value,
                                         modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
-                                        contentScale = ContentScale.FillWidth,
                                     )
                                     navItems.forEach { (direction, stringId, icon) ->
                                         NavigationDrawerItem(

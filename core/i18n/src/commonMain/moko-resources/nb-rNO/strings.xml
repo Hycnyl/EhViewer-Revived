@@ -250,4 +250,5 @@
     <string name="settings_eh_detail_size">Bredde på detaljkort</string>
     <string name="settings_eh_detail_size_long">Bred</string>
     <string name="settings_eh_detail_size_short">Smal</string>
+    <string name="drawer_panda_theme_color">Bruk temafargene på pandaen i sidemenyen</string>
 </resources>

@@ -641,4 +641,5 @@
     <string name="theme_color_invalid_hex">請輸入六位顏色代碼</string>
     <string name="settings_eh_list_mode_scope">%1$s · 瀏覽、收藏、歷史同步，下載頁獨立</string>
     <string name="list_tile_thumb_size">詳情封面大小</string>
+    <string name="drawer_panda_theme_color">側邊欄熊貓跟隨主題配色</string>
 </resources>

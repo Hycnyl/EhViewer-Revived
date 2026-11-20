@@ -141,6 +141,7 @@
 
 ## Other
 
+- The sidebar panda now scales to any resolution. Enable theme colors in Settings → Theme.
 - Four theme styles, clearer gallery view settings, and improved gallery download and floating menu controls.
 
 - Unified theme palette, multiple custom colors, and gradient color sliders.

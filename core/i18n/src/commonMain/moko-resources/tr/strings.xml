@@ -140,4 +140,5 @@
     <string name="settings_eh_detail_size">Ayrıntı kartı genişliği</string>
     <string name="settings_eh_detail_size_long">Geniş</string>
     <string name="settings_eh_detail_size_short">Dar</string>
+    <string name="drawer_panda_theme_color">Kenar çubuğundaki panda için tema renklerini kullan</string>
 </resources>

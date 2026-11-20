@@ -81,6 +81,7 @@ object Settings : DataStorePreferences(null) {
     val themePaletteStyle = intPref("theme_palette_style", 0)
     val themeCustomPalette = stringOrNullPref("theme_custom_palette")
     val themeHiddenPresets = stringPref("theme_hidden_presets", "")
+    val drawerPandaThemeColor = boolPref("drawer_panda_theme_color", false)
     val harmonizeCategoryColor = boolPref("harmonize_category_color", true)
     val launchPage = intPref("launch_page_2", 0)
     val listMode = intPref("list_mode_2", 0)

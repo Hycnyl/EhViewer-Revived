@@ -380,4 +380,5 @@
     <string name="gallery_version_expunged">Expunged</string>
     <string name="settings_eh_list_mode_scope">%1$s · Downloads separat</string>
     <string name="list_tile_thumb_size">Covergröße in der Detailansicht</string>
+    <string name="drawer_panda_theme_color">Themenfarben für den Panda in der Seitenleiste verwenden</string>
 </resources>

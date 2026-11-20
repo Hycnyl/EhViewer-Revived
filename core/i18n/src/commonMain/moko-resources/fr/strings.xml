@@ -452,4 +452,5 @@
     <string name="gallery_version_expunged">Expunged</string>
     <string name="settings_eh_list_mode_scope">%1$s · Télécharg. à part</string>
     <string name="list_tile_thumb_size">Taille des couvertures en vue détaillée</string>
+    <string name="drawer_panda_theme_color">Utiliser les couleurs du thème pour le panda du menu latéral</string>
 </resources>

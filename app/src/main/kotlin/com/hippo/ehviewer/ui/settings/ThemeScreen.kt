@@ -80,6 +80,10 @@ fun AnimatedVisibilityScope.ThemeScreen(navigator: DestinationsNavigator) = Scre
             }
             ThemeColorPreference(isDarkTheme)
             SwitchPreference(
+                title = stringResource(id = R.string.drawer_panda_theme_color),
+                state = Settings.drawerPandaThemeColor.asMutableState(),
+            )
+            SwitchPreference(
                 title = stringResource(id = R.string.harmonize_category_color),
                 state = Settings.harmonizeCategoryColor.asMutableState(),
             )

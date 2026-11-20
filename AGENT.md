@@ -96,5 +96,6 @@ UI 模块保留 `allWarningsAsErrors`，仅用 `-Xwarning-level=DEPRECATION:warn
 
 ## 临时进度 · 1.17.20 侧边栏熊猫
 
-- 已在修改前备份 main 至 [backup/pre-panda-vector-1.17.20](https://github.com/Hycnyl/EhViewer-Revived/tree/backup/pre-panda-vector-1.17.20)，并核对提交 5182b938bdb13913a4bc9ce5203a224003a4f683。当前正式版为 1.17.19。
-- 已定位四档 WebP 和侧边栏入口。接下来比对原图、实现经典及主题配色，验证并发布 1.17.20 后删除备份。
+- 回滚备份 [backup/pre-panda-vector-1.17.20](https://github.com/Hycnyl/EhViewer-Revived/tree/backup/pre-panda-vector-1.17.20) 已核对至 5182b938bdb13913a4bc9ce5203a224003a4f683。
+- 四档 WebP 已重绘为矢量，接入主题开关，默认保留经典配色。折面使用早期无损原图，还原当前透明轮廓。[几何比对](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/44683756469)
+- 下一步验证实际 Compose 渲染、构建并签名发布 1.17.20（180095），复核后删除备份和临时分支。

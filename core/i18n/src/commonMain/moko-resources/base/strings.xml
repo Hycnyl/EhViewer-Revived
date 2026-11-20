@@ -460,6 +460,7 @@
     <string name="favorite_name">Favorite Category</string>
     <string name="dark_theme">Dark theme</string>
     <string name="black_dark_theme">Black dark theme</string>
+    <string name="drawer_panda_theme_color">Use theme colors for the sidebar panda</string>
     <string name="harmonize_category_color">Harmonize category color for Dynamic Color</string>
     <string name="sort_by">Sort by</string>
     <string name="added_time_desc">Added time (descending)</string>

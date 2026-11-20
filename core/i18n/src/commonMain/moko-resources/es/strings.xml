@@ -428,4 +428,5 @@
     <string name="gallery_version_expunged">Expunged</string>
     <string name="settings_eh_list_mode_scope">%1$s · Descarga aparte</string>
     <string name="list_tile_thumb_size">Tamaño de portadas en la vista detallada</string>
+    <string name="drawer_panda_theme_color">Usar los colores del tema en el panda del menú lateral</string>
 </resources>
