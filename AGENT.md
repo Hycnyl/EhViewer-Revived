@@ -97,4 +97,4 @@ UI 模块保留 `allWarningsAsErrors`，仅用 `-Xwarning-level=DEPRECATION:warn
 ## 临时进度 · 1.17.21 界面细节
 
 - 版本候选 1.17.21（180096）已完成设置、分享提示、操作排序、轨道形状和矢量原画修正。经典与主题共用无运行时裁切的折面。12 份语言文件已更新，重点语言审计涵盖 131 项资源。
-- 下一步运行同尺寸黑白底对照、原生工具提示及阅读器操作验证，构建、签名发布。
+- 候选源码 `b970aa21304f4c6ed4af5ffaa17a06212f75d4b3` 已启动[五包构建](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/44696212003)和[黑白底、分享、菜单与调色器定向检查](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/44696334429)。成功后使用原证书签名、验证升级并发布。
