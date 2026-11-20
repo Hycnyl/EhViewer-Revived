@@ -277,13 +277,11 @@ fun AnimatedVisibilityScope.DownloadScreen(navigator: DestinationsNavigator) = S
                     if (result.isEmpty()) {
                         launchSnackbar(RESTORE_COUNT_MSG(restoreDirCount))
                     } else {
-                        val count = result.parMap {
-                            if (it.pages != 0) {
-                                EhDB.putDownloadDirname(it.gid, it.dirname)
-                                DownloadManager.restoreDownload(it.galleryInfo, it.dirname)
-                                SpiderDen(it.galleryInfo, it.dirname).writeComicInfo(false)
-                            }
-                        }.size
+                        val count = result.parMap { item ->
+                            item.pages != 0 && runSuspendCatching {
+                                DownloadManager.restoreFromDirectory(root, item.galleryInfo, item.dirname)
+                            }.onFailure { logcat(it) }.getOrDefault(false)
+                        }.count { it }
                         launchSnackbar(RESTORE_COUNT_MSG(count + restoreDirCount))
                     }
                 }.onFailure {

@@ -53,6 +53,7 @@ import com.hippo.ehviewer.Settings
 import com.hippo.ehviewer.client.exception.FatalException
 import com.hippo.ehviewer.spider.COMIC_INFO_FILE
 import com.hippo.ehviewer.spider.SpeedTracker
+import com.hippo.ehviewer.spider.SpiderDen
 import com.hippo.ehviewer.spider.SpiderQueen
 import com.hippo.ehviewer.spider.SpiderQueen.Companion.SPIDER_INFO_FILENAME
 import com.hippo.ehviewer.spider.SpiderQueen.OnSpiderListener
@@ -77,6 +78,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import logcat.LogPriority
+import moe.tarsin.coroutines.runSuspendCatching
 import okio.Path
 import okio.Path.Companion.toOkioPath
 import okio.Path.Companion.toPath
@@ -445,18 +447,33 @@ object DownloadManager : OnSpiderListener, CoroutineScope {
         }
     }
 
-    suspend fun restoreDownload(galleryInfo: BaseGalleryInfo, dirname: String) {
+    internal suspend fun restoreFromDirectory(root: Path, gallery: BaseGalleryInfo, dirname: String): Boolean =
+        withCachedPageExport(gallery.gid, "Download is in use") {
+            val directory = root / dirname
+            if (downloadLocation != root || readDirectoryIdentity(directory)?.let { it.gid == gallery.gid && it.token == gallery.token } != true) {
+                return@withCachedPageExport false
+            }
+            val inserted = restoreDownload(gallery, dirname)
+            if (inserted) {
+                runSuspendCatching { SpiderDen(gallery, dirname).writeComicInfo(false) }.onFailure { logcat(it) }
+            }
+            inserted
+        }
+
+    suspend fun restoreDownload(galleryInfo: BaseGalleryInfo, dirname: String): Boolean {
         val info = sortMutex.withLock {
-            if (containDownloadInfo(galleryInfo.gid)) return@withLock null
+            if (containDownloadInfo(galleryInfo.gid) || allInfoList.any { it.dirname == dirname } ||
+                EhDB.directoryOwnedByAnotherDownload(dirname, galleryInfo.gid)
+            ) return@withLock null
             DownloadInfo(galleryInfo.asEntity(), dirname).also {
                 it.state = DownloadInfo.STATE_NONE
-                // Persist before publishing. A failed restore remains retryable.
-                EhDB.putDownloadInfo(it)
+                EhDB.putRestoredDownload(it, dirname)
                 allInfoList.insertWith(it, sortMode.comparator())
                 mAllInfoMap[galleryInfo.gid] = it
             }
-        } ?: return
+        } ?: return false
         mutableNotifyFlow.emit(info)
+        return true
     }
 
     suspend fun stopDownload(gid: Long) {

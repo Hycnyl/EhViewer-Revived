@@ -16,6 +16,7 @@
 package com.hippo.ehviewer
 
 import androidx.room.execSQL
+import androidx.room.immediateTransaction
 import androidx.room.useWriterConnection
 import arrow.fx.coroutines.resource
 import arrow.fx.coroutines.resourceScope
@@ -73,6 +74,15 @@ object EhDB {
     suspend fun updateDownloadInfo(downloadInfo: Collection<DownloadInfo>) {
         val dao = db.downloadsDao()
         dao.update(downloadInfo.map(DownloadInfo::downloadInfo))
+    }
+
+    suspend fun putRestoredDownload(info: DownloadInfo, dirname: String) {
+        db.useWriterConnection { connection ->
+            connection.immediateTransaction {
+                putDownloadDirname(info.gid, dirname)
+                putDownloadInfo(info)
+            }
+        }
     }
 
     suspend fun putDownloadInfo(downloadInfo: DownloadInfo) {
