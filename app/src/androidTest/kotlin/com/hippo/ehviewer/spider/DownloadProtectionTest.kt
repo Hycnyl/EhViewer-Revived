@@ -15,10 +15,13 @@ import com.hippo.ehviewer.download.tempDownloadDir
 import com.hippo.ehviewer.jni.archiveFdBatch
 import java.io.File
 import java.io.IOException
+import java.util.zip.ZipEntry
 import java.util.zip.ZipFile
+import java.util.zip.ZipOutputStream
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
+import okio.Path.Companion.toOkioPath
 import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -110,6 +113,36 @@ class DownloadProtectionTest {
             Settings.saveAsCbz.value = old
         }
         Unit
+    }
+
+    @Test
+    fun publicationFailurePreservesSourceAndExistingUnmarkedArchive() {
+        val dir = File(appCtx.cacheDir, "publish-${System.nanoTime()}")
+        assertTrue(dir.mkdirs())
+        try {
+            val source = File(dir, "verified.zip")
+            ZipOutputStream(source.outputStream()).use { zip ->
+                zip.putNextEntry(ZipEntry("page"))
+                zip.write(ByteArray(131072) { it.toByte() })
+                zip.closeEntry()
+            }
+            val destination = File(dir, "123.cbz").toOkioPath()
+            val expected = source.readBytes()
+            assertThrows(IOException::class.java) {
+                publishDownloadArchive(source, destination) {
+                    if (destination.exists() && destination.hasIncompleteDownloadArchive()) throw IOException("Interrupted before final verification")
+                }
+            }
+            assertArrayEquals(expected, source.readBytes())
+            assertNull(dir.toOkioPath().completedArchive(destination.name))
+            publishDownloadArchive(source, destination) {}
+            assertArrayEquals(expected, destination.toFile().readBytes())
+            destination.toFile().writeText("pre-existing archive")
+            assertThrows(IllegalStateException::class.java) { publishDownloadArchive(source, destination) {} }
+            assertEquals("pre-existing archive", destination.toFile().readText())
+        } finally {
+            dir.deleteRecursively()
+        }
     }
 
     @Test

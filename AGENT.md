@@ -96,4 +96,4 @@ UI 模块保留 `allWarningsAsErrors`，仅用 `-Xwarning-level=DEPRECATION:warn
 
 ## 本轮临时进度
 
-1.17.22 已完成 A1 和 A3 及独立复查修订，新增 Android 定向回归。下一步核对候选 CI、正式构建与签名发布。
+1.17.22 已完成 A1/A3，独立审计复核通过。已应用仓库格式化并补充提交中断回归，正在运行 Android API 35 设备验证，之后进行正式五包构建和发布。
