@@ -88,12 +88,7 @@ UI 模块保留 `allWarningsAsErrors`，仅用 `-Xwarning-level=DEPRECATION:warn
 
 ## 临时进度：1.17.19 主题与画廊操作
 
-- 已核对 FlClash main 9f2759e 和列表设置的持久化范围。维护者选择保留共享模式并精简说明。
-- 下载按钮按状态复用启停操作，长按移除。右下菜单用同一触摸夹具比较正式 1.17.18 和本次修改。旧版定向对照 https://github.com/Hycnyl/EhViewer-Revived/actions/runs/44580533165 。
-- 正式 1.17.18 构建的 Profile 文本 Artifact 已过期，本轮随标准 Release 构建重新生成。只执行相关交互检查和精简 API 33 安装升级。
-- 候选源码 00287e1ce12655902d17a4f0c1370069158d59db 已推送；定向 UI 44580788774 与旧版 FAB 对照 44580533165 均已开跑，五包构建 44580788664。共享工作环境仍在启动，签名按原流程留在本地。
-- 同一组4个 FAB 测试在旧版对照 44580533165 有3个断言失败，候选 44580788774 全部通过。旧版收起过渡144毫秒、主按钮上边缘外2像素的触摸实际触发末页，另有恢复时重叠、收起时无障碍节点残留。候选定向主题与下载按钮检查也已通过，正式构建已通过编译与格式检查。
-- 签名环境 ERS 启动超时；截至此节点 GitHub 构建继续执行，原私有 vault 尚不可读取。请在原环境可用后对构建 44580788664 的 unsigned 产物用 tools/release.py sign 和既有 V2/V3 证书完成签名，之后执行 quick_release 安装升级及公开校验。临时来源分支 release-source-1.17.19 与私有草稿准备流程 44583181515 指向实际 APK 源码 00287e1ce12655902d17a4f0c1370069158d59db。
-- 私有草稿 ID 451721454，准备分支已清除。构建 44580788664 第一次已生成 Profile，但 Maven Central 获取 compose-group-mapping 2.4.21 时 HTTP 429，未产出 APK。同源码第二次执行已启动（https://github.com/Hycnyl/EhViewer-Revived/actions/runs/44580788664/attempts/2），仍等待签名环境恢复。候选11项定向检查全部通过的对照报告为 44582015145。
-- 五种未签名 APK 已成功组装。构建 https://github.com/Hycnyl/EhViewer-Revived/actions/runs/44580788664/attempts/2 ，unsigned Artifact 14566880160（26,897,897 字节，ZIP SHA-256 254f426e775a147385a99b09ace80ae33e4cdf811695dcecce0c08992077c613），新 Profile/成功诊断 14566216192，有效至 2026-11-26 19:15 UTC。原签名环境第二次启动再次 ERS 超时，草稿 451721454 尚未公开。恢复后直接在实际源码 00287e1ce12655902d17a4f0c1370069158d59db 上签名，运行精简 release.yml，核对安装/更新和五包公开摘要后再清理此章。
-- 可在 GitHub 完成的签名前检查已全部通过：https://github.com/Hycnyl/EhViewer-Revived/actions/runs/44596587673 。CI 验证完整 unsigned ZIP 并用 tools.release.verify 检查五个 APK，保留成功构建、UI 与对照证据，已删除首次限流失败的诊断及验证临时分支。当前唯一待恢复步骤为访问原环境的私有签名目录，正式发行前始终保留本临时章节和 release-source-1.17.19。
+- 源码 `00287e1ce12655902d17a4f0c1370069158d59db`，版本 1.17.19 / 180094。11 项定向检查通过（包括 1.17.18 与候选版的 FAB 同触点对照）。[交互对照](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/44582015145)
+- 五包[构建](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/44580788664/attempts/2)和[签名前校验](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/44596587673)已通过。未签名 Artifact 14566880160（26,897,897 字节，SHA-256 `254f426e775a147385a99b09ace80ae33e4cdf811695dcecce0c08992077c613`，2026-11-26 19:15 UTC 到期）；成功诊断及 Profile 为 14566216192。首次失败诊断和临时测试分支均已清理。
+- 11 月 20 日再次等待托管环境启动，执行器连接在 ERS readiness 恢复阶段超时，平台随后报告 failed，shell 不可用。环境诊断目录无可读记录。现有发布流程使用原环境私有签名目录；私有草稿 451721454 和来源分支 `release-source-1.17.19` 均指向上述源码。正式版仍为 1.17.18。
+- 恢复可访问原存储卷或维护者密钥备份的执行器后，在上述源码工作树用 `tools/release.py sign` 签署五包；用 `release.yml` 的 `quick_release=true` 完成 API 33 覆盖升级、发布和公开下载校验。完成后删除来源分支、本地临时产物及本章节，更新正式版本记录。
