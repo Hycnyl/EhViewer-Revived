@@ -119,7 +119,7 @@
     <string name="rating1">UNERTRÄGLICH</string>
     <string name="rating0">KATASTROPHE</string>
     <string name="gallery_info">Galeriesinfomationen</string>
-    <string name="copied_to_clipboard">Text in Zwischenablage kopiert</string>
+    <string name="copied_to_clipboard">In die Zwischenablage kopiert</string>
     <string name="key_gid">Gid</string>
     <string name="key_token">Token</string>
     <string name="key_url">URL</string>
@@ -211,7 +211,7 @@
     <string name="filter_tip">Die blockierten Galerien wurde in EHentai nicht angezeigt.\n\nTitel-Blocker: die Galerien, deren Titel das Wort enthalten, ausschließen.\n\nUploader-Blocker: Die vom Uploader hochgeladen Galerien ausschließen.\n\nEtikett-Blocker: Die Galerien, die die Etikett haben, ausschließen. Es wird länger dauern, Galerieliste zu laden.\n\nEtikettnamensraum-Blocker: Die Galerien, die den Etikettnamensraum haben, ausschließen. Es wird länger dauern, Galerieliste zu laden.</string>
     <string name="u_config">EHentai-Einstellungen</string>
     <string name="apply_tip">Zum Speichern der Einstellungen auf Häkchen tippen</string>
-    <string name="share_image">Das Bild teilen</string>
+    <string name="share_image">Bild teilen</string>
     <string name="image_saved">Das Bild wurde zu %s gespeichert</string>
     <string name="settings_eh">EH</string>
     <string name="settings_theme">Design</string>
@@ -222,13 +222,13 @@
     <string name="settings_my_tags_summary">Die gefolgten Etiketten in EHentai-Webseite verwalten.</string>
     <string name="settings_eh_gallery_site">Galerie-Seite</string>
     <string name="settings_eh_launch_page">Standard-Bildschirm nach App-Start</string>
-    <string name="settings_eh_list_mode">Gemeinsame Galerieansicht</string>
+    <string name="settings_eh_list_mode">Galerieansicht</string>
     <string name="settings_eh_list_mode_detail">Details</string>
     <string name="settings_eh_list_mode_thumb">Miniaturbild</string>
     <string name="settings_eh_detail_size">Breite der Detailkarten</string>
     <string name="settings_eh_detail_size_long">Breit</string>
     <string name="settings_eh_detail_size_short">Schmal</string>
-    <string name="settings_advanced_app_language_title">Sprache der App (Language)</string>
+    <string name="settings_advanced_app_language_title">Sprache</string>
     <string name="torrent_count">Torrent (%d)</string>
     <string name="settings_eh_show_jpn_title">Japanische Titel anzeigen</string>
     <string name="settings_eh_filter">Galerie-Blocker</string>
@@ -378,7 +378,17 @@
     <string name="gallery_version_loading">Versionsinformationen werden geladen…</string>
     <string name="gallery_info_copy_field">%1$s kopieren</string>
     <string name="gallery_version_expunged">Expunged</string>
-    <string name="settings_eh_list_mode_scope">%1$s · Downloads separat</string>
     <string name="list_tile_thumb_size">Covergröße in der Detailansicht</string>
-    <string name="drawer_panda_theme_color">Themenfarben für den Panda in der Seitenleiste verwenden</string>
+    <string name="drawer_panda_theme_color">Dynamische Farben für den weinenden Panda verwenden</string>
+    <string name="action_share">Teilen</string>
+    <string name="action_copy">Kopieren</string>
+    <string name="tooltip_copy">Kopieren</string>
+    <string name="theme_color_style">Farbstil</string>
+    <string name="theme_style_vivid">Lebhaft</string>
+    <string name="theme_style_tinted">Getönt</string>
+    <string name="theme_style_soft">Sanft</string>
+    <string name="theme_style_monochrome">Monochrom</string>
+    <string name="tooltip_retry">Erneut versuchen</string>
+    <string name="tooltip_more_actions">Weitere Aktionen</string>
+    <string name="tooltip_close_actions">Aktionen einklappen</string>
 </resources>

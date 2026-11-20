@@ -41,20 +41,13 @@ internal fun DrawerPanda(followTheme: Boolean, modifier: Modifier = Modifier) {
 
 private fun terrainColors(root: VectorGroup, primary: Color): Map<String, VectorConfig> = buildMap {
     val accent = Hct.fromInt(primary.toArgb())
-    fun visit(group: VectorGroup) {
-        for (node in group) {
-            when (node) {
-                is VectorGroup -> visit(node)
-                is VectorPath -> if (node.name.startsWith("ground_")) {
-                    val original = (node.fill as SolidColor).value
-                    val tone = Hct.fromInt(original.toArgb()).tone
-                    val color = Hct.from(accent.hue, accent.chroma.coerceAtMost(38.0), tone)
-                    put(node.name, FacetColor(Color(color.toInt())))
-                }
-            }
-        }
+    for (node in root) {
+        if (node !is VectorPath || !node.name.startsWith("ground_")) continue
+        val original = (node.fill as SolidColor).value
+        val tone = Hct.fromInt(original.toArgb()).tone
+        val color = Hct.from(accent.hue, accent.chroma.coerceAtMost(38.0), tone)
+        put(node.name, FacetColor(Color(color.toInt())))
     }
-    visit(root)
 }
 
 private class FacetColor(color: Color) : VectorConfig {
@@ -62,7 +55,6 @@ private class FacetColor(color: Color) : VectorConfig {
 
     @Suppress("UNCHECKED_CAST")
     override fun <T> getOrDefault(property: VectorProperty<T>, defaultValue: T): T {
-        val changesBrush = property == VectorProperty.Fill || property == VectorProperty.Stroke
-        return if (changesBrush && defaultValue is SolidColor) brush as T else defaultValue
+        return if (property == VectorProperty.Fill && defaultValue is SolidColor) brush as T else defaultValue
     }
 }

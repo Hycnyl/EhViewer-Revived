@@ -166,6 +166,7 @@ fun AnimatedVisibilityScope.GalleryDetailScreen(args: GalleryDetailScreenArgs, n
     }
 
     val signInFirst = stringResource(R.string.sign_in_first)
+    val share = stringResource(R.string.action_share)
     val addTag = stringResource(id = R.string.action_add_tag)
     val refresh = stringResource(id = R.string.refresh)
     val clearCache = stringResource(id = R.string.clear_image_cache)
@@ -208,9 +209,9 @@ fun AnimatedVisibilityScope.GalleryDetailScreen(args: GalleryDetailScreenArgs, n
                                 Settings.clipboardTextHashCode = galleryDetailUrl.hashCode()
                             },
                             icon = {
-                                Icon(imageVector = Icons.Default.Share, contentDescription = null)
+                                Icon(imageVector = Icons.Default.Share, contentDescription = share)
                             },
-                            label = "",
+                            label = share,
                         )
                         clickableItem(
                             onClick = {

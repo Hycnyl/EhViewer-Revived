@@ -306,9 +306,9 @@
     <string name="settings_my_tags_summary">My tags on EHentai website</string>
     <string name="settings_eh_gallery_site">Gallery site</string>
     <string name="settings_eh_launch_page">Launch page</string>
-    <string name="settings_eh_list_mode">Shared gallery view</string>
-    <string name="settings_eh_list_mode_detail">Detail</string>
-    <string name="settings_eh_list_mode_thumb">Thumb</string>
+    <string name="settings_eh_list_mode">Gallery list view</string>
+    <string name="settings_eh_list_mode_detail">Details</string>
+    <string name="settings_eh_list_mode_thumb">Thumbnails</string>
     <string name="settings_eh_detail_size">Detail card width</string>
     <string name="settings_eh_detail_size_long">Wide</string>
     <string name="settings_eh_detail_size_short">Narrow</string>
@@ -375,7 +375,7 @@
     <string name="settings_advanced_dump_logcat_failed">Dump logcat failed</string>
     <string name="settings_advanced_dump_logcat_to">Logcat dumped to %s</string>
     <string name="settings_advanced_read_cache_size">Read cache size</string>
-    <string name="settings_advanced_app_language_title">App language</string>
+    <string name="settings_advanced_app_language_title">Language</string>
     <string name="settings_advanced_enable_quic">QUIC support</string>
     <string name="settings_advanced_hardware_bitmap_threshold">Hardware bitmap (better performance) threshold</string>
     <string name="settings_advanced_hardware_bitmap_threshold_summary">Try decreasing this if long images fail to load</string>
@@ -460,7 +460,7 @@
     <string name="favorite_name">Favorite Category</string>
     <string name="dark_theme">Dark theme</string>
     <string name="black_dark_theme">Black dark theme</string>
-    <string name="drawer_panda_theme_color">Use theme colors for the sidebar panda</string>
+    <string name="drawer_panda_theme_color">Use dynamic colors for the crying panda</string>
     <string name="harmonize_category_color">Harmonize category color for Dynamic Color</string>
     <string name="sort_by">Sort by</string>
     <string name="added_time_desc">Added time (descending)</string>
@@ -809,5 +809,4 @@
     <string name="theme_color_delete">Delete %1$s</string>
     <string name="theme_color_custom_value">Custom %1$s</string>
     <string name="theme_color_invalid_hex">Enter a six-digit color code</string>
-    <string name="settings_eh_list_mode_scope">%1$s · Downloads separate</string>
 </resources>

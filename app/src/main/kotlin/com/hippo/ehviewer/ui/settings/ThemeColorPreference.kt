@@ -360,9 +360,12 @@ private fun ColorSlider(label: String, value: Float, range: ClosedFloatingPointR
                 Box(Modifier.size(26.dp).shadow(2.dp, CircleShape).background(thumbColor, CircleShape).border(2.dp, MaterialTheme.colorScheme.surface, CircleShape))
             },
             track = {
-                Canvas(Modifier.fillMaxWidth().height(20.dp).clip(CircleShape).border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.4f), CircleShape)) {
-                    drawRect(Brush.horizontalGradient(stops))
-                }
+                val trackShape = MaterialTheme.shapes.extraSmall
+                Box(
+                    Modifier.fillMaxWidth().height(20.dp)
+                        .background(Brush.horizontalGradient(stops), trackShape)
+                        .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.4f), trackShape),
+                )
             },
         )
     }

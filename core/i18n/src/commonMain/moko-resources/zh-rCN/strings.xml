@@ -151,7 +151,7 @@
     <string name="rating0">扑街了</string>
     <!-- Gallery Info -->
     <string name="gallery_info">画廊信息</string>
-    <string name="copied_to_clipboard">已复制到剪切板</string>
+    <string name="copied_to_clipboard">已复制到剪贴板</string>
     <string name="key_gid">GID</string>
     <string name="key_token">Token</string>
     <string name="key_url">链接</string>
@@ -356,7 +356,7 @@
     <string name="settings_advanced_dump_logcat_failed">导出日志失败</string>
     <string name="settings_advanced_dump_logcat_to">已保存日志至 %s</string>
     <string name="settings_advanced_read_cache_size">阅读缓存大小</string>
-    <string name="settings_advanced_app_language_title">App 界面语言</string>
+    <string name="settings_advanced_app_language_title">语言</string>
     <string name="settings_advanced_enable_quic">QUIC 支持</string>
     <string name="settings_advanced_hardware_bitmap_threshold">硬件位图（性能更好）阈值</string>
     <string name="settings_advanced_hardware_bitmap_threshold_summary">若长图无法加载请尝试减小此项</string>
@@ -438,7 +438,7 @@
     <string name="download_service">下载服务</string>
     <string name="favorite_name">收藏分类</string>
     <string name="black_dark_theme">纯黑深色主题</string>
-    <string name="drawer_panda_theme_color">侧边栏熊猫跟随主题配色</string>
+    <string name="drawer_panda_theme_color">哭泣熊猫适配动态配色</string>
     <string name="harmonize_category_color">类别颜色适配动态配色</string>
     <string name="backup_before_update">更新前备份数据</string>
     <string name="use_ci_update_channel">使用持续集成(CI)构建频道更新</string>
@@ -791,5 +791,4 @@
     <string name="theme_color_delete">删除%1$s</string>
     <string name="theme_color_custom_value">自定义 %1$s</string>
     <string name="theme_color_invalid_hex">请输入六位颜色代码</string>
-    <string name="settings_eh_list_mode_scope">%1$s · 浏览、收藏、历史同步，下载页独立</string>
 </resources>

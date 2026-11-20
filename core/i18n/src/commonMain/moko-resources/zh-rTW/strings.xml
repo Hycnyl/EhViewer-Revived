@@ -209,7 +209,7 @@
     <string name="download_state_downloaded">已下載</string>
     <string name="download_state_failed">下載失敗</string>
     <string name="download_state_failed_2">還有 %d 未完成</string>
-    <string name="download_state_finish">大功告成</string>
+    <string name="download_state_finish">已完成</string>
     <string name="stat_509_alert_title">509 警告</string>
     <string name="stat_509_alert_text">圖片流量已用盡。請停止下載，休息一下。</string>
     <string name="stat_download_done_title">下載結束</string>
@@ -218,7 +218,7 @@
     <string name="stat_download_done_text_mix">%1$d 項成功下載，%2$d 項下載失敗</string>
     <string name="stat_download_done_line_succeeded"> %s 下載成功</string>
     <string name="stat_download_done_line_failed"> %s 下載失敗</string>
-    <string name="download_remove_dialog_title">移除下載佇列</string>
+    <string name="download_remove_dialog_title">移除下載項目</string>
     <string name="download_remove_dialog_message">將 %s 從下載佇列中移除嗎？</string>
     <string name="download_remove_dialog_message_2">從下載佇列中移除 %d 項任務嗎？</string>
     <string name="download_remove_dialog_check_text">刪除圖檔</string>
@@ -349,7 +349,7 @@
     <string name="settings_advanced_dump_logcat_failed">無法傾印紀錄檔</string>
     <string name="settings_advanced_dump_logcat_to">已將紀錄檔儲存至 %s</string>
     <string name="settings_advanced_read_cache_size">閱讀快取大小</string>
-    <string name="settings_advanced_app_language_title">應用程式介面語言</string>
+    <string name="settings_advanced_app_language_title">語言</string>
     <string name="settings_advanced_export_data">匯出檔案</string>
     <string name="settings_advanced_export_data_summary">儲存資料至外接儲存裝置，例如下載列表，快速搜尋列表</string>
     <string name="settings_advanced_export_data_to">已匯出資料至 %s</string>
@@ -424,7 +424,7 @@
     <string name="download_service">下載服務</string>
     <string name="favorite_name">收藏圖庫</string>
     <string name="black_dark_theme">純黑深色主題</string>
-    <string name="drawer_panda_theme_color">側邊欄熊貓跟隨主題配色</string>
+    <string name="drawer_panda_theme_color">哭泣熊貓適配動態配色</string>
     <string name="harmonize_category_color">以動態顏色為分類顏色配色</string>
     <string name="backup_before_update">更新前備份資料</string>
     <string name="use_ci_update_channel">使用 CI 更新頻道</string>
@@ -734,5 +734,6 @@
     <string name="theme_color_delete">刪除%1$s</string>
     <string name="theme_color_custom_value">自訂 %1$s</string>
     <string name="theme_color_invalid_hex">請輸入六位顏色代碼</string>
-    <string name="settings_eh_list_mode_scope">%1$s · 瀏覽、收藏、歷史同步，下載頁獨立</string>
+    <string name="image_limits_restricted">圖片解析度限制為 1280x</string>
+    <string name="image_limits_normal">無限制</string>
 </resources>

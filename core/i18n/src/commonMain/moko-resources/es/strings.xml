@@ -196,7 +196,7 @@
     <string name="stat_download_done_text_mix">%1$d completado, %2$d fallido</string>
     <string name="stat_download_done_line_succeeded">Completado: %s</string>
     <string name="stat_download_done_line_failed">Fallido: %s</string>
-    <string name="download_remove_dialog_title">Borrar galería descargada</string>
+    <string name="download_remove_dialog_title">Quitar el elemento de la lista de descargas</string>
     <string name="download_remove_dialog_message">¿Borrar %s de la lista de descargas?</string>
     <string name="download_remove_dialog_message_2">¿Borrar %d galerías de la lista de descargas?</string>
     <string name="download_remove_dialog_check_text">Borrar imágenes</string>
@@ -242,7 +242,7 @@
     <string name="settings_my_tags_summary">Ver página de etiquetas en EHentai</string>
     <string name="settings_eh_launch_page">Página al iniciar aplicación</string>
     <string name="settings_eh_gallery_site">Seleccionar galería</string>
-    <string name="settings_eh_list_mode">Vista compartida de galerías</string>
+    <string name="settings_eh_list_mode">Vista de galerías</string>
     <string name="settings_eh_list_mode_detail">Con detalles</string>
     <string name="settings_eh_list_mode_thumb">Solo portada</string>
     <string name="settings_eh_detail_size">Ancho de las tarjetas</string>
@@ -287,7 +287,7 @@
     <string name="settings_advanced_dump_logcat_failed">Guardado de logcat fallido</string>
     <string name="settings_advanced_dump_logcat_to">Logcat guardado en %s</string>
     <string name="settings_advanced_read_cache_size">Tamaño del caché (archivos temporales)</string>
-    <string name="settings_advanced_app_language_title">Idioma de la aplicación</string>
+    <string name="settings_advanced_app_language_title">Idioma</string>
     <string name="settings_advanced_export_data">Exportar datos</string>
     <string name="settings_advanced_export_data_summary">Guardar datos en almacenamiento externo, tales como la lista de descarga, lista de búsqueda rápida, entre otros</string>
     <string name="settings_advanced_export_data_to">Datos exportados en %s</string>
@@ -426,7 +426,17 @@
     <string name="gallery_version_loading">Cargando información de versiones…</string>
     <string name="gallery_info_copy_field">Copiar %1$s</string>
     <string name="gallery_version_expunged">Expunged</string>
-    <string name="settings_eh_list_mode_scope">%1$s · Descarga aparte</string>
     <string name="list_tile_thumb_size">Tamaño de portadas en la vista detallada</string>
-    <string name="drawer_panda_theme_color">Usar los colores del tema en el panda del menú lateral</string>
+    <string name="drawer_panda_theme_color">Usar colores dinámicos para el panda que llora</string>
+    <string name="action_share">Compartir</string>
+    <string name="action_copy">Copiar</string>
+    <string name="tooltip_copy">Copiar</string>
+    <string name="theme_color_style">Estilo de color</string>
+    <string name="theme_style_vivid">Vivo</string>
+    <string name="theme_style_tinted">Teñido</string>
+    <string name="theme_style_soft">Suave</string>
+    <string name="theme_style_monochrome">Monocromático</string>
+    <string name="tooltip_retry">Reintentar</string>
+    <string name="tooltip_more_actions">Más acciones</string>
+    <string name="tooltip_close_actions">Ocultar acciones</string>
 </resources>

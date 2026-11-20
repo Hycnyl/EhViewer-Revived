@@ -160,7 +160,7 @@
 
     <!-- Gallery Info -->
     <string name="gallery_info">畫廊信息</string>
-    <string name="copied_to_clipboard">已複製到剪切板</string>
+    <string name="copied_to_clipboard">已複製到剪貼簿</string>
     <string name="key_gid">Gid</string>
     <string name="key_token">Token</string>
     <string name="key_url">鏈接</string>
@@ -347,7 +347,7 @@
     <string name="settings_advanced_dump_logcat_failed">導出日誌失敗</string>
     <string name="settings_advanced_dump_logcat_to">已保存日誌至 %s</string>
     <string name="settings_advanced_read_cache_size">閲讀緩存大小</string>
-    <string name="settings_advanced_app_language_title">App 界面語言</string>
+    <string name="settings_advanced_app_language_title">語言</string>
     <string name="settings_advanced_export_data">導出數據</string>
     <string name="settings_advanced_export_data_summary">保存數據至外置存儲器，例如下載列表，快速搜索列表</string>
     <string name="settings_advanced_export_data_to">已導出數據至 %s</string>
@@ -639,7 +639,17 @@
     <string name="theme_color_delete">刪除%1$s</string>
     <string name="theme_color_custom_value">自訂 %1$s</string>
     <string name="theme_color_invalid_hex">請輸入六位顏色代碼</string>
-    <string name="settings_eh_list_mode_scope">%1$s · 瀏覽、收藏、歷史同步，下載頁獨立</string>
     <string name="list_tile_thumb_size">詳情封面大小</string>
-    <string name="drawer_panda_theme_color">側邊欄熊貓跟隨主題配色</string>
+    <string name="drawer_panda_theme_color">哭泣熊貓適配動態配色</string>
+    <string name="image_limits">圖片配額</string>
+    <string name="image_limits_restricted">圖片解像度限制為 1280x</string>
+    <string name="image_limits_normal">無限制</string>
+    <string name="image_limits_summary">已用：</string>
+    <string name="current_funds">現有資金：</string>
+    <string name="reset">重設</string>
+    <string name="reset_cost">花費 %d GP 重設</string>
+    <string name="save_progress">儲存進度</string>
+    <string name="toplist">排行榜</string>
+    <string name="action_add_tag">新增標籤</string>
+    <string name="action_copy">複製</string>
 </resources>

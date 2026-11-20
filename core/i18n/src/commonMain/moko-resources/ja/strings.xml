@@ -223,7 +223,7 @@
     <string name="stat_download_done_text_mix">%1$d 件のダウンロードが成功、%2$d 件が失敗</string>
     <string name="stat_download_done_line_succeeded">成功: %s</string>
     <string name="stat_download_done_line_failed">失敗: %s</string>
-    <string name="download_remove_dialog_title">ダウンロードを削除</string>
+    <string name="download_remove_dialog_title">ダウンロード項目を削除</string>
     <string name="download_remove_dialog_message">ダウンロードリストから「%s」を削除しますか？</string>
     <string name="download_remove_dialog_message_2">ダウンロードリストから %d 件のタスクを削除しますか？</string>
     <string name="download_remove_dialog_check_text">画像ファイルを削除</string>
@@ -359,7 +359,7 @@
     <string name="settings_advanced_dump_logcat_failed">Logcat のダンプに失敗しました</string>
     <string name="settings_advanced_dump_logcat_to">Logcat のログが「%s」にダンプされました</string>
     <string name="settings_advanced_read_cache_size">読書用キャッシュのサイズ</string>
-    <string name="settings_advanced_app_language_title">アプリの言語</string>
+    <string name="settings_advanced_app_language_title">言語</string>
     <string name="settings_advanced_enable_quic">QUIC をサポート</string>
     <string name="settings_advanced_hardware_bitmap_threshold">ハードウェアビットマップ (パフォーマンス向上) のしきい値</string>
     <string name="settings_advanced_hardware_bitmap_threshold_summary">長い画像の読み込みに失敗する場合はこれを減らしてみてください</string>
@@ -424,10 +424,10 @@
     <string name="download_archive_failure_no_hath">アーカイブのダウンロードは H@H クライアントが必要です</string>
     <string name="current_funds">現在の資金:</string>
     <string name="insufficient_funds">資金が不足しています</string>
-    <string name="image_limits">画像の制限</string>
-    <string name="image_limits_summary">使用中: </string>
+    <string name="image_limits">画像の利用枠</string>
+    <string name="image_limits_summary">使用済み：</string>
     <string name="image_limits_normal">制限なし</string>
-    <string name="image_limits_restricted">画面解像度は 1280x に制限されます</string>
+    <string name="image_limits_restricted">画像の解像度は 1280x に制限されます</string>
     <string name="reset_cost">%d GP を使用してリセット</string>
     <string name="reset">リセット</string>
     <string name="settings_privacy">プライバシー</string>
@@ -441,7 +441,7 @@
     <string name="favorite_name">お気に入り</string>
     <string name="dark_theme">ダークテーマ</string>
     <string name="black_dark_theme">ブラックダークテーマ</string>
-    <string name="drawer_panda_theme_color">サイドバーのパンダにテーマカラーを使う</string>
+    <string name="drawer_panda_theme_color">泣いているパンダにダイナミックカラーを適用</string>
     <string name="harmonize_category_color">カテゴリーの色をダイナミックカラーで調和する</string>
     <string name="sort_by">並べ替え</string>
     <string name="added_time_desc">追加された時間 (昇順)</string>
@@ -683,7 +683,7 @@
     <string name="image_info_square">正方形</string>
     <string name="image_info_encoded_resolution">ファイルの画素</string>
     <string name="theme_colors">テーマカラー</string>
-    <string name="theme_color_dynamic">ダイナミック</string>
+    <string name="theme_color_dynamic">ダイナミックカラー</string>
     <string name="theme_color_presets">プリセット</string>
     <string name="theme_color_custom">カスタム</string>
     <string name="theme_color_wallpaper">壁紙の色を使用</string>
@@ -743,5 +743,4 @@
     <string name="theme_color_delete">%1$sを削除</string>
     <string name="theme_color_custom_value">カスタム %1$s</string>
     <string name="theme_color_invalid_hex">6桁のカラーコードを入力</string>
-    <string name="settings_eh_list_mode_scope">%1$s · ダウンロードのみ個別設定</string>
 </resources>

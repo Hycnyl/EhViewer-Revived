@@ -92,7 +92,7 @@
     <string name="rating1">Utolererbar</string>
     <string name="rating0">Katastrofe</string>
     <string name="gallery_info">Galleri-info</string>
-    <string name="settings_eh_list_mode">Felles gallerivisning</string>
+    <string name="settings_eh_list_mode">Gallerivisning</string>
     <string name="copied_to_clipboard">Kopiert til utklippstavlen</string>
     <string name="key_title">Navn</string>
     <string name="stat_download_action_stop_all">Stopp alle</string>
@@ -245,10 +245,22 @@
     <string name="gallery_version_loading">Laster versjonsinformasjon…</string>
     <string name="gallery_info_copy_field">Kopier %1$s</string>
     <string name="gallery_version_expunged">Expunged</string>
-    <string name="settings_eh_list_mode_scope">%1$s · Nedlastinger separat</string>
     <string name="list_tile_thumb_size">Omslagsstørrelse i detaljvisning</string>
     <string name="settings_eh_detail_size">Bredde på detaljkort</string>
     <string name="settings_eh_detail_size_long">Bred</string>
     <string name="settings_eh_detail_size_short">Smal</string>
-    <string name="drawer_panda_theme_color">Bruk temafargene på pandaen i sidemenyen</string>
+    <string name="drawer_panda_theme_color">Bruk dynamiske farger på den gråtende pandaen</string>
+    <string name="settings_advanced_app_language_title">Språk</string>
+    <string name="settings_eh_list_mode_detail">Detaljer</string>
+    <string name="settings_eh_list_mode_thumb">Miniatyrbilder</string>
+    <string name="download_remove_dialog_title">Fjern nedlasting</string>
+    <string name="tooltip_copy">Kopier</string>
+    <string name="theme_color_style">Fargestil</string>
+    <string name="theme_style_vivid">Livlig</string>
+    <string name="theme_style_tinted">Farget</string>
+    <string name="theme_style_soft">Myk</string>
+    <string name="theme_style_monochrome">Monokrom</string>
+    <string name="tooltip_retry">Prøv igjen</string>
+    <string name="tooltip_more_actions">Flere handlinger</string>
+    <string name="tooltip_close_actions">Skjul handlinger</string>
 </resources>

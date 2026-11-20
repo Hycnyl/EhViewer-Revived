@@ -146,7 +146,7 @@
 
     <!-- Gallery Info -->
     <string name="gallery_info">ข้อมูลแกลเลอรี่</string>
-    <string name="copied_to_clipboard">คัดลอกลงคลิปบอร์ดแล้ว</string>
+    <string name="copied_to_clipboard">คัดลอกไปยังคลิปบอร์ดแล้ว</string>
     <string name="key_gid">Gid</string>
     <string name="key_token">โทเคน</string>
     <string name="key_url">URL</string>
@@ -264,7 +264,7 @@
     <string name="settings_u_config">การตั้งค่า EHentai</string>
     <string name="settings_u_config_summary">การตั้งค่าบนเว็บไซต์ EHentai</string>
     <string name="settings_eh_gallery_site">เว็บไซต์หลักของแกลเลอรี่</string>
-    <string name="settings_eh_list_mode">มุมมองแกลเลอรีร่วมกัน</string>
+    <string name="settings_eh_list_mode">มุมมองแกลเลอรี</string>
     <string name="settings_eh_list_mode_detail">แสดงรายละเอียด</string>
     <string name="settings_eh_list_mode_thumb">ภาพตัวอย่าง</string>
     <string name="settings_eh_detail_size">ความกว้างของการ์ดรายละเอียด</string>
@@ -312,7 +312,7 @@
     <string name="settings_advanced_dump_logcat_failed">การสร้าง Logcat เกิดข้อผิดพลาด</string>
     <string name="settings_advanced_dump_logcat_to">Logcat ถูกสร้างอยู่ที่ %s</string>
     <string name="settings_advanced_read_cache_size">ขนาดในการเก็บไฟล์ชั่วคราวเพื่ออ่าน</string>
-    <string name="settings_advanced_app_language_title">ภาษาของแอป</string>
+    <string name="settings_advanced_app_language_title">ภาษา</string>
     <string name="settings_advanced_export_data">สำเนาข้อมูล</string>
     <string name="settings_advanced_export_data_summary">บันทึกข้อมูลต่างๆเช่นรายการดาวน์โหลด และค้นหาอย่างด่วนลงพื้นที่จัดเก็บภายนอก</string>
     <string name="settings_advanced_export_data_to">ได้สำเนาข้อมูลแล้วจัดเก็บที่ %s</string>
@@ -431,7 +431,17 @@
     <string name="gallery_version_loading">กำลังโหลดข้อมูลเวอร์ชัน…</string>
     <string name="gallery_info_copy_field">คัดลอก %1$s</string>
     <string name="gallery_version_expunged">Expunged</string>
-    <string name="settings_eh_list_mode_scope">%1$s · แยกดาวน์โหลด</string>
     <string name="list_tile_thumb_size">ขนาดปกในมุมมองรายละเอียด</string>
-    <string name="drawer_panda_theme_color">ใช้สีธีมกับแพนด้าในแถบด้านข้าง</string>
+    <string name="drawer_panda_theme_color">ใช้สีแบบไดนามิกกับแพนด้าร้องไห้</string>
+    <string name="action_share">แชร์</string>
+    <string name="action_copy">คัดลอก</string>
+    <string name="tooltip_copy">คัดลอก</string>
+    <string name="theme_color_style">รูปแบบสี</string>
+    <string name="theme_style_vivid">สดใส</string>
+    <string name="theme_style_tinted">แต้มสี</string>
+    <string name="theme_style_soft">นุ่มนวล</string>
+    <string name="theme_style_monochrome">สีเดียว</string>
+    <string name="tooltip_retry">ลองอีกครั้ง</string>
+    <string name="tooltip_more_actions">การทำงานเพิ่มเติม</string>
+    <string name="tooltip_close_actions">ซ่อนการทำงาน</string>
 </resources>

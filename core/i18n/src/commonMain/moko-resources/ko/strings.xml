@@ -297,7 +297,7 @@
     <string name="settings_advanced_dump_logcat_failed">로그캣을 덤프하지 못했습니다.</string>
     <string name="settings_advanced_dump_logcat_to">%s 경로에 로그캣을 저장했습니다.</string>
     <string name="settings_advanced_read_cache_size">읽기 캐시 크기</string>
-    <string name="settings_advanced_app_language_title">앱 언어 (Language)</string>
+    <string name="settings_advanced_app_language_title">언어</string>
     <string name="settings_advanced_export_data">데이터 내보내기</string>
     <string name="settings_advanced_export_data_summary">다운로드 목록, 빠른 검색 목록 등의 데이터를 외부 저장소에 저장</string>
     <string name="settings_advanced_export_data_to">%s 경로에 데이터를 내보냈습니다.</string>
@@ -420,7 +420,17 @@
     <string name="gallery_version_loading">버전 정보 불러오는 중…</string>
     <string name="gallery_info_copy_field">%1$s 복사</string>
     <string name="gallery_version_expunged">Expunged</string>
-    <string name="settings_eh_list_mode_scope">%1$s · 다운로드는 별도</string>
     <string name="list_tile_thumb_size">상세 보기 표지 크기</string>
-    <string name="drawer_panda_theme_color">사이드바 판다에 테마 색상 적용</string>
+    <string name="drawer_panda_theme_color">우는 판다에 동적 색상 적용</string>
+    <string name="action_share">공유</string>
+    <string name="action_copy">복사</string>
+    <string name="tooltip_copy">복사</string>
+    <string name="theme_color_style">색상 스타일</string>
+    <string name="theme_style_vivid">선명하게</string>
+    <string name="theme_style_tinted">색조 강조</string>
+    <string name="theme_style_soft">부드럽게</string>
+    <string name="theme_style_monochrome">단색</string>
+    <string name="tooltip_retry">다시 시도</string>
+    <string name="tooltip_more_actions">작업 더보기</string>
+    <string name="tooltip_close_actions">작업 접기</string>
 </resources>
