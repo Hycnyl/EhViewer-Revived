@@ -98,4 +98,4 @@ UI 模块保留 `allWarningsAsErrors`，仅用 `-Xwarning-level=DEPRECATION:warn
 
 - 回滚备份 [backup/pre-panda-vector-1.17.20](https://github.com/Hycnyl/EhViewer-Revived/tree/backup/pre-panda-vector-1.17.20) 已核对至 5182b938bdb13913a4bc9ce5203a224003a4f683。
 - 四档 WebP 已重绘为矢量，接入主题开关，默认保留经典配色。折面使用早期无损原图，还原当前透明轮廓。[几何比对](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/44683756469)
-- 正式候选 `e8b11dcd47a6151e79af753379261deab00d2454`（1.17.20 / 180095）已通过[实际渲染复核](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/44684449491)。280、840、1680 px 多尺寸、浅深主题与经典配色恢复均通过，轮廓重合 99.445%。[构建](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/44684449633)已通过编译、格式与 Profile 复用，正在组装五个 APK。下一步签名、验证升级、发布并删除备份。
+- 正式候选 `e8b11dcd47a6151e79af753379261deab00d2454`（1.17.20 / 180095）已通过[三种尺寸的真实组件渲染与颜色复核](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/44684449491)和[五包构建](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/44684449633)。[原证书 V2/V3 签名](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/44686200032)已启动，随后由 release.yml 验证并发布。完成附件核验后删除备份及临时分支。
