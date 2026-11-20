@@ -97,4 +97,4 @@ UI 模块保留 `allWarningsAsErrors`，仅用 `-Xwarning-level=DEPRECATION:warn
 ## 临时进度 · 1.17.21 界面细节
 
 - 版本候选 1.17.21（180096）已完成设置、分享提示、操作排序、轨道形状和矢量原画修正。经典与主题共用无运行时裁切的折面。12 份语言文件已更新，重点语言审计涵盖 131 项资源。
-- 最终源码 `df6f33eefb8aadc0cad44d6592dc27d36664fe43` 已通过[五包构建](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/44696567350)与[定向渲染及交互验证](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/44696871577)。左右地面轮廓覆盖误差在 224 px 宽度从 36.48 降至 8.87（满量程 255）。[原证书签名](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/44698181237)已启动。下一步验证覆盖升级、公开附件并清理。
+- 最终源码 `df6f33eefb8aadc0cad44d6592dc27d36664fe43` 已通过[五包构建](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/44696567350)与[定向渲染及交互验证](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/44696871577)。左右地面轮廓覆盖误差在 224 px 宽度从 36.48 降至 8.87（满量程 255）。[原证书签名](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/44698181237)已成功。[正式发布验证](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/44698299177)正在模拟器上检查安装和从 1.17.20 升级，随后核对公开附件并清理。
