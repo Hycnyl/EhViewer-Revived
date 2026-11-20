@@ -96,4 +96,4 @@ UI 模块保留 `allWarningsAsErrors`，仅用 `-Xwarning-level=DEPRECATION:warn
 
 ## 本轮临时进度
 
-1.17.22 A1/A3 修复与独立审计已完成，[API 35 四项存储回归](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/44784279707)均通过。正式源码为 `38ad62c2d9c5330ca1d7b9929a327ef78dd27ebd`，[五包构建](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/44784235379)正在重新采集 Baseline Profile。下一步按既有流程签名并发布，再删除临时进度和本次交付分支。
+1.17.22 A1/A3 修复与独立审计完成，[API 35 四项存储回归](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/44784279707)均已通过。正式源码为 `38ad62c2d9c5330ca1d7b9929a327ef78dd27ebd`。[五包构建](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/44784235379)和[签名](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/44792370828)已完成。[正式发布流程](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/44792546744)正在验证安装和升级，随后复核公开下载并清理。
