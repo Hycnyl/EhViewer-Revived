@@ -96,4 +96,4 @@ UI 模块保留 `allWarningsAsErrors`，仅用 `-Xwarning-level=DEPRECATION:warn
 
 ## 本轮临时进度
 
-1.17.23 已定位下载长按多选的菜单回调，修复详情与缩略图入口。待完成与 1.17.22 对照的手势验证、正式构建和签名发布，并交付上一版 A1/A3 源码报告。
+1.17.23 下载多选修复已提交，候选源码为 `18e800a0b4d3868b62eb3fd08aa02049a3fd20c3`。[正式构建](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/44854384243)、[界面回归](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/44854363671)正在运行。上一版 A1/A3 逐文件报告已交付维护者。下一步在 Android 上对照旧版和签名候选包的长按手势，再发布并清理本轮分支。
