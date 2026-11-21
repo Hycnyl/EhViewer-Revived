@@ -118,6 +118,7 @@ fun FabLayout(
 ) {
     val updatedHidden by rememberUpdatedState(hidden)
     val updatedExpanded by rememberUpdatedState(expanded)
+    val updatedAutoCancel by rememberUpdatedState(autoCancel)
     val newState = when {
         updatedHidden -> FabLayoutValue.Hidden
         updatedExpanded -> FabLayoutValue.Expand
@@ -144,9 +145,9 @@ fun FabLayout(
         transform = {
             var initial = true
             onEach {
-                // Preserve restored expansion on the initial emission. Later action changes close
-                // through the owner so the toggle, accessibility label and motion stay in sync.
-                if (!initial && updatedExpanded) changeExpansion(false)
+                // Entering selection replaces the actions and opens the menu in the same frame.
+                // Only dismiss menus whose owner allows automatic cancellation.
+                if (!initial && updatedExpanded && updatedAutoCancel) changeExpansion(false)
                 initial = false
             }
         },

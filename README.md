@@ -79,6 +79,7 @@
 
 ## Adjusted
 
+- Long-press a download in either view to select it and open batch actions.
 - Completed CBZ archives are verified before loose pages are removed. Restored download directories are protected during cleanup.
 
 ### Custom reading cache size

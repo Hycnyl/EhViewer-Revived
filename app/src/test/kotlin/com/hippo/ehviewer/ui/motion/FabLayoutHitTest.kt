@@ -1,6 +1,7 @@
 package com.hippo.ehviewer.ui.motion
 
 import android.app.Application
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
@@ -18,6 +19,7 @@ import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.click
 import androidx.compose.ui.test.junit4.v2.createComposeRule
+import androidx.compose.ui.test.longClick
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performTouchInput
@@ -93,6 +95,50 @@ class FabLayoutHitTest {
         assertFalse(lastPage.await(200, TimeUnit.MILLISECONDS))
         tap(bounds("Last page").center)
         assertTrue(lastPage.await(2, TimeUnit.SECONDS))
+    }
+
+    @Test
+    fun longPressKeepsSelectionUntilExplicitDismissal() {
+        var selected by mutableStateOf(false)
+        compose.setContent {
+            val scope = rememberCoroutineScope()
+            CompositionLocalProvider(LocalSnackBarFabPadding provides remember { mutableStateOf(0.dp) }) {
+                MaterialTheme {
+                    Box(Modifier.size(320.dp, 480.dp)) {
+                        Box(
+                            Modifier.size(100.dp).testTag("download").combinedClickable(
+                                onLongClick = { selected = true },
+                                onClick = { selected = false },
+                            ),
+                        )
+                        with(scope) {
+                            FabLayout(
+                                hidden = false,
+                                expanded = selected,
+                                onExpandChanged = { if (!it) selected = false },
+                                expandLabel = "More actions",
+                                collapseLabel = "Close actions",
+                                autoCancel = !selected,
+                            ) {
+                                if (selected) {
+                                    onClick(Icons.Default.Close, "Select all", autoClose = false) {}
+                                } else {
+                                    onClick(Icons.Default.Close, "Filter") {}
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        compose.waitForIdle()
+        compose.onNodeWithTag("download").performTouchInput { longClick() }
+        compose.onNodeWithContentDescription("Select all").assertExists()
+        compose.runOnIdle { assertTrue(selected) }
+        compose.onNodeWithContentDescription("Select all").performTouchInput { click() }
+        compose.onNodeWithContentDescription("Close actions").performTouchInput { click() }
+        compose.runOnIdle { assertFalse(selected) }
+        compose.onNodeWithContentDescription("Select all").assertDoesNotExist()
     }
 
     @Test

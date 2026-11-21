@@ -88,7 +88,6 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import arrow.core.partially1
 import com.ehviewer.core.database.model.DownloadInfo
 import com.ehviewer.core.i18n.R
 import com.ehviewer.core.model.TagNamespace
@@ -602,7 +601,11 @@ fun AnimatedVisibilityScope.DownloadsScreen(navigator: DestinationsNavigator) = 
         }
 
         fun onItemClick(info: DownloadInfo) {
-            navigate(info.galleryInfo.asDst())
+            if (checkedInfoMap.isEmpty()) {
+                navigate(info.galleryInfo.asDst())
+            } else if (checkedInfoMap.remove(info.gid) == null) {
+                checkedInfoMap[info.gid] = info
+            }
         }
 
         Crossfade(targetState = gridView, label = "Downloads") { showGridView ->
@@ -617,14 +620,19 @@ fun AnimatedVisibilityScope.DownloadsScreen(navigator: DestinationsNavigator) = 
                     horizontalArrangement = Arrangement.spacedBy(gridInterval),
                 ) {
                     items(list, key = { it.gid }) { info ->
-                        GalleryInfoGridItem(
-                            onClick = ::onItemClick.partially1(info),
-                            onLongClick = { navigate(info.galleryInfo.asDst()) },
-                            info = info,
+                        CheckableItem(
+                            checked = info.gid in checkedInfoMap,
                             modifier = Modifier.thenIf(animateItems) { animateItem() },
-                            showLanguage = false,
-                            showProgress = showProgress,
-                        )
+                        ) { interactionSource ->
+                            GalleryInfoGridItem(
+                                onClick = { onItemClick(info) },
+                                onLongClick = { checkedInfoMap[info.gid] = info },
+                                info = info,
+                                showLanguage = false,
+                                showProgress = showProgress,
+                                interactionSource = interactionSource,
+                            )
+                        }
                     }
                 }
             } else {
@@ -634,29 +642,13 @@ fun AnimatedVisibilityScope.DownloadsScreen(navigator: DestinationsNavigator) = 
                     verticalArrangement = Arrangement.spacedBy(dimensionResource(com.hippo.ehviewer.R.dimen.gallery_list_interval)),
                 ) {
                     items(list, key = { it.gid }) { info ->
-                        val checked = info.gid in checkedInfoMap
                         CheckableItem(
-                            checked = checked,
+                            checked = info.gid in checkedInfoMap,
                             modifier = Modifier.thenIf(animateItems) { animateItem() },
                         ) { interactionSource ->
                             DownloadCard(
-                                onClick = {
-                                    if (selectMode) {
-                                        if (checked) {
-                                            checkedInfoMap.remove(info.gid)
-                                        } else {
-                                            checkedInfoMap[info.gid] = info
-                                        }
-                                    } else {
-                                        onItemClick(info)
-                                    }
-                                },
-                                onThumbClick = {
-                                    navigate(info.galleryInfo.asDst())
-                                },
-                                onLongClick = {
-                                    checkedInfoMap[info.gid] = info
-                                },
+                                onClick = { onItemClick(info) },
+                                onLongClick = { checkedInfoMap[info.gid] = info },
                                 onStart = {
                                     DownloadService.startDownload(info.galleryInfo)
                                 },

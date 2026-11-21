@@ -29,7 +29,6 @@ import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.movableContentOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.remember
@@ -56,7 +55,6 @@ import com.hippo.ehviewer.util.FileUtils
 context(_: SharedTransitionScope, _: TransitionsVisibilityScope)
 fun DownloadCard(
     onClick: () -> Unit,
-    onThumbClick: () -> Unit,
     onLongClick: () -> Unit,
     onStart: () -> Unit,
     onStop: () -> Unit,
@@ -67,23 +65,12 @@ fun DownloadCard(
     interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
 ) = CrystalCard(modifier = modifier, onClick = onClick, onLongClick = onLongClick, interactionSource = interactionSource) {
     Row {
-        val thumb = remember {
-            movableContentOf<DownloadInfo> {
-                with(listThumbGenerator) {
-                    EhAsyncCropThumb(
-                        key = it,
-                        modifier = Modifier.aspectRatio(DEFAULT_RATIO).fillMaxSize(),
-                    )
-                }
-            }
-        }
-        if (selectMode) {
-            Card {
-                thumb(info)
-            }
-        } else {
-            Card(onClick = onThumbClick) {
-                thumb(info)
+        Card {
+            with(listThumbGenerator) {
+                EhAsyncCropThumb(
+                    key = info,
+                    modifier = Modifier.aspectRatio(DEFAULT_RATIO).fillMaxSize(),
+                )
             }
         }
         val stateFailed = stringResource(R.string.download_state_failed)
