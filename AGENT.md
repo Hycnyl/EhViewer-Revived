@@ -94,6 +94,3 @@ UI 模块保留 `allWarningsAsErrors`，仅用 `-Xwarning-level=DEPRECATION:warn
 
 本托管环境先执行 `source /workspace/.ehviewer-env/activate.sh`，其中设置已固定的 JDK、SDK、Gradle/Cargo 缓存与本地 GNU m4 1.4.20。m4 是 Nettle 汇编的构建依赖；CI 检查并安装它。本地无 sudo，m4 安装于私有工具目录。Nettle 的源码包含预生成文件，CMake 必须保留其解包时间戳（DOWNLOAD_EXTRACT_TIMESTAMP TRUE）。
 
-## 本轮临时进度
-
-1.17.23 源码 `18e800a0b4d3868b62eb3fd08aa02049a3fd20c3`。[五包构建](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/44854384243)和[签名验证](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/44855883054)通过。旧版 1.17.21、1.17.22 的公开 APK 均已在 Android 11 复现长按问题。修复源码同一断言通过。[正式签名 APK 手势检查](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/44856000846)完成后，由既有发布工作流执行覆盖安装和公开下载校验。上一版 A1/A3 报告已交付维护者，剩余步骤为验证公开附件及清理。
