@@ -96,4 +96,4 @@ UI 模块保留 `allWarningsAsErrors`，仅用 `-Xwarning-level=DEPRECATION:warn
 
 ## 本轮临时进度
 
-1.17.23 下载长按多选已修复，正式源码 `18e800a0b4d3868b62eb3fd08aa02049a3fd20c3`。[旧版公开 APK]( https://github.com/Hycnyl/EhViewer-Revived/actions/runs/44854523865) 在 Android 11 重现了勾选消失，[同一回归在旧源码失败](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/44854386446)、[在修复源码通过](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/44854363671)。上一版 A1/A3 源码报告已交付维护者。[正式构建](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/44854384243)后继续签名、测试两个真实视图、发布并清理。
+1.17.23 源码 `18e800a0b4d3868b62eb3fd08aa02049a3fd20c3`。[五包构建](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/44854384243)和[签名验证](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/44855883054)通过。旧版 1.17.21、1.17.22 的公开 APK 均已在 Android 11 复现长按问题。修复源码同一断言通过。[正式签名 APK 手势检查](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/44856000846)完成后，由既有发布工作流执行覆盖安装和公开下载校验。上一版 A1/A3 报告已交付维护者，剩余步骤为验证公开附件及清理。
