@@ -12,6 +12,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -100,7 +101,9 @@ class FabLayoutHitTest {
     @Test
     fun longPressKeepsSelectionUntilExplicitDismissal() {
         var selected by mutableStateOf(false)
+        var batchLabel by mutableStateOf("Select all")
         compose.setContent {
+            val selectMode by rememberUpdatedState(selected)
             val scope = rememberCoroutineScope()
             CompositionLocalProvider(LocalSnackBarFabPadding provides remember { mutableStateOf(0.dp) }) {
                 MaterialTheme {
@@ -114,14 +117,14 @@ class FabLayoutHitTest {
                         with(scope) {
                             FabLayout(
                                 hidden = false,
-                                expanded = selected,
+                                expanded = selectMode,
                                 onExpandChanged = { if (!it) selected = false },
                                 expandLabel = "More actions",
                                 collapseLabel = "Close actions",
-                                autoCancel = !selected,
+                                autoCancel = !selectMode,
                             ) {
-                                if (selected) {
-                                    onClick(Icons.Default.Close, "Select all", autoClose = false) {}
+                                if (selectMode) {
+                                    onClick(Icons.Default.Close, batchLabel, autoClose = false) {}
                                 } else {
                                     onClick(Icons.Default.Close, "Filter") {}
                                 }
@@ -134,11 +137,14 @@ class FabLayoutHitTest {
         compose.waitForIdle()
         compose.onNodeWithTag("download").performTouchInput { longClick() }
         compose.onNodeWithContentDescription("Select all").assertExists()
-        compose.runOnIdle { assertTrue(selected) }
-        compose.onNodeWithContentDescription("Select all").performTouchInput { click() }
+        compose.runOnIdle {
+            assertTrue(selected)
+            batchLabel = "Select both downloads"
+        }
+        compose.onNodeWithContentDescription("Select both downloads").performTouchInput { click() }
         compose.onNodeWithContentDescription("Close actions").performTouchInput { click() }
         compose.runOnIdle { assertFalse(selected) }
-        compose.onNodeWithContentDescription("Select all").assertDoesNotExist()
+        compose.onNodeWithContentDescription("Select both downloads").assertDoesNotExist()
     }
 
     @Test
