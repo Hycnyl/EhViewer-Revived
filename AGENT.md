@@ -96,4 +96,4 @@ UI 模块保留 `allWarningsAsErrors`，仅用 `-Xwarning-level=DEPRECATION:warn
 
 ## 本轮临时进度
 
-A1/A3 稳健性复核已确认 Room schema、备份读写路径和迁移保持原样。A1 发现完整 CBZ 依赖另一分区可用空间，以及保留阅读器时重试会重用任务；A3 发现新记录取得登记锁前已经读完目录身份。采用目标目录内一次暂存、每次下载单独收尾、恢复与清理在已有锁内最终复核。待完成实现与定向设备验证。
+A1/A3 复核与候选实现完成，源码 `d3cc1d7e1ccdd8a946922342673e71c1cfd1dce2`。CBZ 在目标目录直接暂存并回读，重试使用独立下载任务；目录恢复与清理在已有锁内核验。Room schema、迁移及备份函数保持原样。[Android 设备回归](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/45017660246)正在运行，覆盖中断、管道写入、同阅读器重复下载、目录保护和实际备份往返。通过后按现有流程构建、签名与发布。
