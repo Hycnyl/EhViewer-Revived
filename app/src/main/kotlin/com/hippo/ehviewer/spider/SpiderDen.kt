@@ -56,7 +56,6 @@ import com.hippo.ehviewer.util.sha1
 import io.ktor.client.statement.HttpResponse
 import io.ktor.client.statement.bodyAsChannel
 import io.ktor.client.statement.request
-import java.io.File
 import java.util.concurrent.locks.ReentrantReadWriteLock
 import kotlin.concurrent.read
 import kotlin.concurrent.write
@@ -64,8 +63,6 @@ import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.ensureActive
 import moe.tarsin.coroutines.runSuspendCatching
 import okio.Path
-import okio.Path.Companion.toOkioPath
-import splitties.init.appCtx
 
 class SpiderDen(val info: GalleryInfo) {
     private val gid = info.gid
@@ -103,7 +100,7 @@ class SpiderDen(val info: GalleryInfo) {
 
     suspend fun setMode(value: Int) {
         // Latch the preference at the start of a download, not halfway through one.
-        if (value == SpiderQueen.MODE_DOWNLOAD && mode != value) saveAsCbz = Settings.saveAsCbz.value
+        if (value == SpiderQueen.MODE_DOWNLOAD) saveAsCbz = Settings.saveAsCbz.value
         mode = value
         if (mode == SpiderQueen.MODE_DOWNLOAD) {
             if (downloadDir == null) {
@@ -328,17 +325,20 @@ class SpiderDen(val info: GalleryInfo) {
             val destination = dir / archiveName
             val context = currentCoroutineContext()
             val checkpoint = { context.ensureActive() }
-            val staging = File(appCtx.cacheDir, "managed-cbz-$gid.tmp")
+            val staging = prepareDownloadArchive(destination)
             try {
                 val pageDir = checkNotNull(imageDir)
-                val sources = archiveTo(staging.toOkioPath(), pageCount) { index ->
+                // Each page, ComicInfo.xml, then the complete ZIP.
+                val measurements = LongArray((pageCount + 2) * 2)
+                val sources = archiveTo(staging, pageCount, measurements) { index ->
                     localImageSource(checkNotNull(findImageFile(index, directory = pageDir)))
                 }
-                val entries = verifyRescueZip(staging, sources.keys + COMIC_INFO_FILE, checkpoint)
-                val fingerprint = publishDownloadArchive(staging, destination, checkpoint)
-                committedArchive = CommittedArchive(destination, fingerprint, sources.entries.associate { (name, source) -> source to entries.getValue(name) })
+                fun fingerprint(index: Int) = RescueFingerprint(measurements[index * 2], measurements[index * 2 + 1])
+                val expected = fingerprint(pageCount + 1)
+                publishDownloadArchive(staging, destination, expected, checkpoint)
+                committedArchive = CommittedArchive(destination, expected, sources.indices.associate { sources[it] to fingerprint(it) })
             } finally {
-                staging.delete()
+                runCatching { SystemFileSystem.delete(staging) }.onFailure { logcat(it) }
             }
         }.onFailure { logcat(it) }.isFailure
     }
@@ -364,7 +364,12 @@ class SpiderDen(val info: GalleryInfo) {
         if (existing != null) existing sendTo file else archiveTo(file)
     }
 
-    private suspend fun archiveTo(file: Path, pageCount: Int? = null, sourceFor: (Int) -> PathSource = ::getImageSource): Map<String, Path> = resourceScope {
+    private suspend fun archiveTo(
+        file: Path,
+        pageCount: Int? = null,
+        measurements: LongArray? = null,
+        sourceFor: (Int) -> PathSource = ::getImageSource,
+    ): List<Path> = resourceScope {
         val comicInfo = closeable {
             val f = downloadDir!! / COMIC_INFO_FILE
             if (!f.exists()) {
@@ -383,8 +388,9 @@ class SpiderDen(val info: GalleryInfo) {
         val descriptors = sources.map { it.first } + comicInfo.fd
         val names = sources.map { it.second } + COMIC_INFO_FILE
         val arcFd = closeable { file.openFileDescriptor("wt") }
-        archiveFdBatch(descriptors.toIntArray(), names.toTypedArray(), arcFd.fd, names.size)
-        sources.associate { it.second to it.third }
+        archiveFdBatch(descriptors.toIntArray(), names.toTypedArray(), arcFd.fd, names.size, measurements)
+        if (measurements != null && file.isAbsolute) arcFd.fileDescriptor.sync()
+        sources.map { it.third }
     }
 
     suspend fun initDownloadDirIfExist() {

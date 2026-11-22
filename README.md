@@ -79,6 +79,7 @@
 
 ## Adjusted
 
+- CBZ downloads stage on the chosen storage and can restart while the reader is open. Folder cleanup checks ownership again before deletion.
 - Long-press a download in either view to select it and open batch actions.
 - Completed CBZ archives are verified before loose pages are removed. Restored download directories are protected during cleanup.
 

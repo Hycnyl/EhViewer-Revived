@@ -12,7 +12,7 @@
 ## 基线与发布
 
 - 功能源自 `Hycnyl/EhViewer` 的 `v1.17.8`，对应清理后的提交 `92923877ef671e33aa56f69688daa46af6e59ec6`；新仓库独立起始，不继承旧 Git 历史。四种语言 README 继承旧仓库最新的用户文档与完整素材引用，保留 LICENSE、NOTICE 和源码版权说明。
-- 应用名保持 `EhViewer`，正式包名保持 `moe.hycnyl.ehviewer`。当前正式版本为 `1.17.23` / `180098`，上个正式版为 `1.17.22` / `180097`，接续旧版 `1.17.8` / `180083` 和 `1.17.9` / `180084`。后续沿用版本体系，版本码递增。
+- 应用名保持 `EhViewer`，正式包名保持 `moe.hycnyl.ehviewer`。当前正式版本为 `1.17.24` / `180099`，上个正式版为 `1.17.23` / `180098`，接续旧版 `1.17.8` / `180083` 和 `1.17.9` / `180084`。后续沿用版本体系，版本码递增。
 - 任何实际影响用户的改动完成后，除非维护者明确禁止，都须提升 versionName/versionCode，使用 GitHub Actions 发布正式 Release；提供 universal、arm64-v8a、armeabi-v7a、x86_64、x86 五种 APK，并附简短变更说明与 SHA-256 校验和。不得使用 `[skip ci]` 绕过这条规则。
 - README 保持简洁，变更通常只在“变更”章节简要记录；允许修正仓库链接、安装要求和迁移说明。不得随意重写其余内容或丢失截图、素材和致谢。
 - 单轮只改一个目标不是硬性限制。缓存导出、下载恢复和归档格式继承 1.17.8 的当前行为，维护者没有将其固化为不可修改的长期规则。
@@ -96,4 +96,4 @@ UI 模块保留 `allWarningsAsErrors`，仅用 `-Xwarning-level=DEPRECATION:warn
 
 ## 本轮临时进度
 
-A1/A3 复核与候选实现完成，源码 `d3cc1d7e1ccdd8a946922342673e71c1cfd1dce2`。CBZ 在目标目录直接暂存并回读，重试使用独立下载任务；目录恢复与清理在已有锁内核验。Room schema、迁移及备份函数保持原样。[Android 设备回归](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/45017660246)正在运行，覆盖中断、管道写入、同阅读器重复下载、目录保护和实际备份往返。通过后按现有流程构建、签名与发布。
+A1/A3 候选源码 `d721f623ae8f962c955e66c8f008de506ceb4868` 的 [API 35 六项定向设备验证](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/45018161359)已通过，包括实际备份往返。正式源码已合入，待生成 Baseline Profile、构建五种 APK、正式签名和发布验证。

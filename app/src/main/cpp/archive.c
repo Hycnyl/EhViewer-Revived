@@ -32,6 +32,7 @@
 
 #include <archive.h>
 #include <archive_entry.h>
+#include <zlib.h>
 
 #define LOG_TAG "libarchive_wrapper"
 
@@ -457,7 +458,28 @@ Java_com_hippo_ehviewer_jni_ArchiveKt_releaseByteBuffer(JNIEnv *env, jclass thiz
     }
 }
 
-static bool write_fd_entry(struct archive *arc, struct archive_entry *entry, int fd) {
+struct measured_archive_output {
+    int fd;
+    jlong size;
+    uLong crc;
+};
+
+static la_ssize_t write_measured_archive(struct archive *arc, void *data, const void *buffer, size_t length) {
+    struct measured_archive_output *output = data;
+    ssize_t count;
+    do {
+        count = write(output->fd, buffer, length);
+    } while (count < 0 && errno == EINTR);
+    if (count <= 0) {
+        archive_set_error(arc, count == 0 ? EIO : errno, "Could not write CBZ data");
+        return -1;
+    }
+    output->size += count;
+    output->crc = crc32(output->crc, buffer, (uInt)count);
+    return count;
+}
+
+static bool write_fd_entry(struct archive *arc, struct archive_entry *entry, int fd, jlong *fingerprint) {
     struct stat st;
     if (fstat(fd, &st) != 0) return false;
     archive_entry_set_filetype(entry, AE_IFREG);
@@ -468,28 +490,41 @@ static bool write_fd_entry(struct archive *arc, struct archive_entry *entry, int
 
     char buffer[32768];
     int64_t total = 0;
+    uLong crc = crc32(0, Z_NULL, 0);
     for (;;) {
         ssize_t count = read(fd, buffer, sizeof(buffer));
         if (count < 0 && errno == EINTR) continue;
         if (count < 0) return false;
         if (count == 0) break;
         if (archive_write_data(arc, buffer, (size_t)count) != count) return false;
+        if (fingerprint) crc = crc32(crc, (const Bytef *)buffer, (uInt)count);
         total += count;
+    }
+    if (fingerprint) {
+        fingerprint[0] = total;
+        fingerprint[1] = (jlong)crc;
     }
     return total > 0 && (!S_ISREG(st.st_mode) || total == st.st_size) &&
            archive_write_finish_entry(arc) == ARCHIVE_OK;
 }
 
 JNIEXPORT void JNICALL
-Java_com_hippo_ehviewer_jni_ArchiveKt_archiveFdBatch(JNIEnv *env, jclass clazz, jintArray fd_batch, jobjectArray names, jint arc_fd, jint size) {
+Java_com_hippo_ehviewer_jni_ArchiveKt_archiveFdBatch(JNIEnv *env, jclass clazz, jintArray fd_batch, jobjectArray names, jint arc_fd, jint size, jlongArray fingerprints) {
     EH_UNUSED(clazz);
     struct archive *arc = archive_write_new();
     struct archive_entry *entry = archive_entry_new();
+    struct measured_archive_output output = {arc_fd, 0, crc32(0, Z_NULL, 0)};
     bool ok = arc && entry && size > 0 &&
               size == (*env)->GetArrayLength(env, fd_batch) && size == (*env)->GetArrayLength(env, names) &&
+              (!fingerprints || (*env)->GetArrayLength(env, fingerprints) == ((jlong)size + 1) * 2) &&
               archive_write_set_format_zip(arc) == ARCHIVE_OK &&
-              archive_write_zip_set_compression_store(arc) == ARCHIVE_OK &&
-              archive_write_open_fd(arc, arc_fd) == ARCHIVE_OK;
+              archive_write_zip_set_compression_store(arc) == ARCHIVE_OK;
+    if (ok) {
+        ok = fingerprints
+             ? archive_write_set_bytes_in_last_block(arc, 1) == ARCHIVE_OK &&
+               archive_write_open2(arc, &output, NULL, write_measured_archive, NULL, NULL) == ARCHIVE_OK
+             : archive_write_open_fd(arc, arc_fd) == ARCHIVE_OK;
+    }
     bool opened = ok;
     for (int i = 0; ok && i < size; i++) {
         jint fd;
@@ -502,11 +537,20 @@ Java_com_hippo_ehviewer_jni_ArchiveKt_archiveFdBatch(JNIEnv *env, jclass clazz, 
         archive_entry_set_pathname(entry, text);
         (*env)->ReleaseStringUTFChars(env, name, text);
         (*env)->DeleteLocalRef(env, name);
-        ok = write_fd_entry(arc, entry, fd);
+        jlong measurement[2];
+        ok = write_fd_entry(arc, entry, fd, fingerprints ? measurement : NULL);
+        if (ok && fingerprints) {
+            (*env)->SetLongArrayRegion(env, fingerprints, i * 2, 2, measurement);
+            ok = !(*env)->ExceptionCheck(env);
+        }
     }
     if (opened && archive_write_close(arc) != ARCHIVE_OK) ok = false;
     archive_entry_free(entry);
     if (arc && archive_write_free(arc) != ARCHIVE_OK) ok = false;
+    if (ok && fingerprints) {
+        jlong measurement[] = {output.size, (jlong)output.crc};
+        (*env)->SetLongArrayRegion(env, fingerprints, size * 2, 2, measurement);
+    }
     if (!ok && !(*env)->ExceptionCheck(env)) {
         jclass exception = (*env)->FindClass(env, "java/io/IOException");
         if (exception) (*env)->ThrowNew(env, exception, "Could not completely read or write the CBZ archive");

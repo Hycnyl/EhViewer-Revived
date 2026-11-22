@@ -9,11 +9,13 @@ import com.hippo.ehviewer.spider.readComicInfo
 import com.hippo.ehviewer.spider.readCompatFromPath
 import okio.Path
 
-internal suspend fun readDirectoryIdentity(directory: Path): GalleryDetailUrlParser.Result? {
-    val state = directory.find(SPIDER_INFO_FILENAME)?.let { file ->
+internal suspend fun readDirectoryIdentity(directory: Path) = readDirectoryIdentity(directory.find(SPIDER_INFO_FILENAME), directory.find(COMIC_INFO_FILE))
+
+internal suspend fun readDirectoryIdentity(spiderInfo: Path?, comicInfo: Path?): GalleryDetailUrlParser.Result? {
+    val state = spiderInfo?.let { file ->
         readCompatFromPath(file)?.run { GalleryDetailUrlParser.Result(gid, token) }
     }
-    val comic = directory.find(COMIC_INFO_FILE)?.let { file ->
+    val comic = comicInfo?.let { file ->
         readComicInfo(file)?.run { GalleryDetailUrlParser.parse(web) }
     }
     if (state != null && comic != null && (state.gid != comic.gid || state.token != comic.token)) return null
