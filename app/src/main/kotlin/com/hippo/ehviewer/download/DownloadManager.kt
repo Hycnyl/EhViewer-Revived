@@ -463,22 +463,29 @@ object DownloadManager : OnSpiderListener, CoroutineScope {
     internal suspend fun restoreFromDirectory(root: Path, gallery: BaseGalleryInfo, dirname: String): Boolean = withCachedPageExport(gallery.gid, "Download is in use") {
         val directory = root / dirname
         if (directory.name != dirname) return@withCachedPageExport false
+        val inserted = restoreDownload(gallery, dirname) { matchesDownloadDirectory(root, gallery, directory) }
+        if (inserted) {
+            runSuspendCatching { SpiderDen(gallery, directory).writeComicInfo(false) }.onFailure { logcat(it) }
+        }
+        inserted
+    }
+
+    internal suspend fun restoreDownload(galleryInfo: BaseGalleryInfo, dirname: String, validateDirectory: suspend () -> Boolean = { true }): Boolean {
         val info = sortMutex.withLock {
-            if (containDownloadInfo(gallery.gid) || allInfoList.any { it.dirname == dirname } ||
-                EhDB.directoryOwnedByAnotherDownload(dirname, gallery.gid) || !matchesDownloadDirectory(root, gallery, directory)
+            if (containDownloadInfo(galleryInfo.gid) || allInfoList.any { it.dirname == dirname } ||
+                EhDB.directoryOwnedByAnotherDownload(dirname, galleryInfo.gid) || !validateDirectory()
             ) {
                 return@withLock null
             }
-            DownloadInfo(gallery.asEntity(), dirname).also {
+            DownloadInfo(galleryInfo.asEntity(), dirname).also {
                 it.state = DownloadInfo.STATE_NONE
                 EhDB.putRestoredDownload(it, dirname)
                 allInfoList.insertWith(it, sortMode.comparator())
-                mAllInfoMap[gallery.gid] = it
+                mAllInfoMap[galleryInfo.gid] = it
             }
-        } ?: return@withCachedPageExport false
+        } ?: return false
         mutableNotifyFlow.emit(info)
-        runSuspendCatching { SpiderDen(gallery, directory).writeComicInfo(false) }.onFailure { logcat(it) }
-        true
+        return true
     }
 
     private suspend fun matchesDownloadDirectory(root: Path, gallery: GalleryInfo, directory: Path): Boolean {

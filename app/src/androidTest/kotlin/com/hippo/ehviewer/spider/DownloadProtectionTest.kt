@@ -242,6 +242,14 @@ class DownloadProtectionTest {
             ZipFile(archive).use { zip -> assertEquals(3, zip.size()) }
             assertTrue(File(temp, perFilename(0, "jpg")).isFile)
             assertEquals(2, reader.size)
+
+            assertTrue(archive.renameTo(File(dir.toFile(), "second.saved")))
+            Settings.saveAsCbz.value = false
+            Settings.saveAsCbz.valueFlow().first { !it }
+            finishAttempt()
+            assertFalse(archive.exists())
+            assertArrayEquals(byteArrayOf(0, 10), File(dir.toFile(), perFilename(0, "jpg")).readBytes())
+            assertArrayEquals(byteArrayOf(1, 10), File(dir.toFile(), perFilename(1, "jpg")).readBytes())
         } finally {
             DownloadManager.stopDownload(book.gid)
             attachedReader?.let {
