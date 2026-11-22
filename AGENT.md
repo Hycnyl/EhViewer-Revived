@@ -96,4 +96,4 @@ UI 模块保留 `allWarningsAsErrors`，仅用 `-Xwarning-level=DEPRECATION:warn
 
 ## 本轮临时进度
 
-A1/A3 候选源码 `d721f623ae8f962c955e66c8f008de506ceb4868` 的 [API 35 六项定向设备验证](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/45018161359)已通过，包括实际备份往返。正式源码已合入，待生成 Baseline Profile、构建五种 APK、正式签名和发布验证。
+A1/A3 已合入，1.17.24 正式源码为 `28350ea621c56e165ca742cd43ae749448c3f06f`。[API 35 六项设备回归](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/45018161359)及[正式源码定向界面检查](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/45018792654)均通过，1.17.23 已复现同一阅读器内重试超时。备份相关文件和 Room schema 对照通过。[五包构建](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/45018780781)正在生成 Baseline Profile。构建完成后签名，执行 API 26/33/36 安装和升级验证、发布及清理。
