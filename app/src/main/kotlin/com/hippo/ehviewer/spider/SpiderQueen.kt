@@ -509,6 +509,7 @@ class SpiderQueen private constructor(val galleryInfo: GalleryInfo) : CoroutineS
         private val showKeyLock = Mutex()
         private val downloadDelay = Settings.downloadDelay.value.milliseconds
         private var lastRequestTime = TimeSource.Monotonic.markNow()
+
         @Volatile
         private var downloadWorkers: Job? = null
 

@@ -100,7 +100,7 @@ class SpiderDen(val info: GalleryInfo) {
 
     suspend fun setMode(value: Int) {
         // Latch the preference at the start of a download, not halfway through one.
-        if (value == SpiderQueen.MODE_DOWNLOAD && mode != value) saveAsCbz = Settings.saveAsCbz.value
+        if (value == SpiderQueen.MODE_DOWNLOAD) saveAsCbz = Settings.saveAsCbz.value
         mode = value
         if (mode == SpiderQueen.MODE_DOWNLOAD) {
             if (downloadDir == null) {
