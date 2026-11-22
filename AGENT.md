@@ -94,3 +94,6 @@ UI 模块保留 `allWarningsAsErrors`，仅用 `-Xwarning-level=DEPRECATION:warn
 
 本托管环境先执行 `source /workspace/.ehviewer-env/activate.sh`，其中设置已固定的 JDK、SDK、Gradle/Cargo 缓存与本地 GNU m4 1.4.20。m4 是 Nettle 汇编的构建依赖；CI 检查并安装它。本地无 sudo，m4 安装于私有工具目录。Nettle 的源码包含预生成文件，CMake 必须保留其解包时间戳（DOWNLOAD_EXTRACT_TIMESTAMP TRUE）。
 
+## 本轮临时进度
+
+A1/A3 稳健性复核已确认 Room schema、备份读写路径和迁移保持原样。A1 发现完整 CBZ 依赖另一分区可用空间，以及保留阅读器时重试会重用任务；A3 发现新记录取得登记锁前已经读完目录身份。采用目标目录内一次暂存、每次下载单独收尾、恢复与清理在已有锁内最终复核。待完成实现与定向设备验证。
