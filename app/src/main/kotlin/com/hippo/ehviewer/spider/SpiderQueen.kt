@@ -38,6 +38,7 @@ import com.hippo.ehviewer.util.displayString
 import kotlin.concurrent.atomics.AtomicInt
 import kotlin.concurrent.atomics.decrementAndFetch
 import kotlin.concurrent.atomics.incrementAndFetch
+import kotlin.coroutines.EmptyCoroutineContext
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.TimeSource
 import kotlinx.coroutines.CancellationException
@@ -48,6 +49,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.async
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.job
 import kotlinx.coroutines.launch
@@ -73,6 +75,7 @@ class SpiderQueen private constructor(val galleryInfo: GalleryInfo) : CoroutineS
     private val mFinishedPages = AtomicInt(0)
     private val mSpiderListeners: MutableList<OnSpiderListener> = ArrayList()
 
+    @Volatile
     private var mReadReference = 0
     private var mDownloadReference = 0
 
@@ -136,13 +139,14 @@ class SpiderQueen private constructor(val galleryInfo: GalleryInfo) : CoroutineS
         }
     }
 
-    private fun notifyAllPageDownloaded(failed: Boolean) {
+    private fun notifyAllPageDownloaded(attempt: Job, failed: Boolean) {
         synchronized(mSpiderListeners) {
+            if (downloadAttempt !== attempt) return
             mSpiderListeners.forEach {
                 it.onFinish(
                     mFinishedPages.load(),
                     mDownloadedPages.load(),
-                    pageStates.size,
+                    if (this::pageStates.isInitialized) size else galleryInfo.pages,
                     failed,
                 )
             }
@@ -157,71 +161,61 @@ class SpiderQueen private constructor(val galleryInfo: GalleryInfo) : CoroutineS
         }
     }
 
-    private var downloadMode = false
-
     private val isReady
         get() = this::spiderInfo.isInitialized && this::pageStates.isInitialized
 
     private val updateLock = Mutex()
 
     @Volatile
-    private var downloadStarted = false
+    private var downloadAttempt: Job? = null
+
+    @Volatile
+    private var appliedAttempt: Job? = null
 
     fun startDownload() {
-        downloadStarted = true
-        launch { updateMode() }
+        val attempt = launch(start = CoroutineStart.LAZY) {
+            val failed = mFinishedPages.load() != size || spiderDen.archive(size)
+            notifyAllPageDownloaded(coroutineContext.job, failed)
+        }
+        downloadAttempt = attempt
+        launch {
+            updateMode().onFailure { error ->
+                logcat(error)
+                notifyAllPageDownloaded(attempt, failed = true)
+            }
+        }
     }
 
     private suspend fun updateMode() = runSuspendCatching {
         awaitReady()
         updateLock.withLock {
-            val mode: Int = if (mDownloadReference > 0 && downloadStarted) {
-                MODE_DOWNLOAD
-            } else {
-                MODE_READ
-            }
-            spiderDen.setMode(mode)
+            if (appliedAttempt === downloadAttempt && (appliedAttempt != null || spiderDen.mode == MODE_READ)) return@withLock
+            val previous = appliedAttempt
+            appliedAttempt = null
+            previous?.cancelAndJoin()
+            mWorkerScope.leaveDownloadMode()
 
-            // Update download page
-            val intoDownloadMode = mode == MODE_DOWNLOAD
-            if (intoDownloadMode && retryArchive) {
-                retryArchive = false
-                archiveJob = newArchiveJob()
-                if (mFinishedPages.load() == size) {
-                    downloadMode = true
-                    archiveJob.start()
-                    return@withLock
-                }
-            }
-            if (intoDownloadMode && !downloadMode) {
-                // Clear download state
+            val attempt = downloadAttempt
+            spiderDen.setMode(if (attempt == null) MODE_READ else MODE_DOWNLOAD)
+            if (attempt != null && attempt === downloadAttempt) {
                 synchronized(mPageStateLock) {
-                    val temp: IntArray = pageStates
-                    var i = 0
-                    val n = temp.size
-                    while (i < n) {
-                        val oldState = temp[i]
-                        if (STATE_DOWNLOADING != oldState) {
-                            temp[i] = STATE_NONE
-                        }
-                        i++
+                    val states = pageStates
+                    for (i in states.indices) {
+                        if (states[i] != STATE_DOWNLOADING) states[i] = STATE_NONE
                     }
                     mDownloadedPages.store(0)
                     mFinishedPages.store(0)
+                    appliedAttempt = attempt
                 }
                 mWorkerScope.enterDownloadMode()
             }
-            downloadMode = intoDownloadMode
         }
     }
 
     private fun setMode(@Mode mode: Int) {
         when (mode) {
             MODE_READ -> mReadReference++
-            MODE_DOWNLOAD -> {
-                mDownloadReference++
-                retryArchive = archiveFailed
-            }
+            MODE_DOWNLOAD -> mDownloadReference++
         }
         check(mDownloadReference <= 1) { "mDownloadReference can't more than 1" }
     }
@@ -230,29 +224,17 @@ class SpiderQueen private constructor(val galleryInfo: GalleryInfo) : CoroutineS
         when (mode) {
             MODE_READ -> mReadReference--
             MODE_DOWNLOAD -> {
-                downloadStarted = false
+                val attempt = downloadAttempt
+                downloadAttempt = null
+                attempt?.cancel()
                 mDownloadReference--
             }
         }
         check(!(mReadReference < 0 || mDownloadReference < 0)) { "Mode reference < 0" }
     }
 
-    private val prepareScope = CoroutineScope(coroutineContext + SupervisorJob())
+    private val prepareScope = CoroutineScope(coroutineContext + SupervisorJob(coroutineContext.job))
     private val prepareJob = prepareScope.async { doPrepare() }
-
-    @Volatile
-    private var archiveFailed = false
-
-    @Volatile
-    private var retryArchive = false
-
-    private fun newArchiveJob() = launch(start = CoroutineStart.LAZY) {
-        archiveFailed = spiderDen.archive(size)
-        notifyAllPageDownloaded(archiveFailed)
-    }
-
-    @Volatile
-    private var archiveJob = newArchiveJob()
 
     private suspend fun doPrepare() {
         spiderDen.initDownloadDirIfExist()
@@ -274,21 +256,15 @@ class SpiderQueen private constructor(val galleryInfo: GalleryInfo) : CoroutineS
         val queenScope = this
         launch {
             try {
-                if (archiveJob.isActive) {
-                    archiveJob.join()
-                }
-                if (!spiderDen.postArchive()) {
-                    if (mWorkerScope.isDownloadMode) {
-                        runCatching {
-                            spiderDen.writeComicInfo()
-                        }.onFailure {
-                            logcat(it)
+                updateLock.withLock {
+                    appliedAttempt?.join()
+                    val wasDownloading = mWorkerScope.isDownloadMode
+                    mWorkerScope.leaveDownloadMode()
+                    if (!spiderDen.postArchive()) {
+                        if (wasDownloading) {
+                            runSuspendCatching { spiderDen.writeComicInfo() }.onFailure { logcat(it) }
                         }
-                    }
-                    runCatching {
-                        writeSpiderInfoToLocal()
-                    }.onFailure {
-                        logcat(it)
+                        runSuspendCatching { writeSpiderInfoToLocal() }.onFailure { logcat(it) }
                     }
                 }
             } finally {
@@ -420,7 +396,7 @@ class SpiderQueen private constructor(val galleryInfo: GalleryInfo) : CoroutineS
     private fun isStateDone(state: Int): Boolean = state == STATE_FINISHED || state == STATE_FAILED
 
     fun updatePageState(index: Int, @State state: Int, error: String? = null) {
-        synchronized<Unit>(mPageStateLock) {
+        val completion = synchronized(mPageStateLock) {
             val oldState = pageStates[index]
             pageStates[index] = state
             if (!isStateDone(oldState) && isStateDone(state)) {
@@ -433,6 +409,7 @@ class SpiderQueen private constructor(val galleryInfo: GalleryInfo) : CoroutineS
             } else if (oldState == STATE_FINISHED && state != STATE_FINISHED) {
                 mFinishedPages.decrementAndFetch()
             }
+            appliedAttempt?.takeIf { it === downloadAttempt && mDownloadedPages.load() == size }
         }
 
         // Notify listeners
@@ -441,13 +418,7 @@ class SpiderQueen private constructor(val galleryInfo: GalleryInfo) : CoroutineS
         } else if (state == STATE_FINISHED) {
             notifyPageSuccess(index)
         }
-        if (downloadStarted && spiderDen.mode == MODE_DOWNLOAD && mDownloadedPages.load() == size) {
-            if (mFinishedPages.load() == size) {
-                archiveJob.start()
-            } else {
-                notifyAllPageDownloaded(failed = true)
-            }
-        }
+        completion?.start()
     }
 
     @IntDef(MODE_READ, MODE_DOWNLOAD)
@@ -538,28 +509,36 @@ class SpiderQueen private constructor(val galleryInfo: GalleryInfo) : CoroutineS
         private val showKeyLock = Mutex()
         private val downloadDelay = Settings.downloadDelay.value.milliseconds
         private var lastRequestTime = TimeSource.Monotonic.markNow()
-        var isDownloadMode = false
-            private set
+        @Volatile
+        private var downloadWorkers: Job? = null
 
-        @Synchronized
-        fun enterDownloadMode() {
-            if (isDownloadMode) return
-            updateRAList((0 until size).toList())
-            isDownloadMode = true
+        val isDownloadMode get() = downloadWorkers != null
+
+        fun enterDownloadMode() = synchronized(jobs) {
+            downloadWorkers = Job(this@SpiderQueen.coroutineContext.job)
+            for (index in pageStates.indices) {
+                if (getPageState(index) != STATE_FINISHED && jobs[index]?.isActive != true) {
+                    doLaunchDownloadJob(index, false)
+                }
+            }
         }
 
-        fun updateRAList(list: List<Int>, aliveBound: IntRange = 0..Int.MAX_VALUE) {
-            if (isDownloadMode) return
-            synchronized(jobs) {
-                jobs.forEach { (i, job) ->
-                    if (i !in aliveBound) {
-                        job.cancel()
-                    }
+        suspend fun leaveDownloadMode() {
+            val workers = synchronized(jobs) { downloadWorkers }
+            workers?.cancelAndJoin()
+            synchronized(jobs) { downloadWorkers = null }
+        }
+
+        fun updateRAList(list: List<Int>, aliveBound: IntRange = 0..Int.MAX_VALUE) = synchronized(jobs) {
+            if (isDownloadMode) return@synchronized
+            jobs.forEach { (i, job) ->
+                if (i !in aliveBound) {
+                    job.cancel()
                 }
-                list.forEach {
-                    if (pageStates[it] != STATE_FINISHED && jobs[it]?.isActive != true) {
-                        doLaunchDownloadJob(it, false)
-                    }
+            }
+            list.forEach {
+                if (getPageState(it) != STATE_FINISHED && jobs[it]?.isActive != true) {
+                    doLaunchDownloadJob(it, false)
                 }
             }
         }
@@ -569,7 +548,7 @@ class SpiderQueen private constructor(val galleryInfo: GalleryInfo) : CoroutineS
             val skipHath = force && !orgImg && currentJob?.isActive == true
             if (force) currentJob?.cancel(CancellationException(FORCE_RETRY))
             if (currentJob?.isActive != true) {
-                jobs[index] = launch {
+                jobs[index] = launch(downloadWorkers ?: EmptyCoroutineContext) {
                     runCatching {
                         semaphore.withPermit {
                             doInJob(index, force, orgImg, skipHath)
@@ -594,12 +573,13 @@ class SpiderQueen private constructor(val galleryInfo: GalleryInfo) : CoroutineS
             check(index in 0 until size)
             val state = pageStates[index]
             if (!force && state == STATE_FINISHED) return notifyPageReady(index)
-            if (!isDownloadMode) {
-                synchronized(jobs) { doLaunchDownloadJob(index, force, orgImg) }
+            val worker = synchronized(jobs) {
+                if (!isDownloadMode) doLaunchDownloadJob(index, force, orgImg)
+                jobs[index]
             }
             launch {
-                jobs[index]?.join()
-                if (pageStates[index] == STATE_FINISHED) notifyPageReady(index)
+                worker?.join()
+                if (getPageState(index) == STATE_FINISHED) notifyPageReady(index)
             }
         }
 

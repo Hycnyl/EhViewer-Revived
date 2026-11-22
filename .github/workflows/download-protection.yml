@@ -77,7 +77,7 @@ jobs:
           from pathlib import Path
           import xml.etree.ElementTree as ET
           cases = [c for f in Path("app/build/outputs/androidTest-results").rglob("*.xml") for c in ET.parse(f).iter("testcase") if c.get("classname", "").endswith("DownloadProtectionTest")]
-          required = {"nativeWriterReportsSourceAndOutputFailures", "interruptedDownloadKeepsOnlyVerifiedSourcesEligibleForCleanup", "restorationProtectsRenamedDirectoryBeforeAndAfterConfirmation", "publicationFailurePreservesSourceAndExistingUnmarkedArchive"}
+          required = {"nativeWriterReportsSourceAndOutputFailures", "interruptedDownloadKeepsOnlyVerifiedSourcesEligibleForCleanup", "restorationProtectsRenamedDirectoryBeforeAndAfterConfirmation", "publicationFailurePreservesSourceAndExistingUnmarkedArchive", "archiveWriterMeasuresEntriesAndCompleteZipThroughPipe", "retainedReaderCanCompleteAnotherDownloadAfterTheFirstCbz"}
           assert required <= {c.get("name") for c in cases}, "Missing device regressions"
           assert all(not list(c.findall("failure") + c.findall("error") + c.findall("skipped")) for c in cases)
           print("PASS", sorted(required))

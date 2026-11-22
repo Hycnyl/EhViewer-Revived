@@ -36,6 +36,7 @@ import com.ehviewer.core.data.model.asEntity
 import com.ehviewer.core.database.model.DownloadArtist
 import com.ehviewer.core.database.model.DownloadInfo
 import com.ehviewer.core.database.model.DownloadLabel
+import com.ehviewer.core.files.SystemFileSystem
 import com.ehviewer.core.files.delete
 import com.ehviewer.core.files.exists
 import com.ehviewer.core.files.find
@@ -107,6 +108,9 @@ object DownloadManager : OnSpiderListener, CoroutineScope {
     private var mDownloadListener: DownloadListener? = null
     private var mCurrentTask: DownloadInfo? = null
     private var mCurrentSpider: SpiderQueen? = null
+
+    @Volatile
+    private var currentAttempt = Any()
 
     private val mutableNotifyFlow = MutableSharedFlow<DownloadInfo>(extraBufferCapacity = 1)
     val notifyFlow = mutableNotifyFlow.asSharedFlow()
@@ -198,6 +202,7 @@ object DownloadManager : OnSpiderListener, CoroutineScope {
             // Get download from wait list
             if (!mWaitList.isEmpty()) {
                 val info = mWaitList.removeFirst()
+                currentAttempt = Any()
                 mCurrentTask = info
                 with(info) {
                     archiveFile?.let {
@@ -403,16 +408,13 @@ object DownloadManager : OnSpiderListener, CoroutineScope {
     internal suspend fun reattachDownloadDirectory(root: Path, gallery: GalleryInfo, directory: Path): Boolean = withCachedPageExport(gallery.gid, "Download is in use") {
         val info = sortMutex.withLock {
             val item = getDownloadInfo(gallery.gid) ?: return@withLock null
-            if (root != downloadLocation || directory.parent != root || item.token != gallery.token ||
-                readDirectoryIdentity(directory)?.let { it.gid == gallery.gid && it.token == gallery.token } != true
-            ) {
-                return@withLock null
-            }
+            if (root != downloadLocation || directory.parent != root || item.token != gallery.token) return@withLock null
             val name = directory.name
             val persisted = EhDB.getDownloadDirname(item.gid)
             if (persisted == name && item.dirname == name) return@withLock null
             if (listOfNotNull(item.dirname, persisted).any { it != name && (root / it).exists() }) return@withLock null
             if (allInfoList.any { it.gid != item.gid && it.dirname == name } || EhDB.directoryOwnedByAnotherDownload(name, item.gid)) return@withLock null
+            if (!matchesDownloadDirectory(root, gallery, directory)) return@withLock null
             EhDB.putDownloadDirname(item.gid, name)
             item.dirname = name
             item
@@ -431,10 +433,20 @@ object DownloadManager : OnSpiderListener, CoroutineScope {
         if (allInfoList.any { it.dirname == file.name } || EhDB.directoryOwnedByAnotherDownload(file.name, null)) return false
         val currentDir = getDownloadInfo(gid)?.dirname
         if (containDownloadInfo(gid) && (currentDir == null || !(root / currentDir).isDirectory)) return false
-        val identity = readDirectoryIdentity(file)
-        if (identity == null && (file.find(SPIDER_INFO_FILENAME) != null || file.find(COMIC_INFO_FILE) != null)) return false
+        // A provider failing to list the folder is different from a folder with no metadata.
+        val children = SystemFileSystem.listOrNull(file) ?: return false
+        val hasDifferentArchive = children.any { child ->
+            val name = child.name
+            val archiveGid = name.substringBeforeLast('.').toLongOrNull()
+            archiveGid != null && archiveGid != gid && (name.endsWith(".cbz", ignoreCase = true) || name.endsWith(".zip", ignoreCase = true))
+        }
+        if (hasDifferentArchive) return false
+        val state = children.firstOrNull { it.name == SPIDER_INFO_FILENAME }
+        val comic = children.firstOrNull { it.name == COMIC_INFO_FILE }
+        val identity = readDirectoryIdentity(state, comic)
+        if (identity == null && (state != null || comic != null)) return false
         if (identity != null && (identity.gid != gid || containDownloadInfo(identity.gid))) return false
-        return true
+        return root == downloadLocation
     }
 
     internal suspend fun deleteRedundantDirectory(root: Path, file: Path): Boolean {
@@ -450,36 +462,33 @@ object DownloadManager : OnSpiderListener, CoroutineScope {
 
     internal suspend fun restoreFromDirectory(root: Path, gallery: BaseGalleryInfo, dirname: String): Boolean = withCachedPageExport(gallery.gid, "Download is in use") {
         val directory = root / dirname
-        if (downloadLocation != root || readDirectoryIdentity(directory)?.let { it.gid == gallery.gid && it.token == gallery.token } != true) {
-            return@withCachedPageExport false
-        }
-        val inserted = restoreDownload(gallery, dirname)
-        if (inserted) {
-            runSuspendCatching { SpiderDen(gallery, directory).writeComicInfo(false) }.onFailure { logcat(it) }
-        }
-        inserted
-    }
-
-    suspend fun restoreDownload(galleryInfo: BaseGalleryInfo, dirname: String): Boolean {
+        if (directory.name != dirname) return@withCachedPageExport false
         val info = sortMutex.withLock {
-            if (containDownloadInfo(galleryInfo.gid) || allInfoList.any { it.dirname == dirname } ||
-                EhDB.directoryOwnedByAnotherDownload(dirname, galleryInfo.gid)
+            if (containDownloadInfo(gallery.gid) || allInfoList.any { it.dirname == dirname } ||
+                EhDB.directoryOwnedByAnotherDownload(dirname, gallery.gid) || !matchesDownloadDirectory(root, gallery, directory)
             ) {
                 return@withLock null
             }
-            DownloadInfo(galleryInfo.asEntity(), dirname).also {
+            DownloadInfo(gallery.asEntity(), dirname).also {
                 it.state = DownloadInfo.STATE_NONE
                 EhDB.putRestoredDownload(it, dirname)
                 allInfoList.insertWith(it, sortMode.comparator())
-                mAllInfoMap[galleryInfo.gid] = it
+                mAllInfoMap[gallery.gid] = it
             }
-        } ?: return false
+        } ?: return@withCachedPageExport false
         mutableNotifyFlow.emit(info)
-        return true
+        runSuspendCatching { SpiderDen(gallery, directory).writeComicInfo(false) }.onFailure { logcat(it) }
+        true
+    }
+
+    private suspend fun matchesDownloadDirectory(root: Path, gallery: GalleryInfo, directory: Path): Boolean {
+        if (root != downloadLocation || directory.parent != root || !directory.isDirectory) return false
+        val identity = readDirectoryIdentity(directory) ?: return false
+        return identity.gid == gallery.gid && identity.token == gallery.token && root == downloadLocation
     }
 
     suspend fun stopDownload(gid: Long) {
-        val info = stopDownloadInternal(gid)
+        val info = mutex.withLock { stopDownloadInternal(gid) }
         if (info != null) {
             // Update listener
             mutableNotifyFlow.emit(info)
@@ -489,7 +498,7 @@ object DownloadManager : OnSpiderListener, CoroutineScope {
     }
 
     suspend fun stopRangeDownload(gidList: LongArray) {
-        stopRangeDownloadInternal(gidList)
+        mutex.withLock { stopRangeDownloadInternal(gidList) }
 
         // Update listener
         gidList.mapNotNull { mAllInfoMap[it] }.forEach {
@@ -520,7 +529,7 @@ object DownloadManager : OnSpiderListener, CoroutineScope {
     }
 
     suspend fun deleteDownload(gid: Long, deleteFiles: Boolean = false) {
-        stopDownloadInternal(gid)
+        mutex.withLock { stopDownloadInternal(gid) }
         val info = mAllInfoMap[gid]
         if (info != null) {
             // Remove from DB
@@ -547,7 +556,7 @@ object DownloadManager : OnSpiderListener, CoroutineScope {
     }
 
     suspend fun deleteRangeDownload(gidList: LongArray) {
-        stopRangeDownloadInternal(gidList)
+        mutex.withLock { stopRangeDownloadInternal(gidList) }
         val list = gidList.mapNotNull { gid ->
             mAllInfoMap.remove(gid)
         }
@@ -837,14 +846,17 @@ object DownloadManager : OnSpiderListener, CoroutineScope {
     }
 
     override fun onFinish(finished: Int, downloaded: Int, total: Int, failed: Boolean) {
+        val attempt = currentAttempt
         launch {
-            mSpeedReminder.onFinish()
-            mCurrentSpider?.let { spider ->
-                mCurrentSpider = null
-                spider.removeOnSpiderListener(DownloadManager)
-                SpiderQueen.releaseSpiderQueen(spider, SpiderQueen.MODE_DOWNLOAD)
-            }
-            mCurrentTask?.let { info ->
+            mutex.withLock {
+                val info = mCurrentTask ?: return@launch
+                if (attempt !== currentAttempt) return@launch
+                mSpeedReminder.onFinish()
+                mCurrentSpider?.let { spider ->
+                    mCurrentSpider = null
+                    spider.removeOnSpiderListener(DownloadManager)
+                    SpiderQueen.releaseSpiderQueen(spider, SpiderQueen.MODE_DOWNLOAD)
+                }
                 mCurrentTask = null
                 mSpeedReminder.stop()
                 info.finished = finished
@@ -855,8 +867,8 @@ object DownloadManager : OnSpiderListener, CoroutineScope {
                 EhDB.putDownloadInfo(info)
                 mDownloadListener?.onFinish(info)
                 mutableNotifyFlow.emit(info)
-                ensureDownload()
-            } ?: logcat(TAG, LogPriority.ERROR) { "Current task is null, but it should not be" }
+            }
+            ensureDownload()
         }
     }
 

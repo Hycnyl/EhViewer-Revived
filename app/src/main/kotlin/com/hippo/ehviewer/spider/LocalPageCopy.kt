@@ -78,12 +78,23 @@ internal fun Path.hasIncompleteDownloadArchive() = (parent!! / downloadMarker(na
 
 internal fun Path.completedArchive(name: String): Path? = (this / name).takeIf { it.isFile && !(this / downloadMarker(name)).exists() && !(this / rescueMarkerName(name)).exists() }
 
-internal fun publishDownloadArchive(source: File, destination: Path, checkpoint: () -> Unit): RescueFingerprint {
+internal fun prepareDownloadArchive(destination: Path): Path {
     val parent = destination.parent!!
     val marker = parent / downloadMarker(destination.name)
-    val temporary = parent / ".${destination.name}.download-staging"
     check(!(parent / rescueMarkerName(destination.name)).exists()) { "A cache export is incomplete" }
-    // A freshly verified private CBZ is available before recovering this writer's reserved paths.
+    check(marker.isFile || !destination.exists()) { "Destination already exists: $destination" }
+    val temporary = parent / ".${destination.name}.download-staging"
+    if (temporary.isFile) SystemFileSystem.delete(temporary)
+    check(!temporary.exists()) { "Staging path is occupied: $temporary" }
+    return temporary
+}
+
+internal fun publishDownloadArchive(temporary: Path, destination: Path, expected: RescueFingerprint, checkpoint: () -> Unit) {
+    val parent = destination.parent!!
+    val marker = parent / downloadMarker(destination.name)
+    check(temporary.withRescueInput { readRescueBytes(it, checkpoint = checkpoint) } == expected) { "Staging verification failed" }
+    check(!(parent / rescueMarkerName(destination.name)).exists()) { "A cache export is incomplete" }
+    // A verified replacement is available before recovering a previous incomplete publication.
     if (marker.isFile) {
         if (destination.exists()) {
             check(destination.isFile)
@@ -91,25 +102,33 @@ internal fun publishDownloadArchive(source: File, destination: Path, checkpoint:
         }
         SystemFileSystem.delete(marker)
     }
-    if (temporary.isFile) SystemFileSystem.delete(temporary)
-    return commitLocalFile({ source.inputStream() }, destination, marker, temporary, checkpoint)
+    publishStagedFile(temporary, destination, marker, expected, checkpoint)
 }
 
-private fun commitLocalFile(openSource: () -> InputStream, destination: Path, marker: Path, temporary: Path, checkpoint: () -> Unit): RescueFingerprint {
+private fun commitLocalFile(openSource: () -> InputStream, destination: Path, marker: Path, temporary: Path, checkpoint: () -> Unit) {
     check(!destination.exists() && !marker.exists() && !temporary.exists()) { "Destination already exists: $destination" }
     val expected = openSource().use { readRescueBytes(it, checkpoint = checkpoint) }
-    var ownsDestination = false
-    var ownsMarker = false
-    var committed = false
     try {
         openSource().use { input ->
             ParcelFileDescriptor.AutoCloseOutputStream(temporary.openFileDescriptor("wt")).use { readRescueBytes(input, it, checkpoint = checkpoint) }
         }
         check(temporary.withRescueInput { readRescueBytes(it, checkpoint = checkpoint) } == expected) { "Staging verification failed" }
+        publishStagedFile(temporary, destination, marker, expected, checkpoint)
+    } finally {
+        runCatching { SystemFileSystem.delete(temporary) }
+    }
+}
+
+private fun publishStagedFile(temporary: Path, destination: Path, marker: Path, expected: RescueFingerprint, checkpoint: () -> Unit) {
+    var ownsDestination = false
+    var ownsMarker = false
+    var committed = false
+    try {
         checkpoint()
         check(!destination.exists() && !marker.exists()) { "Destination appeared during export: $destination" }
         ownsMarker = true
         ParcelFileDescriptor.AutoCloseOutputStream(marker.openFileDescriptor("wt")).use { it.write(destination.name.toByteArray()) }
+        check(!destination.exists()) { "Destination appeared during export: $destination" }
         ownsDestination = true
         runSuspendCatching { temporary moveTo destination }
         if (!destination.exists()) {
@@ -122,10 +141,8 @@ private fun commitLocalFile(openSource: () -> InputStream, destination: Path, ma
         check(!marker.exists()) { "Cannot remove incomplete marker: $marker" }
         committed = true
     } finally {
-        runCatching { temporary.delete() }
-        if (!committed && ownsDestination) runCatching { destination.delete() }
+        if (!committed && ownsDestination) runCatching { SystemFileSystem.delete(destination) }
         // If cleanup cannot remove the incomplete destination, retain its reader guard.
-        if (!committed && ownsMarker && !destination.exists()) runCatching { marker.delete() }
+        if (!committed && ownsMarker && (!ownsDestination || !destination.exists())) runCatching { SystemFileSystem.delete(marker) }
     }
-    return expected
 }
