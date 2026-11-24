@@ -393,11 +393,9 @@
     <string name="cached_export_failed_pages">%1$d페이지를 저장하지 못했습니다.</string>
     <string name="read_cache_size_custom">사용자 지정</string>
     <string name="read_cache_cleanup">읽기 캐시 정리</string>
-    <string name="read_cache_cleanup_summary">선택한 시점 이전에 저장된 이미지 정리</string>
-    <string name="read_cache_cleanup_day">하루 전</string>
-    <string name="read_cache_cleanup_week">일주일 전</string>
-    <string name="read_cache_cleanup_month">한 달 전</string>
-    <string name="read_cache_cleanup_year">일 년 전</string>
+    <string name="read_cache_cleanup_summary">시간 또는 갤러리별로 이미지 캐시 정리</string>
+    <string name="read_cache_cleanup_by_time">시간별 정리</string>
+    <string name="read_cache_cleanup_by_gallery">갤러리별 정리</string>
     <string name="read_cache_cleanup_action">정리</string>
     <string name="read_cache_cleanup_running">정리 중…</string>
     <string name="read_cache_cleanup_done">캐시 %1$d개를 정리했습니다</string>

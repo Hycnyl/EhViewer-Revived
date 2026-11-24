@@ -404,11 +404,9 @@
     <string name="cached_export_failed_pages">บันทึกไม่ได้ %1$d หน้า</string>
     <string name="read_cache_size_custom">กำหนดเอง</string>
     <string name="read_cache_cleanup">ล้างแคชการอ่าน</string>
-    <string name="read_cache_cleanup_summary">ลบภาพที่บันทึกไว้ก่อนเวลาที่เลือก</string>
-    <string name="read_cache_cleanup_day">หนึ่งวันก่อน</string>
-    <string name="read_cache_cleanup_week">หนึ่งสัปดาห์ก่อน</string>
-    <string name="read_cache_cleanup_month">หนึ่งเดือนก่อน</string>
-    <string name="read_cache_cleanup_year">หนึ่งปีก่อน</string>
+    <string name="read_cache_cleanup_summary">ล้างรูปภาพในแคชตามเวลาหรือแกลเลอรี</string>
+    <string name="read_cache_cleanup_by_time">ล้างตามเวลา</string>
+    <string name="read_cache_cleanup_by_gallery">ล้างตามแกลเลอรี</string>
     <string name="read_cache_cleanup_action">ล้าง</string>
     <string name="read_cache_cleanup_running">กำลังล้าง…</string>
     <string name="read_cache_cleanup_done">ล้างแคชแล้ว %1$d รายการ</string>

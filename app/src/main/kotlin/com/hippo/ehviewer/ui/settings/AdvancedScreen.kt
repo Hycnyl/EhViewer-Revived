@@ -45,6 +45,7 @@ import com.hippo.ehviewer.client.data.FavListUrlBuilder
 import com.hippo.ehviewer.collectAsState
 import com.hippo.ehviewer.ktor.isCronetAvailable
 import com.hippo.ehviewer.ui.Screen
+import com.hippo.ehviewer.ui.destinations.ReadCacheGalleryScreenDestination
 import com.hippo.ehviewer.ui.main.NavigationIcon
 import com.hippo.ehviewer.ui.showRestartDialog
 import com.hippo.ehviewer.util.AdsPlaceholderFile
@@ -62,6 +63,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.merge
 import moe.tarsin.coroutines.runSuspendCatching
+import moe.tarsin.navigate
 import moe.tarsin.snackbar
 import moe.tarsin.string
 
@@ -164,7 +166,7 @@ fun AnimatedVisibilityScope.AdvancedScreen(navigator: DestinationsNavigator) = S
             }
             HorizontalDivider()
             ReadCacheSizePreference()
-            ReadCacheCleanupPreference()
+            ReadCacheCleanupPreference { navigate(ReadCacheGalleryScreenDestination) }
             HorizontalDivider()
             SimpleMenuPreferenceInt(
                 title = stringResource(R.string.gallery_version_load_strategy),

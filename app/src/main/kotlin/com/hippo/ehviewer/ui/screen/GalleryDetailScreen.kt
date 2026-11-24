@@ -57,7 +57,7 @@ import com.hippo.ehviewer.client.EhEngine
 import com.hippo.ehviewer.client.EhUrl
 import com.hippo.ehviewer.client.EhUtils
 import com.hippo.ehviewer.client.data.fillInfo
-import com.hippo.ehviewer.client.getImageKey
+import com.hippo.ehviewer.coil.clearGalleryImages
 import com.hippo.ehviewer.coil.justDownload
 import com.hippo.ehviewer.download.DownloadManager
 import com.hippo.ehviewer.ktbuilder.executeIn
@@ -257,10 +257,7 @@ fun AnimatedVisibilityScope.GalleryDetailScreen(args: GalleryDetailScreenArgs, n
                                     ) {
                                         Text(text = stringResource(id = R.string.clear_image_cache_confirm))
                                     }
-                                    repeat(gd.pages) {
-                                        val key = getImageKey(gd.gid, it)
-                                        imageCache.remove(key)
-                                    }
+                                    imageCache.clearGalleryImages(gd.gid, 0 until gd.pages)
                                     snackbar(cacheCleared)
                                 }
                             },
