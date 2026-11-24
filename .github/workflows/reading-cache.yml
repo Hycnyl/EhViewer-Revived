@@ -6,7 +6,7 @@ on:
     branches: [main]
     paths:
       - 'app/src/main/java/com/hippo/ehviewer/coil/ReadCacheCleaner.java'
-      - 'app/src/main/kotlin/com/hippo/ehviewer/coil/ReadCacheGalleries.kt'
+      - 'app/src/main/kotlin/com/hippo/ehviewer/coil/ReadCachedGallery.kt'
       - 'app/src/main/kotlin/com/hippo/ehviewer/coil/DiskCacheScoped.kt'
       - 'app/src/main/kotlin/com/hippo/ehviewer/spider/SpiderInfo.kt'
       - 'app/src/main/kotlin/com/hippo/ehviewer/ui/settings/ReadCache*.kt'
