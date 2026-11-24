@@ -94,3 +94,6 @@ UI 模块保留 `allWarningsAsErrors`，仅用 `-Xwarning-level=DEPRECATION:warn
 
 本托管环境先执行 `source /workspace/.ehviewer-env/activate.sh`，其中设置已固定的 JDK、SDK、Gradle/Cargo 缓存与本地 GNU m4 1.4.20。m4 是 Nettle 汇编的构建依赖；CI 检查并安装它。本地无 sudo，m4 安装于私有工具目录。Nettle 的源码包含预生成文件，CMake 必须保留其解包时间戳（DOWNLOAD_EXTRACT_TIMESTAMP TRUE）。
 
+## 本轮临时进度
+
+已确认原版缓存导出同时读取 Coil、正式下载散页及 CBZ 暂存散页，完整 CBZ 不在扫描范围。清理阅读缓存将复用 Material 日期/时钟与本地画廊、SpiderInfo 元数据，按截止时间或画廊清理，不触碰下载文件或备份格式。待实现并验证。
