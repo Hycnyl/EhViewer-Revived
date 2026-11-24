@@ -423,11 +423,9 @@
     <string name="cached_export_failed_pages">%1$d pages n’ont pas pu être enregistrées.</string>
     <string name="read_cache_size_custom">Personnalisé</string>
     <string name="read_cache_cleanup">Vider le cache de lecture</string>
-    <string name="read_cache_cleanup_summary">Supprimer les images mises en cache avant la date choisie</string>
-    <string name="read_cache_cleanup_day">Il y a un jour</string>
-    <string name="read_cache_cleanup_week">Il y a une semaine</string>
-    <string name="read_cache_cleanup_month">Il y a un mois</string>
-    <string name="read_cache_cleanup_year">Il y a un an</string>
+    <string name="read_cache_cleanup_summary">Effacer les images en cache par date ou par galerie</string>
+    <string name="read_cache_cleanup_by_time">Par date et heure</string>
+    <string name="read_cache_cleanup_by_gallery">Par galerie</string>
     <string name="read_cache_cleanup_action">Vider</string>
     <string name="read_cache_cleanup_running">Suppression…</string>
     <string name="read_cache_cleanup_done">%1$d entrées du cache supprimées</string>

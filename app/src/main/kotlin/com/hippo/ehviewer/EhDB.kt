@@ -225,6 +225,10 @@ object EhDB {
         dao.update(quickSearchList)
     }
 
+    internal suspend fun getReadCacheGalleryInfo() = db.galleryDao().list()
+
+    internal suspend fun getReadCacheHistoryGids() = db.historyDao().list().map { it.gid }
+
     val historyLazyList
         get() = db.historyDao().joinListLazy()
 

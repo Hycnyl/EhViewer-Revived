@@ -1,0 +1,44 @@
+name: Check reading cache cleanup
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'app/src/main/java/com/hippo/ehviewer/coil/ReadCacheCleaner.java'
+      - 'app/src/main/kotlin/com/hippo/ehviewer/coil/ReadCacheGalleries.kt'
+      - 'app/src/main/kotlin/com/hippo/ehviewer/coil/DiskCacheScoped.kt'
+      - 'app/src/main/kotlin/com/hippo/ehviewer/spider/SpiderInfo.kt'
+      - 'app/src/main/kotlin/com/hippo/ehviewer/ui/settings/ReadCache*.kt'
+      - 'app/src/test/kotlin/com/hippo/ehviewer/ui/settings/ReadCacheCleanupTest.kt'
+      - '.github/workflows/reading-cache.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: layout-${{ github.sha }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - uses: actions/setup-java@v6.1.0
+        with:
+          distribution: temurin
+          java-version: '21'
+      - uses: android-actions/setup-android@v4.0.4
+        with:
+          packages: 'platform-tools platforms;android-37.2 build-tools;37.0.0'
+      - uses: gradle/actions/setup-gradle@v6.4.1
+      - name: Check the two cleanup modes and their deletion scope
+        run: ./gradlew :app:testDefaultDebugUnitTest --tests '*ReadCacheCleanupTest' spotlessCheck --no-configuration-cache --max-workers=2 -Pkotlin.compiler.execution.strategy=in-process --stacktrace
+      - uses: actions/upload-artifact@v7.0.2
+        if: always()
+        with:
+          name: reading-cache-checks
+          path: |
+            app/build/reports/tests/testDefaultDebugUnitTest/
+            app/build/test-results/testDefaultDebugUnitTest/
+          if-no-files-found: warn
+          retention-days: 7

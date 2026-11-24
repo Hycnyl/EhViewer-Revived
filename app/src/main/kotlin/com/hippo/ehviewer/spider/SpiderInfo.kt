@@ -5,6 +5,7 @@ import com.ehviewer.core.files.write
 import com.ehviewer.core.model.GalleryInfo
 import com.ehviewer.core.util.logcat
 import com.hippo.ehviewer.coil.edit
+import com.hippo.ehviewer.coil.existingDataFiles
 import com.hippo.ehviewer.coil.read
 import com.hippo.ehviewer.ktbuilder.diskCache
 import com.hippo.ehviewer.legacy.readLegacySpiderInfo
@@ -81,3 +82,11 @@ fun readCompatFromPath(file: Path): SpiderInfo? = runCatching {
 }.getOrNull() ?: runCatching {
     file.readLegacySpiderInfo()
 }.getOrNull()
+
+internal fun readCachedSpiderPageCounts(checkpoint: () -> Unit): Map<Long, Int> = buildMap {
+    for (file in spiderInfoCache.existingDataFiles()) {
+        checkpoint()
+        val info = runCatching { file.read { cbor.decodeFromByteArray<SpiderInfo>(readByteArray()) } }.getOrNull() ?: continue
+        if (info.gid > 0) put(info.gid, maxOf(get(info.gid) ?: 0, rescuePageCount(info.pages, info.cachedPageCount)))
+    }
+}

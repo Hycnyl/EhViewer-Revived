@@ -2,109 +2,102 @@
 package com.hippo.ehviewer.ui.settings
 
 import android.content.Context
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.selection.selectable
-import androidx.compose.foundation.selection.selectableGroup
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.RadioButton
+import android.text.format.DateFormat
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Collections
+import androidx.compose.material.icons.outlined.Schedule
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.unit.dp
 import com.ehviewer.core.i18n.R
 import com.ehviewer.core.util.logcat
-import com.hippo.ehviewer.EhApplication
+import com.hippo.ehviewer.EhApplication.Companion.imageCache
 import com.hippo.ehviewer.coil.ReadCacheCleaner
+import com.hippo.ehviewer.ui.tools.DialogState
+import com.hippo.ehviewer.ui.tools.awaitConfirmationOrCancel
+import com.hippo.ehviewer.ui.tools.awaitSelectDate
+import com.hippo.ehviewer.ui.tools.awaitSelectItemWithIcon
+import com.hippo.ehviewer.ui.tools.awaitSelectTime
+import java.time.Instant
+import java.time.ZoneId
+import java.time.ZoneOffset
 import java.time.ZonedDateTime
-import java.time.temporal.ChronoUnit
+import java.util.Date
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runInterruptible
 import moe.tarsin.coroutines.runSuspendCatching
 import moe.tarsin.snackbar
 
 @Composable
-context(ctx: Context, _: SnackbarHostState)
-internal fun ReadCacheCleanupPreference() {
-    var visible by remember { mutableStateOf(false) }
-    var selected by remember { mutableIntStateOf(0) }
-    var cleaning by remember { mutableStateOf(false) }
-    var job by remember { mutableStateOf<Job?>(null) }
+context(ctx: Context, _: DialogState, _: SnackbarHostState)
+internal fun ReadCacheCleanupPreference(openGalleries: () -> Unit) {
+    var active by remember { mutableStateOf(false) }
+    var clearing by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
     val title = stringResource(R.string.read_cache_cleanup)
-    Preference(title = title, summary = stringResource(R.string.read_cache_cleanup_summary)) { visible = true }
-    if (visible) {
-        val choices = listOf(
-            stringResource(R.string.read_cache_cleanup_day),
-            stringResource(R.string.read_cache_cleanup_week),
-            stringResource(R.string.read_cache_cleanup_month),
-            stringResource(R.string.read_cache_cleanup_year),
-        )
-        fun dismiss() {
-            job?.cancel()
-            visible = false
-        }
-        AlertDialog(
-            onDismissRequest = ::dismiss,
-            title = { Text(title) },
-            text = {
-                Column(Modifier.selectableGroup()) {
-                    choices.forEachIndexed { index, label ->
-                        Row(
-                            modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp).selectable(
-                                selected = selected == index,
-                                enabled = !cleaning,
-                                role = Role.RadioButton,
-                                onClick = { selected = index },
-                            ),
-                            verticalAlignment = Alignment.CenterVertically,
-                        ) {
-                            RadioButton(selected = selected == index, onClick = null, enabled = !cleaning, modifier = Modifier.padding(end = 16.dp))
-                            Text(label)
+    Preference(
+        title = title,
+        summary = stringResource(if (clearing) R.string.read_cache_cleanup_running else R.string.read_cache_cleanup_summary),
+    ) {
+        if (active) return@Preference
+        active = true
+        scope.launch {
+            try {
+                val choices = listOf(
+                    Icons.Outlined.Schedule to R.string.read_cache_cleanup_by_time,
+                    Icons.Outlined.Collections to R.string.read_cache_cleanup_by_gallery,
+                )
+                when (awaitSelectItemWithIcon(choices, title)) {
+                    0 -> {
+                        val now = ZonedDateTime.now()
+                        val date = awaitSelectDate(
+                            title = R.string.read_cache_cleanup_date,
+                            initialSelectedDateMillis = now.toLocalDate().atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli(),
+                        )
+                        val (hour, minute) = awaitSelectTime(ctx.getString(R.string.read_cache_cleanup_time), now.hour, now.minute)
+                        val cutoff = readCacheCutoffMillis(date, hour, minute, now.zone)
+                        val label = formatReadCacheTime(ctx, cutoff)
+                        awaitConfirmationOrCancel(confirmText = R.string.read_cache_cleanup_action, title = R.string.read_cache_cleanup_by_time) {
+                            Text(stringResource(R.string.read_cache_cleanup_confirm_time, label))
                         }
+                        clearing = true
+                        clearReadingCache(scope) { ReadCacheCleaner.clearBefore(imageCache, cutoff) }
                     }
+                    1 -> openGalleries()
                 }
-            },
-            confirmButton = {
-                TextButton(enabled = !cleaning, onClick = {
-                    val unit = listOf(ChronoUnit.DAYS, ChronoUnit.WEEKS, ChronoUnit.MONTHS, ChronoUnit.YEARS)[selected]
-                    val cutoff = ZonedDateTime.now().minus(1, unit).toInstant().toEpochMilli()
-                    cleaning = true
-                    job = scope.launch {
-                        val result = try {
-                            runSuspendCatching {
-                                runInterruptible(Dispatchers.IO) { ReadCacheCleaner.clearBefore(EhApplication.imageCache, cutoff) }
-                            }
-                        } finally {
-                            cleaning = false
-                        }
-                        visible = false
-                        result.onSuccess { count ->
-                            snackbar(ctx.getString(R.string.read_cache_cleanup_done, count))
-                        }.onFailure {
-                            logcat(it)
-                            snackbar(ctx.getString(R.string.read_cache_cleanup_failed))
-                        }
-                    }
-                }) { Text(stringResource(if (cleaning) R.string.read_cache_cleanup_running else R.string.read_cache_cleanup_action)) }
-            },
-            dismissButton = { TextButton(onClick = ::dismiss) { Text(stringResource(android.R.string.cancel)) } },
-        )
+            } finally {
+                clearing = false
+                active = false
+            }
+        }
     }
+}
+
+internal fun readCacheCutoffMillis(utcDate: Long, hour: Int, minute: Int, zone: ZoneId): Long =
+    Instant.ofEpochMilli(utcDate).atOffset(ZoneOffset.UTC).toLocalDate()
+        .atTime(hour, minute).atZone(zone).toInstant().toEpochMilli()
+
+internal fun formatReadCacheTime(context: Context, millis: Long): String {
+    val date = Date(millis)
+    return DateFormat.getMediumDateFormat(context).format(date) + " " + DateFormat.getTimeFormat(context).format(date)
+}
+
+context(ctx: Context, _: SnackbarHostState)
+internal suspend fun clearReadingCache(scope: CoroutineScope, action: () -> Int) {
+    val message = runSuspendCatching { runInterruptible(Dispatchers.IO, action) }.fold(
+        onSuccess = { ctx.getString(R.string.read_cache_cleanup_done, it) },
+        onFailure = {
+            logcat(it)
+            ctx.getString(R.string.read_cache_cleanup_failed)
+        },
+    )
+    scope.launch { snackbar(message) }
 }
