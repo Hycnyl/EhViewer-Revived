@@ -96,4 +96,4 @@ UI 模块保留 `allWarningsAsErrors`，仅用 `-Xwarning-level=DEPRECATION:warn
 
 ## 本轮临时进度
 
-1.17.25 发版源码 `06d92251792eae56d6b2f77987dcc9bbfca28c52`。四项定向测试、实际设置入口离线设备验证及五包构建均通过。[清理测试](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/45322837606) · [Android 设备验证](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/45324933837) · [正式构建](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/45322837580)。已启动正式签名，后续为 API 26/33/36 安装验证、正式发布和清理。
+1.17.25 发版源码 `06d92251792eae56d6b2f77987dcc9bbfca28c52`。四项定向测试、Android 高级设置实际路由及两视图多选验证完成，[模拟器设置页流程](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/45324933837)确认按画廊清理仅移除目标页面，所选画廊的下载文件内容保留。[五包构建](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/45322837580)和[签名](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/45365551361)通过。[正式发布验证](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/45365692150)进行中，随后确认公开附件并清理临时分支与本记录。
