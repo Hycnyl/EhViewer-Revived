@@ -48,6 +48,7 @@ import org.robolectric.annotation.GraphicsMode
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
 class ReadCacheCleanupTest {
     @get:Rule val compose = createComposeRule()
+
     @get:Rule val temp = TemporaryFolder()
 
     private var disk: DiskCache? = null

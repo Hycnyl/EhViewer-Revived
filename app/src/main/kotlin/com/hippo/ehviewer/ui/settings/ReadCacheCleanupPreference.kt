@@ -81,9 +81,10 @@ internal fun ReadCacheCleanupPreference(openGalleries: () -> Unit) {
     }
 }
 
-internal fun readCacheCutoffMillis(utcDate: Long, hour: Int, minute: Int, zone: ZoneId): Long =
-    Instant.ofEpochMilli(utcDate).atOffset(ZoneOffset.UTC).toLocalDate()
-        .atTime(hour, minute).atZone(zone).toInstant().toEpochMilli()
+internal fun readCacheCutoffMillis(utcDate: Long, hour: Int, minute: Int, zone: ZoneId): Long {
+    val localDate = Instant.ofEpochMilli(utcDate).atOffset(ZoneOffset.UTC).toLocalDate()
+    return localDate.atTime(hour, minute).atZone(zone).toInstant().toEpochMilli()
+}
 
 internal fun formatReadCacheTime(context: Context, millis: Long): String {
     val date = Date(millis)

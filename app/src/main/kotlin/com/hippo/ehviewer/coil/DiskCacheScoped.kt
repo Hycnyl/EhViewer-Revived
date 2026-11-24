@@ -34,8 +34,10 @@ inline fun <T> DiskCache.read(key: String, block: DiskCache.Snapshot.() -> T): T
 
 private val cacheDataFileName = Regex("[a-f0-9]{64}\\.1")
 
-internal fun DiskCache.existingDataFiles(): List<Path> =
-    if (size == 0L) emptyList() else fileSystem.list(directory).filter { cacheDataFileName.matches(it.name) }
+internal fun DiskCache.existingDataFiles(): List<Path> {
+    if (size == 0L) return emptyList()
+    return fileSystem.list(directory).filter { cacheDataFileName.matches(it.name) }
+}
 
 internal fun DiskCache.clearGalleryImages(gid: Long, pageIndices: IntRange): Int = pageIndices.count { index ->
     if (Thread.currentThread().isInterrupted) throw InterruptedException()
