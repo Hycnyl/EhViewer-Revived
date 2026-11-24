@@ -96,4 +96,4 @@ UI 模块保留 `allWarningsAsErrors`，仅用 `-Xwarning-level=DEPRECATION:warn
 
 ## 本轮临时进度
 
-日期/时钟及按画廊批量清理已合入，候选 `e77083acbd771034b068d87f8f60497ce0a0d4a3` 的[定向验证](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/45322392321)已通过。按画廊清理复用详情页原有缓存删除方法，既有缓存键和 Room schema 保持原样。待构建五个 APK、签名和发布验证。
+1.17.25 发版源码 `06d92251792eae56d6b2f77987dcc9bbfca28c52`。四项定向测试、实际设置入口离线设备验证及五包构建均通过。[清理测试](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/45322837606) · [Android 设备验证](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/45324933837) · [正式构建](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/45322837580)。已启动正式签名，后续为 API 26/33/36 安装验证、正式发布和清理。
