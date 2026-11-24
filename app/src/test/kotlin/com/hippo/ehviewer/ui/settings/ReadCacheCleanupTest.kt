@@ -28,6 +28,7 @@ import com.hippo.ehviewer.ui.main.GalleryViewToggle
 import com.hippo.ehviewer.ui.tools.DialogState
 import java.time.Instant
 import java.time.ZoneId
+import me.zhanghai.compose.preference.ProvidePreferenceTheme
 import okio.Path
 import okio.Path.Companion.toOkioPath
 import org.junit.After
@@ -155,13 +156,15 @@ class ReadCacheCleanupTest {
             val snackbar = remember { SnackbarHostState() }
             val context = LocalContext.current
             MaterialTheme {
-                Box {
-                    with(context) {
-                        with(dialog) {
-                            with(snackbar) { ReadCacheCleanupPreference {} }
+                ProvidePreferenceTheme {
+                    Box {
+                        with(context) {
+                            with(dialog) {
+                                with(snackbar) { ReadCacheCleanupPreference {} }
+                            }
                         }
+                        dialog.Place()
                     }
-                    dialog.Place()
                 }
             }
         }
