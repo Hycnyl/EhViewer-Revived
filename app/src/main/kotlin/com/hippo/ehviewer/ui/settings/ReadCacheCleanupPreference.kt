@@ -96,7 +96,7 @@ internal suspend fun clearReadingCache(scope: CoroutineScope, action: () -> Int)
     val message = runSuspendCatching { runInterruptible(Dispatchers.IO, action) }.fold(
         onSuccess = { ctx.getString(R.string.read_cache_cleanup_done, it) },
         onFailure = {
-            logcat(it)
+            logcat("ReadCacheCleanup", it)
             ctx.getString(R.string.read_cache_cleanup_failed)
         },
     )
