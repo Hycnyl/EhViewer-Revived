@@ -96,4 +96,4 @@ UI 模块保留 `allWarningsAsErrors`，仅用 `-Xwarning-level=DEPRECATION:warn
 
 ## 本轮临时进度
 
-已确认原版缓存导出同时读取 Coil、正式下载散页及 CBZ 暂存散页，完整 CBZ 不在扫描范围。清理阅读缓存将复用 Material 日期/时钟与本地画廊、SpiderInfo 元数据，按截止时间或画廊清理，不触碰下载文件或备份格式。待实现并验证。
+缓存导出行为复核已完成，原功能同时扫描 Coil、下载散页和 CBZ 暂存散页。候选源码 `e27cf5b2fb6bd520f2a347993ac6a31643322d54` 已完成日期/表盘清理和画廊列表/封面多选，清理动作与画廊详情页共享。现有 Room schema 和缓存键设计保持原样。[定向验证](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/45321109898)完成后按正式流程构建、签名与发布。
