@@ -98,3 +98,4 @@ UI 模块保留 `allWarningsAsErrors`，仅用 `-Xwarning-level=DEPRECATION:warn
 
 - 从 1.17.26 开始，计划发布 1.17.27。已定位缓存缩略图使用按最小宽度推算的列数，准备改成三列，并实现可关闭的配额提示与标签菜单文案。按维护者要求用定向检查和快速发布。
 - 已完成固定三列、配额状态图标及开关、长按标签操作的本地化预览。即将运行对应的 UI 专项检查。通过后使用上个正式版的 Profile 规则构建并签名发布。
+- 最终源码 `42e4d436b4b627d0bc256565a20c3b128239cadb` 已通过 [定向 UI 检查](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/45687030578)，覆盖平板三列、配额边界、明暗主题颜色、提示开关和长标签滚动。已推进 main 并启动 [快速构建](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/45687624168)，复用 1.17.26 的 Profile 规则。常设 [缓存检查](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/45687599399) 并行运行。
