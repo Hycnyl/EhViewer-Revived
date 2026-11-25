@@ -446,4 +446,5 @@
     <string name="tooltip_retry">ลองอีกครั้ง</string>
     <string name="tooltip_more_actions">การทำงานเพิ่มเติม</string>
     <string name="tooltip_close_actions">ซ่อนการทำงาน</string>
+    <string name="tag_action_search">ค้นหา</string>
 </resources>

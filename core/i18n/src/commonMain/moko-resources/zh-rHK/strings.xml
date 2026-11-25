@@ -652,6 +652,13 @@
     <string name="list_tile_thumb_size">詳情封面大小</string>
     <string name="drawer_panda_theme_color">哭泣熊貓適配動態配色</string>
     <string name="image_limits">圖片配額</string>
+    <string name="image_limits_usage_hint">圖片配額用量提示</string>
+    <string name="image_limits_usage_description">如果您在 E-Hentai 網站設定的偏好圖片解像度高於 1280x，請留意：圖片配額用盡時，您只能瀏覽 1280x 圖片，偏好圖片解像度會設為 Auto。等待配額恢復或使用 GP 重設配額後，偏好設定不會自動還原，您可能會在不知情的情況下繼續瀏覽低解像度圖片。使用 GP 瀏覽或下載原圖不受影響。</string>
+    <string name="image_limits_usage_hide">關閉提示</string>
+    <string name="image_limits_usage_acknowledge">我知道了</string>
+    <string name="image_limits_usage_available">配額充足</string>
+    <string name="image_limits_usage_near">配額即將用盡</string>
+    <string name="image_limits_usage_exhausted">配額已用盡</string>
     <string name="image_limits_restricted">圖片解像度限制為 1280x</string>
     <string name="image_limits_normal">無限制</string>
     <string name="image_limits_summary">已用：</string>
@@ -662,4 +669,7 @@
     <string name="toplist">排行榜</string>
     <string name="action_add_tag">新增標籤</string>
     <string name="action_copy">複製</string>
+    <string name="tag_action_search">搜索</string>
+    <string name="tag_vote_up">贊成使用此標籤</string>
+    <string name="tag_vote_down">反對使用此標籤</string>
 </resources>

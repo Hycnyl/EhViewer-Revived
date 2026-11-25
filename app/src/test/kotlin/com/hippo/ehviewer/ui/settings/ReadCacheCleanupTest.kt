@@ -172,9 +172,25 @@ class ReadCacheCleanupTest {
         compose.onNodeWithContentDescription("Clear").assertDoesNotExist()
     }
 
-    private fun showGalleryList(onClear: suspend (List<ReadCachedGallery>) -> Unit = {}) {
+    @Test
+    @Config(qualifiers = "en-rUS-sw600dp-w800dp-h1100dp-mdpi")
+    fun tabletCoverViewShowsThreeColumns() {
+        showGalleryList(count = 6)
+        compose.onNodeWithContentDescription("Cover view").performClick()
+
+        val firstRow = (1..3).map { index ->
+            compose.onNodeWithContentDescription("Gallery #${100 * index}").fetchSemanticsNode().boundsInRoot
+        }
+        val fourth = compose.onNodeWithContentDescription("Gallery #400").fetchSemanticsNode().boundsInRoot
+        assertEquals(3, firstRow.map { it.left }.distinct().size)
+        assertEquals(1, firstRow.map { it.top }.distinct().size)
+        assertTrue(fourth.top > firstRow.first().top)
+    }
+
+    private fun showGalleryList(count: Int = 3, onClear: suspend (List<ReadCachedGallery>) -> Unit = {}) {
         val preview = temp.newFile("preview.png").toOkioPath()
-        val rows = listOf(100L, 200L, 300L).map { gid ->
+        val rows = (1..count).map { index ->
+            val gid = 100L * index
             ReadCachedGallery(gid, null, preview, 1, 1, 9, 1_700_000_000_000 - gid)
         }
         compose.setContent {

@@ -161,4 +161,5 @@
     <string name="tooltip_more_actions">Diğer işlemler</string>
     <string name="tooltip_close_actions">İşlemleri gizle</string>
     <string name="copied_to_clipboard">Panoya kopyalandı</string>
+    <string name="tag_action_search">Ara</string>
 </resources>

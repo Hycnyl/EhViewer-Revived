@@ -444,6 +444,13 @@
     <string name="insufficient_funds">Insufficient Funds</string>
     <string name="insufficient_gp">Insufficient GP to download original images</string>
     <string name="image_limits">Image Limits</string>
+    <string name="image_limits_usage_hint">Image Quota Usage Tip</string>
+    <string name="image_limits_usage_description">If your preferred image resolution on E-Hentai is higher than 1280x, take note. When you use up your image quota, you can only view 1280x images and your preferred resolution is set to Auto. When the quota recovers over time or you spend GP to reset it, the previous setting is not restored automatically. You may continue viewing lower-resolution images without realizing it. Using GP to access or download original images is unaffected.</string>
+    <string name="image_limits_usage_hide">Turn off tip</string>
+    <string name="image_limits_usage_acknowledge">Got it</string>
+    <string name="image_limits_usage_available">Image quota available</string>
+    <string name="image_limits_usage_near">Image quota nearly exhausted</string>
+    <string name="image_limits_usage_exhausted">Image quota exhausted</string>
     <string name="image_limits_summary">Used: </string>
     <string name="image_limits_normal">No restrictions</string>
     <string name="image_limits_restricted">Image resolution restricted to 1280x</string>
@@ -819,4 +826,5 @@
     <string name="theme_color_delete">Delete %1$s</string>
     <string name="theme_color_custom_value">Custom %1$s</string>
     <string name="theme_color_invalid_hex">Enter a six-digit color code</string>
+    <string name="tag_action_search">Search</string>
 </resources>

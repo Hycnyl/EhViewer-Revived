@@ -411,6 +411,13 @@
     <string name="current_funds">目前資金：</string>
     <string name="insufficient_funds">餘額不足</string>
     <string name="image_limits">圖片配額</string>
+    <string name="image_limits_usage_hint">圖片配額用量提示</string>
+    <string name="image_limits_usage_description">如果您在 E-Hentai 網站設定的偏好圖片解析度高於 1280x，請留意：圖片配額耗盡時，您只能瀏覽 1280x 圖片，偏好圖片解析度會設為 Auto。等待配額恢復或使用 GP 重設配額後，偏好設定不會自動還原，您可能會在不知情的情況下繼續瀏覽低解析度圖片。使用 GP 瀏覽或下載原圖不受影響。</string>
+    <string name="image_limits_usage_hide">關閉提示</string>
+    <string name="image_limits_usage_acknowledge">我知道了</string>
+    <string name="image_limits_usage_available">配額充足</string>
+    <string name="image_limits_usage_near">配額即將耗盡</string>
+    <string name="image_limits_usage_exhausted">配額已耗盡</string>
     <string name="image_limits_summary">已用：</string>
     <string name="reset_cost">花費 %d GP 重置</string>
     <string name="reset">重置</string>
@@ -449,8 +456,8 @@
     <string name="toplist_pastmonth">過去一個月</string>
     <string name="toplist_yesterday">昨日</string>
     <string name="toplist">排行</string>
-    <string name="tag_vote_down">不，這不是</string>
-    <string name="tag_vote_up">是的，這很正確</string>
+    <string name="tag_vote_down">反對使用此標籤</string>
+    <string name="tag_vote_up">贊成使用此標籤</string>
     <string name="tag_vote_successfully">投票成功</string>
     <string name="delete_search_history">從搜尋記錄中刪除“%s”？</string>
     <string name="action_add_tag">增加標籤</string>
@@ -746,4 +753,5 @@
     <string name="theme_color_invalid_hex">請輸入六位顏色代碼</string>
     <string name="image_limits_restricted">圖片解析度限制為 1280x</string>
     <string name="image_limits_normal">無限制</string>
+    <string name="tag_action_search">搜尋</string>
 </resources>

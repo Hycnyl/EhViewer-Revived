@@ -2,6 +2,8 @@ package com.hippo.ehviewer.ui.main
 
 import android.content.Context
 import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
@@ -9,9 +11,11 @@ import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ShapeDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -82,6 +86,29 @@ fun GalleryTags(
                     }
                 }
             }
+        }
+    }
+}
+
+@Composable
+internal fun TagActionLabel(action: String, value: String) {
+    FlowRow(
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalArrangement = Arrangement.spacedBy(4.dp),
+        itemVerticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(text = action)
+        Surface(
+            color = MaterialTheme.colorScheme.secondaryContainer,
+            shape = ShapeDefaults.ExtraSmall,
+        ) {
+            Text(
+                text = value,
+                modifier = Modifier.horizontalScroll(rememberScrollState()).padding(horizontal = 8.dp, vertical = 2.dp),
+                style = MaterialTheme.typography.labelLarge,
+                maxLines = 1,
+                softWrap = false,
+            )
         }
     }
 }

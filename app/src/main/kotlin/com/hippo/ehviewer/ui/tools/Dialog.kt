@@ -110,7 +110,9 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 
 fun interface ActionScope {
-    fun onSelect(action: String, that: suspend () -> Unit)
+    fun onSelect(action: @Composable () -> Unit, that: suspend () -> Unit)
+
+    fun onSelect(action: String, that: suspend () -> Unit) = onSelect({ Text(text = action) }, that)
 }
 
 interface DialogScope<R> {
@@ -614,6 +616,15 @@ suspend fun awaitSelectItem(
     title: Either<String, Int>?,
     selected: Int = -1,
     respectDefaultWidth: Boolean = true,
+): Int = awaitSelectItemContent(items, title, selected, respectDefaultWidth) { Text(text = it) }
+
+context(_: DialogState)
+private suspend fun <T> awaitSelectItemContent(
+    items: List<T>,
+    title: Either<String, Int>?,
+    selected: Int,
+    respectDefaultWidth: Boolean,
+    itemContent: @Composable (T) -> Unit,
 ): Int = showNoButton(respectDefaultWidth) {
     Column(modifier = Modifier.padding(vertical = 8.dp)) {
         if (title != null) {
@@ -624,25 +635,24 @@ suspend fun awaitSelectItem(
             )
         }
         FastScrollLazyColumn {
-            itemsIndexed(items) { index, text ->
+            itemsIndexed(items) { index, item ->
                 CheckableItem(
-                    text = text,
                     checked = index == selected,
                     modifier = Modifier.fillMaxWidth().clickable { resume(index) }.padding(horizontal = 8.dp),
-                )
+                ) { itemContent(item) }
             }
         }
     }
 }
 
 context(_: DialogState)
-suspend inline fun awaitSelectAction(
+suspend fun awaitSelectAction(
     @StringRes title: Int? = null,
     selected: Int = -1,
     builder: ActionScope.() -> Unit,
 ): suspend () -> Unit {
     val (items, actions) = buildList { builder { action, that -> add(action to that) } }.unzip()
-    val index = awaitSelectItem(items, title, selected)
+    val index = awaitSelectItemContent(items, title?.right(), selected, respectDefaultWidth = true) { it() }
     return actions[index]
 }
 
@@ -664,10 +674,9 @@ suspend fun awaitSelectItemWithCheckBox(
         FastScrollLazyColumn {
             itemsIndexed(items) { index, text ->
                 CheckableItem(
-                    text = text,
                     checked = index == selected,
                     modifier = Modifier.fillMaxWidth().clickable { resume(index to checked) }.padding(horizontal = 8.dp),
-                )
+                ) { Text(text = text) }
             }
         }
         LabeledCheckbox(
@@ -760,15 +769,12 @@ suspend fun awaitSelectItemWithIconAndTextField(
 }
 
 @Composable
-private fun CheckableItem(text: String, checked: Boolean, modifier: Modifier = Modifier) {
+private fun CheckableItem(checked: Boolean, modifier: Modifier = Modifier, content: @Composable () -> Unit) {
     val textStyle = MaterialTheme.typography.titleMedium
     val checkedColor = MaterialTheme.colorScheme.primary
     ListItem(
         headlineContent = {
-            Text(
-                text = text,
-                style = if (checked) textStyle.copy(color = checkedColor) else textStyle,
-            )
+            ProvideTextStyle(if (checked) textStyle.copy(color = checkedColor) else textStyle, content)
         },
         modifier = modifier,
         trailingContent = checked.ifTrueThen {

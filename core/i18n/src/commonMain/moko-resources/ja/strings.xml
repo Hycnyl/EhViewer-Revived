@@ -425,6 +425,13 @@
     <string name="current_funds">現在の資金:</string>
     <string name="insufficient_funds">資金が不足しています</string>
     <string name="image_limits">画像の利用枠</string>
+    <string name="image_limits_usage_hint">画像利用枠のヒント</string>
+    <string name="image_limits_usage_description">E-Hentai のサイト設定で画像の解像度を 1280x より高く設定している場合はご注意ください。画像の利用枠を使い切ると、閲覧できる画像は 1280x に制限され、設定が Auto に切り替わります。時間の経過や GP の消費で利用枠を回復しても、設定は自動では元に戻りません。そのため、気づかないうちに低解像度の画像を閲覧し続けることがあります。GP を消費して元画像を閲覧・ダウンロードする場合は、この制限の影響を受けません。</string>
+    <string name="image_limits_usage_hide">ヒントをオフにする</string>
+    <string name="image_limits_usage_acknowledge">わかりました</string>
+    <string name="image_limits_usage_available">画像の利用枠に余裕があります</string>
+    <string name="image_limits_usage_near">画像の利用枠が残りわずかです</string>
+    <string name="image_limits_usage_exhausted">画像の利用枠を使い切りました</string>
     <string name="image_limits_summary">使用済み：</string>
     <string name="image_limits_normal">制限なし</string>
     <string name="image_limits_restricted">画像の解像度は 1280x に制限されます</string>
@@ -753,4 +760,5 @@
     <string name="theme_color_delete">%1$sを削除</string>
     <string name="theme_color_custom_value">カスタム %1$s</string>
     <string name="theme_color_invalid_hex">6桁のカラーコードを入力</string>
+    <string name="tag_action_search">検索</string>
 </resources>

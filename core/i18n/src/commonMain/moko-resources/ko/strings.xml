@@ -435,4 +435,5 @@
     <string name="tooltip_retry">다시 시도</string>
     <string name="tooltip_more_actions">작업 더보기</string>
     <string name="tooltip_close_actions">작업 접기</string>
+    <string name="tag_action_search">검색</string>
 </resources>

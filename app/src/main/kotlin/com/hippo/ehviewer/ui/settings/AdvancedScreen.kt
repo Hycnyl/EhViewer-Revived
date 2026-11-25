@@ -168,6 +168,10 @@ fun AnimatedVisibilityScope.AdvancedScreen(navigator: DestinationsNavigator) = S
             ReadCacheSizePreference()
             ReadCacheCleanupPreference { navigate(ReadCacheGalleryScreenDestination) }
             HorizontalDivider()
+            SwitchPreference(
+                title = stringResource(R.string.image_limits_usage_hint),
+                state = Settings.imageQuotaUsageHint.asMutableState(),
+            )
             SimpleMenuPreferenceInt(
                 title = stringResource(R.string.gallery_version_load_strategy),
                 entry = com.hippo.ehviewer.R.array.gallery_version_load_strategy_entries,

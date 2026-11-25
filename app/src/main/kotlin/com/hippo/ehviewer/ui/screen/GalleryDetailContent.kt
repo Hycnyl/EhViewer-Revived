@@ -132,6 +132,7 @@ import com.hippo.ehviewer.ui.main.GalleryCommentCard
 import com.hippo.ehviewer.ui.main.GalleryDetailErrorTip
 import com.hippo.ehviewer.ui.main.GalleryDetailHeaderCard
 import com.hippo.ehviewer.ui.main.GalleryTags
+import com.hippo.ehviewer.ui.main.TagActionLabel
 import com.hippo.ehviewer.ui.main.TorrentList
 import com.hippo.ehviewer.ui.modifyFavorites
 import com.hippo.ehviewer.ui.navToReader
@@ -718,6 +719,7 @@ fun BelowHeader(galleryDetail: GalleryDetail, voteTag: VoteTag) {
             Text(text = stringResource(id = R.string.no_tags))
         }
     } else {
+        val searchLabel = stringResource(R.string.tag_action_search)
         val copy = stringResource(android.R.string.copy)
         val copyTrans = stringResource(R.string.copy_trans)
         val showDefine = stringResource(R.string.show_definition)
@@ -734,14 +736,14 @@ fun BelowHeader(galleryDetail: GalleryDetail, voteTag: VoteTag) {
                 val rawValue = tag.substringAfter(':')
                 launchIO {
                     awaitSelectAction {
-                        onSelect(ctx.getString(R.string.search_bar_hint, tag)) {
+                        onSelect({ TagActionLabel(searchLabel, tag) }) {
                             withUIContext { search(tag) }
                         }
-                        onSelect(copy) {
+                        onSelect({ TagActionLabel(copy, tag) }) {
                             addTextToClipboard(tag)
                         }
                         if (rawValue != translation) {
-                            onSelect(copyTrans) {
+                            onSelect({ TagActionLabel(copyTrans, translation) }) {
                                 addTextToClipboard(translation)
                             }
                         }

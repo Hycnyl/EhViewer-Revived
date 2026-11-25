@@ -423,6 +423,13 @@
     <string name="insufficient_funds">余额不足</string>
     <string name="insufficient_gp">没有足够的 GP 来下载原图</string>
     <string name="image_limits">图片配额</string>
+    <string name="image_limits_usage_hint">图片配额用量提示</string>
+    <string name="image_limits_usage_description">如果您在 E-Hentai 网站中设置的偏好图片分辨率高于 1280x，那么此提示对您非常重要：当您的图片配额耗尽时，您将只能浏览 1280x 图片，设置中的偏好图片分辨率将设为 Auto。然而通过等待一段时间或消耗 GP 来恢复图片配额后，设置项不会自动修改回来，这导致您可能在无意中持续访问低分辨率图像。消耗 GP 访问和下载原图不受影响。</string>
+    <string name="image_limits_usage_hide">关闭提示</string>
+    <string name="image_limits_usage_acknowledge">我知道了</string>
+    <string name="image_limits_usage_available">配额充足</string>
+    <string name="image_limits_usage_near">配额即将耗尽</string>
+    <string name="image_limits_usage_exhausted">配额已耗尽</string>
     <string name="image_limits_summary">已用：</string>
     <string name="image_limits_normal">未受限制</string>
     <string name="image_limits_restricted">图片分辨率限制为 1280x</string>
@@ -464,8 +471,8 @@
     <string name="toplist_pastmonth">近一月排行</string>
     <string name="toplist_yesterday">昨日排行</string>
     <string name="toplist">排行</string>
-    <string name="tag_vote_down">不，这不是</string>
-    <string name="tag_vote_up">是的，这很正确</string>
+    <string name="tag_vote_down">反对使用此标签</string>
+    <string name="tag_vote_up">赞成使用此标签</string>
     <string name="tag_vote_withdraw">撤回投票</string>
     <string name="tag_vote_successfully">投票成功</string>
     <string name="delete_search_history">从搜索记录中删除“%s”？</string>
@@ -801,4 +808,5 @@
     <string name="theme_color_delete">删除%1$s</string>
     <string name="theme_color_custom_value">自定义 %1$s</string>
     <string name="theme_color_invalid_hex">请输入六位颜色代码</string>
+    <string name="tag_action_search">搜索</string>
 </resources>

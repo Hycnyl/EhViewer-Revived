@@ -79,6 +79,7 @@
 
 ## Adjusted
 
+- Reading-cache covers use three columns. The image quota dialog offers an optional usage tip, and tag actions preview the text they use.
 - Clear reading cache before a chosen date and time, or long-press galleries to batch clear them in the list or cover grid. The selection menu can select all, invert, or clear the selection.
 - CBZ downloads stage on the chosen storage and can restart while the reader is open. Folder cleanup checks ownership again before deletion.
 - Long-press a download in either view to select it and open batch actions.

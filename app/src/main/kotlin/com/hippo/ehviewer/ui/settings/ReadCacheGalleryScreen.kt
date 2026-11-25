@@ -52,7 +52,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
@@ -298,9 +297,8 @@ private fun ReadCacheGalleryContent(
     )
     if (grid) {
         val spacing = dimensionResource(com.hippo.ehviewer.R.dimen.gallery_grid_interval)
-        val minTileWidth = 96.dp * LocalDensity.current.fontScale.coerceAtLeast(1f)
         FastScrollLazyVerticalStaggeredGrid(
-            columns = StaggeredGridCells.Adaptive(minTileWidth),
+            columns = StaggeredGridCells.Fixed(3),
             modifier = modifier,
             contentPadding = contentPadding,
             verticalItemSpacing = spacing,

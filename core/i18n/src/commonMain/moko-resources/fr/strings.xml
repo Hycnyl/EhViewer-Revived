@@ -465,4 +465,5 @@
     <string name="tooltip_retry">Réessayer</string>
     <string name="tooltip_more_actions">Plus d\'actions</string>
     <string name="tooltip_close_actions">Masquer les actions</string>
+    <string name="tag_action_search">Rechercher</string>
 </resources>
