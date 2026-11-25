@@ -7,8 +7,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.test.assertIsNotSelected
+import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertIsSelected
+import androidx.compose.ui.test.isSelected
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.longClick
 import androidx.compose.ui.test.onNodeWithContentDescription
@@ -123,7 +124,7 @@ class ReadCacheCleanupTest {
         showGalleryList { galleries -> cleared += galleries.map { it.gid } }
 
         val first = compose.onNodeWithText("Gallery #100")
-        first.performClick().assertIsNotSelected()
+        first.performClick().assert(!isSelected())
         compose.onNodeWithText("Clear").assertDoesNotExist()
         first.performTouchInput { longClick() }.assertIsSelected()
         compose.onNodeWithContentDescription("Cover view").performClick()
@@ -145,15 +146,15 @@ class ReadCacheCleanupTest {
         val third = compose.onNodeWithText("Gallery #300")
 
         chooseSelectionAction("Select all")
-        second.performClick().assertIsNotSelected()
+        second.performClick().assert(!isSelected())
 
         chooseSelectionAction("Invert selection")
-        first.assertIsNotSelected()
+        first.assert(!isSelected())
         second.assertIsSelected()
-        third.assertIsNotSelected()
+        third.assert(!isSelected())
         chooseSelectionAction("Invert selection")
         first.assertIsSelected()
-        second.assertIsNotSelected()
+        second.assert(!isSelected())
         third.assertIsSelected()
 
         chooseSelectionAction("Select all")
@@ -163,9 +164,9 @@ class ReadCacheCleanupTest {
         chooseSelectionAction("Invert selection")
         compose.onNodeWithText("3 selected").assertExists()
         chooseSelectionAction("Cancel selection")
-        first.assertIsNotSelected()
-        second.assertIsNotSelected()
-        third.assertIsNotSelected()
+        first.assert(!isSelected())
+        second.assert(!isSelected())
+        third.assert(!isSelected())
         compose.onNodeWithText("Clear").assertDoesNotExist()
     }
 
