@@ -126,7 +126,9 @@ class ReadCacheCleanupTest {
         val first = compose.onNodeWithText("Gallery #100")
         first.performClick().assert(!isSelected())
         compose.onNodeWithText("Clear").assertDoesNotExist()
-        first.performTouchInput { longClick() }.assertIsSelected()
+        first.performTouchInput { longClick() }
+        compose.onNodeWithText("1 selected").assertExists()
+        first.assertIsSelected()
         compose.onNodeWithContentDescription("Cover view").performClick()
         compose.onNodeWithContentDescription("Gallery #100").assertIsSelected()
         compose.onNodeWithContentDescription("Gallery #200").performClick().assertIsSelected()

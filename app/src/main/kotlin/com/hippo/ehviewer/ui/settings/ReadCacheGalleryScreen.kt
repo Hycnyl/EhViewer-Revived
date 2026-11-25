@@ -354,19 +354,19 @@ private fun ReadCachedGalleryItem(
     }
     val details = stringResource(R.string.read_cache_gallery_details, gallery.cachedPages, Formatter.formatShortFileSize(context, gallery.bytes))
     val date = remember(context, gallery.latestWriteMillis) { formatReadCacheTime(context, gallery.latestWriteMillis) }
-    val cardModifier = Modifier.fillMaxWidth().semantics {
+    val selectionSemantics = Modifier.semantics {
         selected = checked
         if (grid) contentDescription = title
     }
     CheckableItem(checked, checkAlignment = if (grid) Alignment.BottomEnd else Alignment.TopEnd) { interactionSource ->
         if (grid) {
             ElevatedCard(
-                modifier = cardModifier,
+                modifier = Modifier.fillMaxWidth(),
                 onClick = onClick,
                 onLongClick = onLongClick,
                 interactionSource = interactionSource,
             ) {
-                ReadCacheCover(gallery, Modifier.fillMaxWidth().aspectRatio(DEFAULT_RATIO))
+                ReadCacheCover(gallery, Modifier.fillMaxWidth().aspectRatio(DEFAULT_RATIO).then(selectionSemantics))
                 Column(Modifier.padding(6.dp), verticalArrangement = Arrangement.spacedBy(2.dp)) {
                     Text(details, style = MaterialTheme.typography.labelMedium)
                     Text(date, modifier = Modifier.heightIn(min = 20.dp).padding(end = 22.dp), style = MaterialTheme.typography.bodySmall)
@@ -374,12 +374,12 @@ private fun ReadCachedGalleryItem(
             }
         } else {
             CrystalCard(
-                modifier = cardModifier,
+                modifier = Modifier.fillMaxWidth(),
                 onClick = onClick,
                 onLongClick = onLongClick,
                 interactionSource = interactionSource,
             ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
+                Row(modifier = selectionSemantics, verticalAlignment = Alignment.CenterVertically) {
                     ReadCacheCover(gallery, Modifier.height(listThumbHeight).aspectRatio(DEFAULT_RATIO).clip(ShapeDefaults.Small))
                     Column(
                         modifier = Modifier.weight(1f).padding(start = 8.dp, top = 4.dp, end = 28.dp, bottom = 4.dp),
