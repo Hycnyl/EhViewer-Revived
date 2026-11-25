@@ -12,7 +12,7 @@
 ## 基线与发布
 
 - 功能源自 `Hycnyl/EhViewer` 的 `v1.17.8`，对应清理后的提交 `92923877ef671e33aa56f69688daa46af6e59ec6`；新仓库独立起始，不继承旧 Git 历史。四种语言 README 继承旧仓库最新的用户文档与完整素材引用，保留 LICENSE、NOTICE 和源码版权说明。
-- 应用名保持 `EhViewer`，正式包名保持 `moe.hycnyl.ehviewer`。当前源码版本为 `1.17.26` / `180101`，最新已发布版本为 `1.17.25` / `180100`，接续旧版 `1.17.8` / `180083` 和 `1.17.9` / `180084`。后续沿用版本体系，版本码递增。
+- 应用名保持 `EhViewer`，正式包名保持 `moe.hycnyl.ehviewer`。当前正式版本为 `1.17.26` / `180101`，上个正式版为 `1.17.25` / `180100`，接续旧版 `1.17.8` / `180083` 和 `1.17.9` / `180084`。后续沿用版本体系，版本码递增。
 - 任何实际影响用户的改动完成后，除非维护者明确禁止，都须提升 versionName/versionCode，使用 GitHub Actions 发布正式 Release；提供 universal、arm64-v8a、armeabi-v7a、x86_64、x86 五种 APK，并附简短变更说明与 SHA-256 校验和。不得使用 `[skip ci]` 绕过这条规则。
 - README 保持简洁，变更通常只在“变更”章节简要记录；允许修正仓库链接、安装要求和迁移说明。不得随意重写其余内容或丢失截图、素材和致谢。
 - 单轮只改一个目标不是硬性限制。缓存导出、下载恢复和归档格式继承 1.17.8 的当前行为，维护者没有将其固化为不可修改的长期规则。
@@ -93,15 +93,3 @@ UI 模块保留 `allWarningsAsErrors`，仅用 `-Xwarning-level=DEPRECATION:warn
 发布验证按本轮改动选择场景。UI、签名和构建默认使用 API 26、33、36；Target 37 的候选将现代设备检查切换至 API 37.2。使用包含 WebView 的 google_apis 镜像，现代设备使用 google_apis_ps16k 并检查真实页大小；每次新建 AVD，分配 4096M RAM / 512M heap。验证设备端 APK SHA-256、文件式 universal/匹配 ABI 安装、上个正式版本覆盖安装和启动。UI 按改动选用 archive-ui、interaction-ui 或 reading-cache 工作流渲染实际组件，支持指定 APK 源码与更新验证夹具，避免测试修正触发重复原生构建。只有涉及相关业务功能的改动，才增加离线 CBZ、设置迁移等对应检查。临时数据不进入源码或 Release。
 
 本托管环境先执行 `source /workspace/.ehviewer-env/activate.sh`，其中设置已固定的 JDK、SDK、Gradle/Cargo 缓存与本地 GNU m4 1.4.20。m4 是 Nettle 汇编的构建依赖；CI 检查并安装它。本地无 sudo，m4 安装于私有工具目录。Nettle 的源码包含预生成文件，CMake 必须保留其解包时间戳（DOWNLOAD_EXTRACT_TIMESTAMP TRUE）。
-
-## 本轮临时进度
-
-- 计划发布 1.17.26。已确认从发布版 1.17.25 和干净的 main 开始，按时间清理与既有缓存删除范围沿用。
-- 已复用下载页卡片和圆勾标记，完成长按多选、全选／反选／取消选择和悬浮清理按钮。准备运行清理专项检查和完整正式构建，随后签名、上传并验证安装。
-- 正式构建的元数据和格式检查通过。专项测试定位到长按卡片的内层点击节点未合并外层选中语义，已将选中状态和缩略图描述移到内容层。现在重跑相同源码的构建与缓存检查。
-- 长按及全选／反选／取消选择的专项断言已通过。扩展悬浮按钮的 Material 文本为装饰性语义，已补上清理图标的无障碍名称，随后重新验证操作和发布包。
-- 最终源码 `b0ab1530c3bfbfae84fb71155ca365ff36d33c93` 已通过 [缓存清理专项](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/45564133901)。[五包构建](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/45564133849) 与 [Android 设置页验证](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/45564153921) 并行运行。两项通过后签名并提交正式 Release。
-- [Android 15 设置页验证](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/45564153921) 已通过。确认了长按、三种选择操作、两种视图保持选择、取消确认，以及仅删除所选缓存页并保留下载归档。正式构建仍在采集 Baseline Profile。
-- [正式构建](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/45564133849) 的 Baseline 与 Startup Profile 已生成并通过两套阅读器覆盖检查，现在组装全部五种 APK。
-- [五包构建](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/45564133849) 已成功。未签名 Artifact 为 `15001358640`，摘要为 `sha256:b54d48f477c3bb1e4531b21fff71252f8905ed263aadf3812618e8eac9a9be36`。接下来由一次性签名流程核验来源及签名，交接常设发布流程。
-- [正式签名](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/45570450993) 成功，五包使用既有证书签署 V2/V3。签名临时材料已清理。[正式发布验证](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/45570587214) 正在接收草稿附件并运行安装、覆盖升级和公开下载检查。
