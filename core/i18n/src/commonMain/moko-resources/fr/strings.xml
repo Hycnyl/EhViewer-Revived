@@ -426,6 +426,10 @@
     <string name="read_cache_cleanup_summary">Effacer les images en cache par date ou par galerie</string>
     <string name="read_cache_cleanup_by_time">Par date et heure</string>
     <string name="read_cache_cleanup_by_gallery">Par galerie</string>
+    <string name="read_cache_selection_menu">Options de sélection</string>
+    <string name="read_cache_selection_invert">Inverser la sélection</string>
+    <string name="read_cache_selection_cancel">Annuler la sélection</string>
+    <string name="tooltip_select_all">Tout sélectionner</string>
     <string name="read_cache_cleanup_action">Vider</string>
     <string name="read_cache_cleanup_running">Suppression…</string>
     <string name="read_cache_cleanup_done">%1$d entrées du cache supprimées</string>

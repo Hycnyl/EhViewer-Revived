@@ -396,6 +396,10 @@
     <string name="read_cache_cleanup_summary">시간 또는 갤러리별로 이미지 캐시 정리</string>
     <string name="read_cache_cleanup_by_time">시간별 정리</string>
     <string name="read_cache_cleanup_by_gallery">갤러리별 정리</string>
+    <string name="read_cache_selection_menu">선택 작업</string>
+    <string name="read_cache_selection_invert">선택 반전</string>
+    <string name="read_cache_selection_cancel">선택 해제</string>
+    <string name="tooltip_select_all">모두 선택</string>
     <string name="read_cache_cleanup_action">정리</string>
     <string name="read_cache_cleanup_running">정리 중…</string>
     <string name="read_cache_cleanup_done">캐시 %1$d개를 정리했습니다</string>

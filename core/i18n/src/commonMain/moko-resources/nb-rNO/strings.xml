@@ -220,6 +220,10 @@
     <string name="read_cache_cleanup_summary">Fjern bufrede bilder etter tidspunkt eller galleri</string>
     <string name="read_cache_cleanup_by_time">Etter tidspunkt</string>
     <string name="read_cache_cleanup_by_gallery">Etter galleri</string>
+    <string name="read_cache_selection_menu">Valgalternativer</string>
+    <string name="read_cache_selection_invert">Inverter valg</string>
+    <string name="read_cache_selection_cancel">Opphev valg</string>
+    <string name="tooltip_select_all">Velg alle</string>
     <string name="read_cache_cleanup_action">Tøm</string>
     <string name="read_cache_cleanup_running">Tømmer…</string>
     <string name="read_cache_cleanup_done">Fjernet %1$d bufferoppføringer</string>

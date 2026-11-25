@@ -3,20 +3,19 @@ package com.hippo.ehviewer.ui.settings
 
 import android.app.Application
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.test.assertIsOn
+import androidx.compose.ui.test.assertIsNotSelected
+import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.junit4.v2.createComposeRule
+import androidx.compose.ui.test.longClick
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performTouchInput
+import androidx.compose.ui.unit.dp
 import coil3.disk.DiskCache
 import com.ehviewer.core.model.BaseGalleryInfo
 import com.hippo.ehviewer.client.getImageKey
@@ -24,7 +23,6 @@ import com.hippo.ehviewer.coil.ReadCacheCleaner
 import com.hippo.ehviewer.coil.ReadCachedGallery
 import com.hippo.ehviewer.coil.clearGalleryImages
 import com.hippo.ehviewer.coil.findReadCachedGalleries
-import com.hippo.ehviewer.ui.main.GalleryViewToggle
 import com.hippo.ehviewer.ui.tools.DialogState
 import java.time.Instant
 import java.time.ZoneId
@@ -120,33 +118,79 @@ class ReadCacheCleanupTest {
     }
 
     @Test
-    fun bothViewsUseTheSameGallerySelection() {
+    fun longPressStartsSelectionAndBothViewsKeepIt() {
+        val cleared = mutableListOf<Long>()
+        showGalleryList { galleries -> cleared += galleries.map { it.gid } }
+
+        val first = compose.onNodeWithText("Gallery #100")
+        first.performClick().assertIsNotSelected()
+        compose.onNodeWithText("Clear").assertDoesNotExist()
+        first.performTouchInput { longClick() }.assertIsSelected()
+        compose.onNodeWithContentDescription("Cover view").performClick()
+        compose.onNodeWithContentDescription("Gallery #100").assertIsSelected()
+        compose.onNodeWithContentDescription("Gallery #200").performClick().assertIsSelected()
+        compose.onNodeWithContentDescription("List view").performClick()
+        first.assertIsSelected()
+        compose.onNodeWithText("Gallery #200").assertIsSelected()
+        compose.onNodeWithText("2 selected").assertExists()
+        compose.onNodeWithText("Clear").performClick().assertDoesNotExist()
+        compose.runOnIdle { assertEquals(listOf(100L, 200L), cleared) }
+    }
+
+    @Test
+    fun selectionMenuCanInvertRefillAndClearSelection() {
+        showGalleryList()
+        val first = compose.onNodeWithText("Gallery #100")
+        val second = compose.onNodeWithText("Gallery #200")
+        val third = compose.onNodeWithText("Gallery #300")
+
+        chooseSelectionAction("Select all")
+        second.performClick().assertIsNotSelected()
+
+        chooseSelectionAction("Invert selection")
+        first.assertIsNotSelected()
+        second.assertIsSelected()
+        third.assertIsNotSelected()
+        chooseSelectionAction("Invert selection")
+        first.assertIsSelected()
+        second.assertIsNotSelected()
+        third.assertIsSelected()
+
+        chooseSelectionAction("Select all")
+        second.assertIsSelected()
+        chooseSelectionAction("Invert selection")
+        compose.onNodeWithText("Clear").assertDoesNotExist()
+        chooseSelectionAction("Invert selection")
+        compose.onNodeWithText("3 selected").assertExists()
+        chooseSelectionAction("Cancel selection")
+        first.assertIsNotSelected()
+        second.assertIsNotSelected()
+        third.assertIsNotSelected()
+        compose.onNodeWithText("Clear").assertDoesNotExist()
+    }
+
+    private fun showGalleryList(onClear: suspend (List<ReadCachedGallery>) -> Unit = {}) {
         val preview = temp.newFile("preview.png").toOkioPath()
-        val rows = listOf(
-            ReadCachedGallery(100, null, preview, 1, 1, 9, 1_700_000_000_000),
-            ReadCachedGallery(200, null, preview, 1, 1, 9, 1_690_000_000_000),
-        )
-        var selected by mutableStateOf(emptySet<Long>())
+        val rows = listOf(100L, 200L, 300L).map { gid ->
+            ReadCachedGallery(gid, null, preview, 1, 1, 9, 1_700_000_000_000 - gid)
+        }
         compose.setContent {
             MaterialTheme {
-                var grid by remember { mutableStateOf(false) }
-                Column {
-                    GalleryViewToggle(grid) { grid = it }
-                    ReadCacheGalleryContent(rows, grid, selected, true, {
-                        selected = if (it in selected) selected - it else selected + it
-                    }, Modifier.weight(1f))
-                }
+                ReadCacheGalleryLayout(
+                    galleries = rows,
+                    listThumbHeight = 120.dp,
+                    loadFailed = false,
+                    onRetry = {},
+                    navigationIcon = {},
+                    onClear = onClear,
+                )
             }
         }
+    }
 
-        compose.onNodeWithText("Gallery #100").performClick().assertIsOn()
-        compose.onNodeWithContentDescription("Cover view").performClick()
-        compose.onNodeWithText("Gallery #100").assertIsOn()
-        compose.onNodeWithText("Gallery #200").performClick().assertIsOn()
-        compose.onNodeWithContentDescription("List view").performClick()
-        compose.onNodeWithText("Gallery #100").assertIsOn()
-        compose.onNodeWithText("Gallery #200").assertIsOn()
-        compose.runOnIdle { assertEquals(setOf(100L, 200L), selected) }
+    private fun chooseSelectionAction(action: String) {
+        compose.onNodeWithContentDescription("Selection actions").performClick()
+        compose.onNodeWithText(action).performClick()
     }
 
     @Test

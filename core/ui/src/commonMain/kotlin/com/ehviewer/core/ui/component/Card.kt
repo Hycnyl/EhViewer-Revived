@@ -23,10 +23,12 @@ fun CrystalCard(
     onLongClick: () -> Unit,
     modifier: Modifier = Modifier,
     interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
+    enabled: Boolean = true,
     content: @Composable ColumnScope.() -> Unit,
 ) = OutlinedCard(
     onClick = onClick,
     onLongClick = onLongClick,
+    enabled = enabled,
     modifier = modifier,
     border = crystalCardBorder(),
     interactionSource = interactionSource,

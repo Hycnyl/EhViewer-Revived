@@ -107,6 +107,10 @@
     <string name="read_cache_cleanup_summary">Önbellekteki görüntüleri zamana veya galeriye göre temizle</string>
     <string name="read_cache_cleanup_by_time">Zamana göre</string>
     <string name="read_cache_cleanup_by_gallery">Galeriye göre</string>
+    <string name="read_cache_selection_menu">Seçim işlemleri</string>
+    <string name="read_cache_selection_invert">Seçimi tersine çevir</string>
+    <string name="read_cache_selection_cancel">Seçimi kaldır</string>
+    <string name="tooltip_select_all">Tümünü seç</string>
     <string name="read_cache_cleanup_action">Temizle</string>
     <string name="read_cache_cleanup_running">Temizleniyor…</string>
     <string name="read_cache_cleanup_done">%1$d önbellek öğesi temizlendi</string>

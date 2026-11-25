@@ -678,6 +678,9 @@
     <string name="read_cache_cleanup_summary">Clear cached images by time or gallery</string>
     <string name="read_cache_cleanup_by_time">By time</string>
     <string name="read_cache_cleanup_by_gallery">By gallery</string>
+    <string name="read_cache_selection_menu">Selection actions</string>
+    <string name="read_cache_selection_invert">Invert selection</string>
+    <string name="read_cache_selection_cancel">Cancel selection</string>
     <string name="read_cache_cleanup_date">Choose a date</string>
     <string name="read_cache_cleanup_time">Choose a time</string>
     <string name="read_cache_cleanup_confirm_time">Clear images cached before %1$s?</string>

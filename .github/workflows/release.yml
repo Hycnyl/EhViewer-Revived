@@ -23,7 +23,7 @@ on:
         description: 'Focused UI checks appropriate to this release'
         required: false
         type: choice
-        options: [interaction-ui.yml, archive-ui.yml]
+        options: [interaction-ui.yml, archive-ui.yml, reading-cache.yml]
         default: interaction-ui.yml
       quick_release:
         description: 'Scoped UI patch: omit optional UI suites and use one Android 13 install/upgrade check'

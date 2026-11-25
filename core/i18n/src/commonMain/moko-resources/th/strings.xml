@@ -407,6 +407,10 @@
     <string name="read_cache_cleanup_summary">ล้างรูปภาพในแคชตามเวลาหรือแกลเลอรี</string>
     <string name="read_cache_cleanup_by_time">ล้างตามเวลา</string>
     <string name="read_cache_cleanup_by_gallery">ล้างตามแกลเลอรี</string>
+    <string name="read_cache_selection_menu">ตัวเลือกการเลือก</string>
+    <string name="read_cache_selection_invert">กลับการเลือก</string>
+    <string name="read_cache_selection_cancel">ยกเลิกการเลือก</string>
+    <string name="tooltip_select_all">เลือกทั้งหมด</string>
     <string name="read_cache_cleanup_action">ล้าง</string>
     <string name="read_cache_cleanup_running">กำลังล้าง…</string>
     <string name="read_cache_cleanup_done">ล้างแคชแล้ว %1$d รายการ</string>

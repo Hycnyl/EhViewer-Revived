@@ -354,6 +354,10 @@
     <string name="read_cache_cleanup_summary">Bildcache nach Zeitpunkt oder Galerie leeren</string>
     <string name="read_cache_cleanup_by_time">Nach Zeitpunkt</string>
     <string name="read_cache_cleanup_by_gallery">Nach Galerie</string>
+    <string name="read_cache_selection_menu">Auswahlaktionen</string>
+    <string name="read_cache_selection_invert">Auswahl umkehren</string>
+    <string name="read_cache_selection_cancel">Auswahl aufheben</string>
+    <string name="tooltip_select_all">Alle auswählen</string>
     <string name="read_cache_cleanup_action">Leeren</string>
     <string name="read_cache_cleanup_running">Wird geleert…</string>
     <string name="read_cache_cleanup_done">%1$d Cacheeinträge entfernt</string>

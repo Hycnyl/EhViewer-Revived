@@ -638,6 +638,9 @@
     <string name="read_cache_cleanup_summary">依時間或畫廊清理圖片快取</string>
     <string name="read_cache_cleanup_by_time">依時間清理</string>
     <string name="read_cache_cleanup_by_gallery">依畫廊清理</string>
+    <string name="read_cache_selection_menu">選取操作</string>
+    <string name="read_cache_selection_invert">反選</string>
+    <string name="read_cache_selection_cancel">取消選取</string>
     <string name="read_cache_cleanup_date">選擇日期</string>
     <string name="read_cache_cleanup_time">選擇時間</string>
     <string name="read_cache_cleanup_confirm_time">清理 %1$s 之前寫入的快取圖片？</string>

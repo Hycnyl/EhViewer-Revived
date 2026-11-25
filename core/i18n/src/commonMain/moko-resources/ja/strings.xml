@@ -647,6 +647,9 @@
     <string name="read_cache_cleanup_summary">日時またはギャラリーで画像キャッシュを削除</string>
     <string name="read_cache_cleanup_by_time">日時で削除</string>
     <string name="read_cache_cleanup_by_gallery">ギャラリーで削除</string>
+    <string name="read_cache_selection_menu">選択操作</string>
+    <string name="read_cache_selection_invert">選択を反転</string>
+    <string name="read_cache_selection_cancel">選択解除</string>
     <string name="read_cache_cleanup_date">日付を選択</string>
     <string name="read_cache_cleanup_time">時刻を選択</string>
     <string name="read_cache_cleanup_confirm_time">%1$s より前にキャッシュした画像を削除しますか？</string>

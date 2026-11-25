@@ -29,6 +29,7 @@ import kotlinx.coroutines.flow.merge
 fun CheckableItem(
     checked: Boolean,
     modifier: Modifier = Modifier,
+    checkAlignment: Alignment = Alignment.TopEnd,
     content: @Composable (MutableInteractionSource) -> Unit,
 ) {
     val src = controlledInteractionSource(enabled = checked)
@@ -38,7 +39,7 @@ fun CheckableItem(
             Icon(
                 imageVector = Icons.Default.CheckCircle,
                 contentDescription = null,
-                modifier = Modifier.align(Alignment.TopEnd),
+                modifier = Modifier.align(checkAlignment),
             )
         }
     }

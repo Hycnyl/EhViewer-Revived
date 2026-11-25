@@ -660,6 +660,9 @@
     <string name="read_cache_cleanup_summary">按时间或画廊清理图片缓存</string>
     <string name="read_cache_cleanup_by_time">按时间清理</string>
     <string name="read_cache_cleanup_by_gallery">按画廊清理</string>
+    <string name="read_cache_selection_menu">选择操作</string>
+    <string name="read_cache_selection_invert">反选</string>
+    <string name="read_cache_selection_cancel">取消选择</string>
     <string name="read_cache_cleanup_date">选择日期</string>
     <string name="read_cache_cleanup_time">选择时间</string>
     <string name="read_cache_cleanup_confirm_time">清理 %1$s 之前写入的缓存图片？</string>
