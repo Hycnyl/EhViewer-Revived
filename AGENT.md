@@ -101,3 +101,4 @@ UI 模块保留 `allWarningsAsErrors`，仅用 `-Xwarning-level=DEPRECATION:warn
 - 正式构建的元数据和格式检查通过。专项测试定位到长按卡片的内层点击节点未合并外层选中语义，已将选中状态和缩略图描述移到内容层。现在重跑相同源码的构建与缓存检查。
 - 长按及全选／反选／取消选择的专项断言已通过。扩展悬浮按钮的 Material 文本为装饰性语义，已补上清理图标的无障碍名称，随后重新验证操作和发布包。
 - 最终源码 `b0ab1530c3bfbfae84fb71155ca365ff36d33c93` 已通过 [缓存清理专项](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/45564133901)。[五包构建](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/45564133849) 与 [Android 设置页验证](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/45564153921) 并行运行。两项通过后签名并提交正式 Release。
+- [Android 15 设置页验证](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/45564153921) 已通过。确认了长按、三种选择操作、两种视图保持选择、取消确认，以及仅删除所选缓存页并保留下载归档。正式构建仍在采集 Baseline Profile。
