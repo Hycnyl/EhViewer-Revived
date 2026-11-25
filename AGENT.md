@@ -104,3 +104,4 @@ UI 模块保留 `allWarningsAsErrors`，仅用 `-Xwarning-level=DEPRECATION:warn
 - [Android 15 设置页验证](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/45564153921) 已通过。确认了长按、三种选择操作、两种视图保持选择、取消确认，以及仅删除所选缓存页并保留下载归档。正式构建仍在采集 Baseline Profile。
 - [正式构建](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/45564133849) 的 Baseline 与 Startup Profile 已生成并通过两套阅读器覆盖检查，现在组装全部五种 APK。
 - [五包构建](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/45564133849) 已成功。未签名 Artifact 为 `15001358640`，摘要为 `sha256:b54d48f477c3bb1e4531b21fff71252f8905ed263aadf3812618e8eac9a9be36`。接下来由一次性签名流程核验来源及签名，交接常设发布流程。
+- [正式签名](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/45570450993) 成功，五包使用既有证书签署 V2/V3。签名临时材料已清理。[正式发布验证](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/45570587214) 正在接收草稿附件并运行安装、覆盖升级和公开下载检查。
