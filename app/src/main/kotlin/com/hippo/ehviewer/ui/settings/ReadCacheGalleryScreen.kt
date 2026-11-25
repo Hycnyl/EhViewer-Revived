@@ -215,13 +215,14 @@ internal fun ReadCacheGalleryLayout(
                 listThumbHeight = listThumbHeight,
                 grid = grid,
                 selected = selectedIds,
-                enabled = !busy,
                 onToggle = { gid ->
-                    if (selecting) {
+                    if (!busy && selecting) {
                         selection = (if (gid in selectedIds) selectedIds - gid else selectedIds + gid).toLongArray()
                     }
                 },
-                onSelect = { gid -> selection = (selectedIds + gid).toLongArray() },
+                onSelect = { gid ->
+                    if (!busy) selection = (selectedIds + gid).toLongArray()
+                },
                 modifier = modifier,
             )
         }
@@ -282,7 +283,6 @@ private fun ReadCacheGalleryContent(
     listThumbHeight: Dp,
     grid: Boolean,
     selected: Set<Long>,
-    enabled: Boolean,
     onToggle: (Long) -> Unit,
     onSelect: (Long) -> Unit,
     modifier: Modifier = Modifier,
@@ -311,7 +311,6 @@ private fun ReadCacheGalleryContent(
                     listThumbHeight = listThumbHeight,
                     grid = true,
                     checked = gallery.gid in selected,
-                    enabled = enabled,
                     onClick = { onToggle(gallery.gid) },
                     onLongClick = { onSelect(gallery.gid) },
                 )
@@ -329,7 +328,6 @@ private fun ReadCacheGalleryContent(
                     listThumbHeight = listThumbHeight,
                     grid = false,
                     checked = gallery.gid in selected,
-                    enabled = enabled,
                     onClick = { onToggle(gallery.gid) },
                     onLongClick = { onSelect(gallery.gid) },
                 )
@@ -344,7 +342,6 @@ private fun ReadCachedGalleryItem(
     listThumbHeight: Dp,
     grid: Boolean,
     checked: Boolean,
-    enabled: Boolean,
     onClick: () -> Unit,
     onLongClick: () -> Unit,
 ) {
@@ -367,7 +364,6 @@ private fun ReadCachedGalleryItem(
                 modifier = cardModifier,
                 onClick = onClick,
                 onLongClick = onLongClick,
-                enabled = enabled,
                 interactionSource = interactionSource,
             ) {
                 ReadCacheCover(gallery, Modifier.fillMaxWidth().aspectRatio(DEFAULT_RATIO))
@@ -381,7 +377,6 @@ private fun ReadCachedGalleryItem(
                 modifier = cardModifier,
                 onClick = onClick,
                 onLongClick = onLongClick,
-                enabled = enabled,
                 interactionSource = interactionSource,
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
