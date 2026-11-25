@@ -190,10 +190,11 @@ internal fun ReadCacheGalleryLayout(
         },
         floatingActionButton = {
             if (selecting) {
+                val action = stringResource(if (busy) R.string.read_cache_cleanup_running else R.string.read_cache_cleanup_action)
                 ExtendedFloatingActionButton(
                     onClick = ::clearSelected,
-                    icon = { Icon(Icons.Default.Delete, contentDescription = null) },
-                    text = { Text(stringResource(if (busy) R.string.read_cache_cleanup_running else R.string.read_cache_cleanup_action)) },
+                    icon = { Icon(Icons.Default.Delete, contentDescription = action) },
+                    text = { Text(action) },
                 )
             }
         },

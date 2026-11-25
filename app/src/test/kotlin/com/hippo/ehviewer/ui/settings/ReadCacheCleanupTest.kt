@@ -125,7 +125,7 @@ class ReadCacheCleanupTest {
 
         val first = compose.onNodeWithText("Gallery #100")
         first.performClick().assert(!isSelected())
-        compose.onNodeWithText("Clear").assertDoesNotExist()
+        compose.onNodeWithContentDescription("Clear").assertDoesNotExist()
         first.performTouchInput { longClick() }
         compose.onNodeWithText("1 selected").assertExists()
         first.assertIsSelected()
@@ -136,7 +136,7 @@ class ReadCacheCleanupTest {
         first.assertIsSelected()
         compose.onNodeWithText("Gallery #200").assertIsSelected()
         compose.onNodeWithText("2 selected").assertExists()
-        compose.onNodeWithText("Clear").performClick().assertDoesNotExist()
+        compose.onNodeWithContentDescription("Clear").performClick().assertDoesNotExist()
         compose.runOnIdle { assertEquals(listOf(100L, 200L), cleared) }
     }
 
@@ -162,14 +162,14 @@ class ReadCacheCleanupTest {
         chooseSelectionAction("Select all")
         second.assertIsSelected()
         chooseSelectionAction("Invert selection")
-        compose.onNodeWithText("Clear").assertDoesNotExist()
+        compose.onNodeWithContentDescription("Clear").assertDoesNotExist()
         chooseSelectionAction("Invert selection")
         compose.onNodeWithText("3 selected").assertExists()
         chooseSelectionAction("Cancel selection")
         first.assert(!isSelected())
         second.assert(!isSelected())
         third.assert(!isSelected())
-        compose.onNodeWithText("Clear").assertDoesNotExist()
+        compose.onNodeWithContentDescription("Clear").assertDoesNotExist()
     }
 
     private fun showGalleryList(onClear: suspend (List<ReadCachedGallery>) -> Unit = {}) {
