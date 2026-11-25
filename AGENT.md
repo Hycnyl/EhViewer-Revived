@@ -100,3 +100,4 @@ UI 模块保留 `allWarningsAsErrors`，仅用 `-Xwarning-level=DEPRECATION:warn
 - 已复用下载页卡片和圆勾标记，完成长按多选、全选／反选／取消选择和悬浮清理按钮。准备运行清理专项检查和完整正式构建，随后签名、上传并验证安装。
 - 正式构建的元数据和格式检查通过。专项测试定位到长按卡片的内层点击节点未合并外层选中语义，已将选中状态和缩略图描述移到内容层。现在重跑相同源码的构建与缓存检查。
 - 长按及全选／反选／取消选择的专项断言已通过。扩展悬浮按钮的 Material 文本为装饰性语义，已补上清理图标的无障碍名称，随后重新验证操作和发布包。
+- 最终源码 `b0ab1530c3bfbfae84fb71155ca365ff36d33c93` 已通过 [缓存清理专项](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/45564133901)。[五包构建](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/45564133849) 与 [Android 设置页验证](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/45564153921) 并行运行。两项通过后签名并提交正式 Release。
