@@ -98,7 +98,7 @@ object EhTagDatabase : CoroutineScope {
         candidates.mapNotNull { result ->
             TagIdentity.from(prefix, result.tag)?.let { it to (result.score / (nsScore[prefix] ?: 1f)) }
         }
-    }.sortedBy { it.second }.take(limit).map { it.first }.toList()
+    }.sortedBy { it.second }.map { it.first }.distinct().take(limit).toList()
 
     // Copied from https://github.com/EhTagTranslation/EhSyringe/blob/c0cf88da04081072492829673aca34380b14dae6/src/plugin/suggest.ts#L37
     // TODO: Optimize

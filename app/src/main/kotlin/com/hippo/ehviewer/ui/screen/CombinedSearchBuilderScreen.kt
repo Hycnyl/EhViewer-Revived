@@ -68,6 +68,7 @@ import com.hippo.ehviewer.client.EhTagDatabase
 import com.hippo.ehviewer.client.data.ListUrlBuilder
 import com.hippo.ehviewer.collectAsState
 import com.hippo.ehviewer.search.CombinedSearchSource
+import com.hippo.ehviewer.search.EMPTY_SEARCH_NAME
 import com.hippo.ehviewer.search.QuickSearchConflict
 import com.hippo.ehviewer.search.QuickSearchConflictChoice
 import com.hippo.ehviewer.search.SearchExpression
@@ -177,7 +178,7 @@ fun AnimatedVisibilityScope.CombinedSearchBuilderScreen(source: CombinedSearchSo
                     return@launch
                 }
                 val originalName = original?.let(SearchName::of)
-                val name = if (original != null && !original.automaticallyNamed) originalName!!.label else expression.text
+                val name = if (original != null && !original.automaticallyNamed) originalName!!.label else expression.text.ifBlank { EMPTY_SEARCH_NAME }
                 val cursor = when {
                     currentPosition != null && saveProgress -> currentPosition
                     original?.sameSearch(criteria) == true -> originalName?.afterGid
@@ -259,25 +260,42 @@ fun AnimatedVisibilityScope.CombinedSearchBuilderScreen(source: CombinedSearchSo
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             item("keywords") {
-                OutlinedTextField(
-                    value = titleKeywords,
-                    onValueChange = { titleKeywords = it },
-                    label = { Text(stringResource(R.string.combined_title_keywords)) },
-                    modifier = Modifier.fillMaxWidth(),
-                    trailingIcon = {
-                        val label = stringResource(R.string.combined_add_keywords)
-                        IconTooltip(label) {
-                            IconButton(
-                                onClick = {
-                                    raw = query.text
-                                    titleKeywords = ""
-                                },
-                                enabled = pending.isNotEmpty(),
-                                shapes = IconButtonDefaults.shapes(),
-                            ) { Icon(Icons.Default.Add, contentDescription = label) }
+                Column {
+                    FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                        terms.forEachIndexed { index, term ->
+                            if (term.isKeyword && term.placement == SearchPlacement.Required) {
+                                ConditionChip(
+                                    term = term,
+                                    label = term.displayLabel(context, translate),
+                                    onChange = { changeTerm(index, it) },
+                                    onEditRaw = {
+                                        rawExpanded = true
+                                        launch { formState.animateScrollToItem(SearchPlacement.entries.size + 3) }
+                                    },
+                                )
+                            }
                         }
-                    },
-                )
+                    }
+                    OutlinedTextField(
+                        value = titleKeywords,
+                        onValueChange = { titleKeywords = it },
+                        label = { Text(stringResource(R.string.combined_title_keywords)) },
+                        modifier = Modifier.fillMaxWidth(),
+                        trailingIcon = {
+                            val label = stringResource(R.string.combined_add_keywords)
+                            IconTooltip(label) {
+                                IconButton(
+                                    onClick = {
+                                        raw = query.text
+                                        titleKeywords = ""
+                                    },
+                                    enabled = pending.isNotEmpty(),
+                                    shapes = IconButtonDefaults.shapes(),
+                                ) { Icon(Icons.Default.Add, contentDescription = label) }
+                            }
+                        },
+                    )
+                }
             }
             items(SearchPlacement.entries.size, key = { SearchPlacement.entries[it].name }) { i ->
                 val placement = SearchPlacement.entries[i]
@@ -310,7 +328,7 @@ fun AnimatedVisibilityScope.CombinedSearchBuilderScreen(source: CombinedSearchSo
                         )
                         FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                             terms.forEachIndexed { index, term ->
-                                if (term.placement == placement) {
+                                if (term.placement == placement && !(term.isKeyword && placement == SearchPlacement.Required)) {
                                     ConditionChip(
                                         term = term,
                                         label = term.displayLabel(context, translate),

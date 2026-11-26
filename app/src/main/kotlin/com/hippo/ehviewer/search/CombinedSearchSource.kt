@@ -79,8 +79,10 @@ internal data class SearchName(val label: String, val afterGid: Long?) {
     }
 }
 
+internal const val EMPTY_SEARCH_NAME = "All galleries"
+
 internal val QuickSearch.automaticallyNamed: Boolean
-    get() = mode in setOf(MODE_NORMAL, MODE_SUBSCRIPTION) && SearchName.of(this).label == keyword.orEmpty()
+    get() = mode in setOf(MODE_NORMAL, MODE_SUBSCRIPTION) && SearchName.of(this).label.let { it == keyword.orEmpty() || (keyword.isNullOrBlank() && it == EMPTY_SEARCH_NAME) }
 
 private fun SearchExpression.comparableTerms() = terms.map { term ->
     val canonical = term.tag?.let { SearchTerm.forTag(it, term.placement, term.match).raw } ?: term.raw

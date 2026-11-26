@@ -67,6 +67,7 @@ import com.hippo.ehviewer.search.FavoriteTagFile
 import com.hippo.ehviewer.search.TagFavorites
 import com.hippo.ehviewer.search.TagIdentity
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -271,24 +272,29 @@ internal fun TagLibraryMenu() {
         uri ?: return@rememberLauncherForActivityResult
         busy = true
         scope.launch {
+            var verified = false
             val message = try {
                 runSuspendCatching {
                     withContext(Dispatchers.IO) {
                         val json = TagFavorites.export()
                         val bytes = json.encodeToByteArray()
+                        require(bytes.size <= MAX_TAG_BACKUP_BYTES)
                         check(FavoriteTagFile.decode(json).second == 0)
                         val resolver = context.contentResolver
                         checkNotNull(resolver.openOutputStream(uri, "wt")).use { it.write(bytes) }
                         check(resolver.readTagBackup(uri).contentEquals(bytes))
+                        verified = true
                     }
                     R.string.combined_export_done
                 }.getOrElse {
                     logcat("TagFavorites", it)
-                    withContext(Dispatchers.IO) { runCatching { DocumentsContract.deleteDocument(context.contentResolver, uri) } }
                     R.string.combined_export_failed
                 }
             } finally {
                 busy = false
+                if (!verified) {
+                    withContext(NonCancellable + Dispatchers.IO) { runCatching { DocumentsContract.deleteDocument(context.contentResolver, uri) } }
+                }
             }
             snackbar(context.getString(message))
         }
@@ -321,7 +327,9 @@ internal fun TagLibraryMenu() {
     }
 }
 
+private const val MAX_TAG_BACKUP_BYTES = 8L * 1024 * 1024
+
 private fun ContentResolver.readTagBackup(uri: Uri): ByteArray = checkNotNull(openInputStream(uri)).source().buffer().use { input ->
-    require(!input.request(8L * 1024 * 1024 + 1))
+    require(!input.request(MAX_TAG_BACKUP_BYTES + 1))
     input.readByteArray()
 }
