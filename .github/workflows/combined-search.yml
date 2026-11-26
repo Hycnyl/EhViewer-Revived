@@ -1,0 +1,40 @@
+name: Check combined searching
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'app/src/main/kotlin/com/hippo/ehviewer/search/**'
+      - 'app/src/main/kotlin/com/hippo/ehviewer/ui/search/**'
+      - 'app/src/main/kotlin/com/hippo/ehviewer/ui/screen/CombinedSearch*.kt'
+      - 'app/src/main/kotlin/com/hippo/ehviewer/ui/screen/GalleryListScreen.kt'
+      - 'app/src/main/kotlin/com/hippo/ehviewer/client/data/ListUrlBuilder.kt'
+      - 'app/src/test/kotlin/com/hippo/ehviewer/search/**'
+      - '.github/workflows/combined-search.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: layout-${{ github.sha }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - uses: actions/setup-java@v6.1.0
+        with:
+          distribution: temurin
+          java-version: '21'
+      - uses: android-actions/setup-android@v4.0.4
+        with:
+          packages: 'platform-tools platforms;android-37.2 build-tools;37.0.0'
+      - uses: gradle/actions/setup-gradle@v6.4.1
+      - name: Check search expressions and nearby dialog behavior
+        run: ./gradlew :app:testDefaultDebugUnitTest --tests '*SearchExpressionTest' --tests '*GalleryDialogUiTest' --tests '*MaterialDialogDesignTest' spotlessCheck --no-configuration-cache --max-workers=2 -Pkotlin.compiler.execution.strategy=in-process
+      - name: Compare the backup database schema with 1.17.27
+        run: |
+          base=42e4d436b4b627d0bc256565a20c3b128239cadb
+          git fetch --no-tags --depth=1 origin "$base"
+          git diff --exit-code "$base" -- core/data/schemas core/data/src/commonMain/kotlin/com/ehviewer/core/database/model/QuickSearch.kt
