@@ -140,7 +140,7 @@ internal data class SearchExpression(val terms: List<SearchTerm> = emptyList()) 
         if (terms.any { it.namespace == TagNamespace.Temp }) add(SearchProblem.TemporaryTag)
 
         val notes = terms.count { it.qualifier in noteQualifiers }
-        val required = terms.count { it.placement != SearchPlacement.Excluded && it.qualifier !in uncountedQualifiers }
+        val required = countInclusions()
         val excluded = terms.count {
             it.placement == SearchPlacement.Excluded && it.qualifier != "title" && it.qualifier !in uncountedQualifiers
         }
@@ -161,7 +161,9 @@ internal data class SearchExpression(val terms: List<SearchTerm> = emptyList()) 
                     }
                 } == true
             }
-        ) add(SearchProblem.WeakAndActive)
+        ) {
+            add(SearchProblem.WeakAndActive)
+        }
     }
 
     fun describe(joiner: String, describeTerm: (SearchTerm) -> String, alternatives: (List<String>) -> String, exclusion: (String) -> String): String {
@@ -181,8 +183,31 @@ internal data class SearchExpression(val terms: List<SearchTerm> = emptyList()) 
         }.joinToString(joiner)
     }
 
+    private fun countInclusions(): Int {
+        var count = 0
+        var bareTerms = 0
+        var substantiveTerms = 0
+        fun finishBareTerms() {
+            if (bareTerms > 0) count += substantiveTerms.coerceAtLeast(1)
+            bareTerms = 0
+            substantiveTerms = 0
+        }
+        for (term in terms) {
+            if (term.placement == SearchPlacement.Required && !term.weak && term.raw.all { it.isLetterOrDigit() }) {
+                bareTerms++
+                if (term.raw.length > 2 && term.raw.lowercase(Locale.ROOT) !in joinedWords) substantiveTerms++
+            } else {
+                finishBareTerms()
+                if (term.placement != SearchPlacement.Excluded && term.qualifier !in uncountedQualifiers) count++
+            }
+        }
+        finishBareTerms()
+        return count
+    }
+
     companion object {
         const val MAX_SEARCH_CHARACTERS = 200
+        private val joinedWords = setOf("the", "and", "small", "big", "huge", "gigantic")
         private val noteQualifiers = setOf("comment", "favnote")
         private val uncountedQualifiers = noteQualifiers + setOf("uploader", "uploaduid", "gid")
 

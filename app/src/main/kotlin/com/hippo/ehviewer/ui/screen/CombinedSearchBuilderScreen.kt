@@ -204,7 +204,7 @@ fun AnimatedVisibilityScope.CombinedSearchBuilderScreen(source: CombinedSearchSo
                         QuickSearchConflictChoice.KeepExisting -> return@launch
                     }
                 }
-                val saved = runSuspendCatching { EhDB.saveQuickSearch(candidate, target) }.onFailure { logcat(it) }.getOrNull()
+                val saved = runSuspendCatching { EhDB.saveQuickSearch(candidate, target, rows) }.onFailure { logcat(it) }.getOrNull()
                 if (saved == null) {
                     snackbar(context.getString(R.string.combined_save_conflict))
                     return@launch

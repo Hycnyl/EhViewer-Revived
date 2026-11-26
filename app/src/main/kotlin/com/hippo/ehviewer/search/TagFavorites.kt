@@ -56,8 +56,7 @@ internal object TagFavorites : DataStorePreferences("tag_favorites") {
 
     val entries = document.valueFlow().map(::readStored)
 
-    private fun readStored(text: String) =
-        if (text.isBlank()) emptyList() else FavoriteTagFile.decode(text).first.distinctBy(FavoriteTag::tag)
+    private fun readStored(text: String) = if (text.isBlank()) emptyList() else FavoriteTagFile.decode(text).first.distinctBy(FavoriteTag::tag)
 
     suspend fun toggle(tag: TagIdentity): Boolean {
         var added = false

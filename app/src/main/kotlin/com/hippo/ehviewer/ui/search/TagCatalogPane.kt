@@ -80,7 +80,7 @@ internal suspend fun toggleFavoriteTag(context: Context, tag: TagIdentity) {
     val message = runSuspendCatching {
         if (TagFavorites.toggle(tag)) R.string.combined_tag_added else R.string.combined_tag_removed
     }.getOrElse {
-        logcat(it)
+        logcat("TagFavorites", it)
         R.string.combined_tag_failed
     }
     snackbar(context.getString(message))
@@ -258,7 +258,7 @@ internal fun TagLibraryMenu() {
                     }
                     context.getString(R.string.combined_import_result, stats.added, stats.existing, stats.invalid)
                 }.getOrElse {
-                    logcat(it)
+                    logcat("TagFavorites", it)
                     context.getString(R.string.combined_import_failed)
                 }
             } finally {
@@ -283,7 +283,7 @@ internal fun TagLibraryMenu() {
                     }
                     R.string.combined_export_done
                 }.getOrElse {
-                    logcat(it)
+                    logcat("TagFavorites", it)
                     withContext(Dispatchers.IO) { runCatching { DocumentsContract.deleteDocument(context.contentResolver, uri) } }
                     R.string.combined_export_failed
                 }

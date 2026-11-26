@@ -41,6 +41,7 @@ import com.hippo.ehviewer.download.DownloadManager
 import com.hippo.ehviewer.search.QuickSearchConflict
 import com.hippo.ehviewer.search.QuickSearchConflictChoice
 import com.hippo.ehviewer.search.mergeSearchBackups
+import com.hippo.ehviewer.search.sameRecord
 import java.util.UUID
 import kotlinx.coroutines.flow.Flow
 import okio.Path
@@ -215,10 +216,11 @@ object EhDB {
         quickSearch.id = dao.insert(quickSearch)
     }
 
-    internal suspend fun saveQuickSearch(item: QuickSearch, previous: QuickSearch?): Long? = db.useWriterConnection { connection ->
+    internal suspend fun saveQuickSearch(item: QuickSearch, previous: QuickSearch?, expected: List<QuickSearch>): Long? = db.useWriterConnection { connection ->
         connection.immediateTransaction {
             val dao = db.quickSearchDao()
             val current = dao.list()
+            if (current != expected) return@immediateTransaction null
             if (previous == null) {
                 dao.insert(item.copy(id = null, position = (current.lastOrNull()?.position ?: -1) + 1))
             } else if (previous in current) {
@@ -231,9 +233,14 @@ object EhDB {
     }
 
     suspend fun deleteQuickSearch(quickSearch: QuickSearch) {
-        val dao = db.quickSearchDao()
-        dao.delete(quickSearch)
-        dao.fill(quickSearch.position)
+        db.useWriterConnection { connection ->
+            connection.immediateTransaction {
+                val dao = db.quickSearchDao()
+                val current = dao.list().firstOrNull { it.id == quickSearch.id && it.sameRecord(quickSearch) } ?: return@immediateTransaction
+                dao.delete(current)
+                dao.fill(current.position)
+            }
+        }
     }
 
     suspend fun updateQuickSearch(quickSearchList: List<QuickSearch>) {
