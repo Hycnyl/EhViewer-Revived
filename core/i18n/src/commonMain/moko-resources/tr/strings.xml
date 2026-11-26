@@ -162,4 +162,13 @@
     <string name="tooltip_close_actions">İşlemleri gizle</string>
     <string name="copied_to_clipboard">Panoya kopyalandı</string>
     <string name="tag_action_search">Ara</string>
+
+    <string name="combined_search">Birleşik arama</string>
+    <string name="combined_builder">Arama oluştur</string>
+    <string name="combined_saved">Kayıtlı aramalar</string>
+    <string name="combined_favorite_tags">Favori etiketler</string>
+    <string name="combined_save">Birleşimi kaydet</string>
+    <string name="combined_run">Şimdi ara</string>
+    <string name="combined_edit">Birleşimi düzenle</string>
+    <string name="combined_find_tags">Etiket ara</string>
 </resources>

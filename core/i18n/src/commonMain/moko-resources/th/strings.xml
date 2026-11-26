@@ -447,4 +447,13 @@
     <string name="tooltip_more_actions">การทำงานเพิ่มเติม</string>
     <string name="tooltip_close_actions">ซ่อนการทำงาน</string>
     <string name="tag_action_search">ค้นหา</string>
+
+    <string name="combined_search">การค้นหาแบบรวม</string>
+    <string name="combined_builder">สร้างชุดการค้นหา</string>
+    <string name="combined_saved">ชุดการค้นหาที่บันทึกไว้</string>
+    <string name="combined_favorite_tags">แท็กโปรด</string>
+    <string name="combined_save">บันทึกชุดการค้นหา</string>
+    <string name="combined_run">ค้นหาทันที</string>
+    <string name="combined_edit">แก้ไขชุดการค้นหา</string>
+    <string name="combined_find_tags">ค้นหาแท็ก</string>
 </resources>

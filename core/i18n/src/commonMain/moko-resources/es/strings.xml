@@ -442,4 +442,13 @@
     <string name="tooltip_more_actions">Más acciones</string>
     <string name="tooltip_close_actions">Ocultar acciones</string>
     <string name="tag_action_search">Buscar</string>
+
+    <string name="combined_search">Búsqueda combinada</string>
+    <string name="combined_builder">Crear búsqueda</string>
+    <string name="combined_saved">Búsquedas guardadas</string>
+    <string name="combined_favorite_tags">Etiquetas favoritas</string>
+    <string name="combined_save">Guardar combinación</string>
+    <string name="combined_run">Buscar ahora</string>
+    <string name="combined_edit">Editar combinación</string>
+    <string name="combined_find_tags">Buscar etiquetas</string>
 </resources>

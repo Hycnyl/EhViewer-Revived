@@ -119,6 +119,7 @@ fun SearchBarScreen(
     localSearch: Boolean = true,
     searchBarOffsetY: () -> Int = { 0 },
     trailingIcon: @Composable () -> Unit = {},
+    searchActions: @Composable () -> Unit = {},
     filter: @Composable (() -> Unit)? = null,
     floatingActionButton: @Composable () -> Unit = {},
     content: @Composable (PaddingValues) -> Unit,
@@ -266,7 +267,9 @@ fun SearchBarScreen(
                         }
                     },
                     trailingIcon = {
-                        if (expanded) {
+                        Row {
+                            if (expanded) {
+                                searchActions()
                             AnimatedContent(targetState = searchFieldState.text.isNotEmpty()) { hasText ->
                                 if (hasText) {
                                     IconTooltip(stringResource(R.string.tooltip_clear)) {
@@ -282,9 +285,9 @@ fun SearchBarScreen(
                                     }
                                 }
                             }
-                        } else {
-                            Row {
+                            } else {
                                 trailingIcon()
+                                searchActions()
                             }
                         }
                     },

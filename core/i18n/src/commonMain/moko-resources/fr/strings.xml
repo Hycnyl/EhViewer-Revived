@@ -466,4 +466,13 @@
     <string name="tooltip_more_actions">Plus d\'actions</string>
     <string name="tooltip_close_actions">Masquer les actions</string>
     <string name="tag_action_search">Rechercher</string>
+
+    <string name="combined_search">Recherche combinée</string>
+    <string name="combined_builder">Composer une recherche</string>
+    <string name="combined_saved">Recherches enregistrées</string>
+    <string name="combined_favorite_tags">Tags favoris</string>
+    <string name="combined_save">Enregistrer la combinaison</string>
+    <string name="combined_run">Rechercher</string>
+    <string name="combined_edit">Modifier la combinaison</string>
+    <string name="combined_find_tags">Trouver des tags</string>
 </resources>

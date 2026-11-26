@@ -266,4 +266,13 @@
     <string name="tooltip_more_actions">Flere handlinger</string>
     <string name="tooltip_close_actions">Skjul handlinger</string>
     <string name="tag_action_search">Søk</string>
+
+    <string name="combined_search">Kombinert søk</string>
+    <string name="combined_builder">Sett sammen et søk</string>
+    <string name="combined_saved">Lagrede søk</string>
+    <string name="combined_favorite_tags">Favorittmerker</string>
+    <string name="combined_save">Lagre kombinasjon</string>
+    <string name="combined_run">Søk nå</string>
+    <string name="combined_edit">Rediger kombinasjon</string>
+    <string name="combined_find_tags">Finn merker</string>
 </resources>

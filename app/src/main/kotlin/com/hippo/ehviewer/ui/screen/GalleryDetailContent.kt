@@ -115,6 +115,8 @@ import com.hippo.ehviewer.client.exception.NoHathClientException
 import com.hippo.ehviewer.coil.PrefetchAround
 import com.hippo.ehviewer.coil.justDownload
 import com.hippo.ehviewer.collectAsState
+import com.hippo.ehviewer.search.TagFavorites
+import com.hippo.ehviewer.search.TagIdentity
 import com.hippo.ehviewer.download.DownloadManager
 import com.hippo.ehviewer.download.DownloadService
 import com.hippo.ehviewer.ktbuilder.executeIn
@@ -138,6 +140,7 @@ import com.hippo.ehviewer.ui.modifyFavorites
 import com.hippo.ehviewer.ui.navToReader
 import com.hippo.ehviewer.ui.openBrowser
 import com.hippo.ehviewer.ui.startDownload
+import com.hippo.ehviewer.ui.search.toggleFavoriteTag
 import com.hippo.ehviewer.ui.tools.DialogState
 import com.hippo.ehviewer.ui.tools.awaitConfirmationOrCancel
 import com.hippo.ehviewer.ui.tools.awaitResult
@@ -719,6 +722,9 @@ fun BelowHeader(galleryDetail: GalleryDetail, voteTag: VoteTag) {
             Text(text = stringResource(id = R.string.no_tags))
         }
     } else {
+        val favorites by TagFavorites.entries.collectAsState(emptyList())
+        val favoriteLabel = stringResource(R.string.combined_favorite_tag)
+        val unfavoriteLabel = stringResource(R.string.combined_unfavorite_tag)
         val searchLabel = stringResource(R.string.tag_action_search)
         val copy = stringResource(android.R.string.copy)
         val copyTrans = stringResource(R.string.copy_trans)
@@ -738,6 +744,10 @@ fun BelowHeader(galleryDetail: GalleryDetail, voteTag: VoteTag) {
                     awaitSelectAction {
                         onSelect({ TagActionLabel(searchLabel, tag) }) {
                             withUIContext { search(tag) }
+                        }
+                        TagIdentity.from(tag)?.let { identity ->
+                            val label = if (favorites.any { it.tag == identity }) unfavoriteLabel else favoriteLabel
+                            onSelect(label) { toggleFavoriteTag(ctx, identity) }
                         }
                         onSelect({ TagActionLabel(copy, tag) }) {
                             addTextToClipboard(tag)

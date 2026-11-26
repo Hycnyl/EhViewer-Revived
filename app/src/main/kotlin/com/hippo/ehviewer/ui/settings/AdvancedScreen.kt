@@ -47,7 +47,9 @@ import com.hippo.ehviewer.ktor.isCronetAvailable
 import com.hippo.ehviewer.ui.Screen
 import com.hippo.ehviewer.ui.destinations.ReadCacheGalleryScreenDestination
 import com.hippo.ehviewer.ui.main.NavigationIcon
+import com.hippo.ehviewer.ui.search.resolveCombinedSearchConflict
 import com.hippo.ehviewer.ui.showRestartDialog
+import com.hippo.ehviewer.ui.tools.DialogState
 import com.hippo.ehviewer.util.AdsPlaceholderFile
 import com.hippo.ehviewer.util.AppConfig
 import com.hippo.ehviewer.util.CrashHandler
@@ -95,10 +97,10 @@ private suspend fun exportDatabase(uri: Uri) {
     EhDB.exportDB(uri.toOkioPath())
 }
 
-context(ctx: Context)
+context(ctx: Context, _: DialogState)
 private suspend fun importDatabase(uri: Uri) {
     ctx.grantUriPermission(BuildConfig.APPLICATION_ID, uri, Intent.FLAG_GRANT_READ_URI_PERMISSION)
-    EhDB.importDB(uri.toOkioPath())
+    EhDB.importDB(uri.toOkioPath()) { resolveCombinedSearchConflict(it) }
 }
 
 @Destination<RootGraph>
@@ -241,7 +243,7 @@ fun AnimatedVisibilityScope.AdvancedScreen(navigator: DestinationsNavigator) = S
                 key = "application/octet-stream",
             ) { uri ->
                 uri?.let {
-                    runCatching {
+                    runSuspendCatching {
                         importDatabase(uri)
                         launchSnackbar(importSucceed)
                     }.onFailure {

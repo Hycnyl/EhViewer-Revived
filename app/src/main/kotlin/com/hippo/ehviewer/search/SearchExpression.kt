@@ -24,6 +24,7 @@ private val namespaceNames = buildMap {
 internal fun searchNamespace(value: String): TagNamespace? = namespaceNames[value.lowercase(Locale.ROOT)]
 
 @Serializable
+@ConsistentCopyVisibility
 internal data class TagIdentity private constructor(val namespace: String, val name: String) {
     val qualifiedName: String get() = "$namespace:$name"
     val searchable: Boolean get() = namespace != TagNamespace.Temp.value
