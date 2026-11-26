@@ -5,12 +5,16 @@ import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Update
+import kotlinx.coroutines.flow.Flow
 import com.ehviewer.core.database.model.QuickSearch
 
 @Dao
 interface QuickSearchDao {
     @Query("SELECT * FROM QUICK_SEARCH ORDER BY POSITION")
     suspend fun list(): List<QuickSearch>
+
+    @Query("SELECT * FROM QUICK_SEARCH ORDER BY POSITION")
+    fun observe(): Flow<List<QuickSearch>>
 
     @Query("SELECT * FROM QUICK_SEARCH ORDER BY POSITION LIMIT :limit OFFSET :offset")
     suspend fun list(offset: Int, limit: Int): List<QuickSearch>
