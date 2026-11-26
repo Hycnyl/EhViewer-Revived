@@ -270,21 +270,21 @@ fun SearchBarScreen(
                         Row {
                             if (expanded) {
                                 searchActions()
-                            AnimatedContent(targetState = searchFieldState.text.isNotEmpty()) { hasText ->
-                                if (hasText) {
-                                    IconTooltip(stringResource(R.string.tooltip_clear)) {
-                                        IconButton(onClick = { searchFieldState.clearText() }, shapes = IconButtonDefaults.shapes()) {
-                                            Icon(Icons.Default.Close, contentDescription = stringResource(R.string.tooltip_clear))
+                                AnimatedContent(targetState = searchFieldState.text.isNotEmpty()) { hasText ->
+                                    if (hasText) {
+                                        IconTooltip(stringResource(R.string.tooltip_clear)) {
+                                            IconButton(onClick = { searchFieldState.clearText() }, shapes = IconButtonDefaults.shapes()) {
+                                                Icon(Icons.Default.Close, contentDescription = stringResource(R.string.tooltip_clear))
+                                            }
                                         }
-                                    }
-                                } else {
-                                    IconTooltip(stringResource(R.string.search_image)) {
-                                        IconButton(onClick = { navigate(ImageSearchScreenDestination) }, shapes = IconButtonDefaults.shapes()) {
-                                            Icon(Icons.Default.ImageSearch, contentDescription = stringResource(R.string.search_image))
+                                    } else {
+                                        IconTooltip(stringResource(R.string.search_image)) {
+                                            IconButton(onClick = { navigate(ImageSearchScreenDestination) }, shapes = IconButtonDefaults.shapes()) {
+                                                Icon(Icons.Default.ImageSearch, contentDescription = stringResource(R.string.search_image))
+                                            }
                                         }
                                     }
                                 }
-                            }
                             } else {
                                 trailingIcon()
                                 searchActions()

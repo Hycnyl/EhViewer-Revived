@@ -87,20 +87,18 @@ object EhTagDatabase : CoroutineScope {
         }
     }
 
-    internal fun catalogMatches(filter: TagCatalogQuery, limit: Int): List<TagIdentity> {
-        return tagGroups.asSequence().filter { (prefix, _) ->
-            prefix != NAMESPACE_PREFIX && (filter.namespace == null || prefix == filter.namespace.prefix)
-        }.flatMap { (prefix, tags) ->
-            val candidates = if (filter.text.isEmpty()) {
-                tags.keys.asSequence().map { Tag(it, null, 0f) }
-            } else {
-                lookup(tags, filter.text, translate = true)
-            }
-            candidates.mapNotNull { result ->
-                TagIdentity.from(prefix, result.tag)?.let { it to (result.score / (nsScore[prefix] ?: 1f)) }
-            }
-        }.sortedBy { it.second }.take(limit).map { it.first }.toList()
-    }
+    internal fun catalogMatches(filter: TagCatalogQuery, limit: Int): List<TagIdentity> = tagGroups.asSequence().filter { (prefix, _) ->
+        prefix != NAMESPACE_PREFIX && (filter.namespace == null || prefix == filter.namespace.prefix)
+    }.flatMap { (prefix, tags) ->
+        val candidates = if (filter.text.isEmpty()) {
+            tags.keys.asSequence().map { Tag(it, null, 0f) }
+        } else {
+            lookup(tags, filter.text, translate = true)
+        }
+        candidates.mapNotNull { result ->
+            TagIdentity.from(prefix, result.tag)?.let { it to (result.score / (nsScore[prefix] ?: 1f)) }
+        }
+    }.sortedBy { it.second }.take(limit).map { it.first }.toList()
 
     // Copied from https://github.com/EhTagTranslation/EhSyringe/blob/c0cf88da04081072492829673aca34380b14dae6/src/plugin/suggest.ts#L37
     // TODO: Optimize

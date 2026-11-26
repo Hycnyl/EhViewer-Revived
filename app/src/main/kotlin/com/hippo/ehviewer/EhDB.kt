@@ -215,21 +215,20 @@ object EhDB {
         quickSearch.id = dao.insert(quickSearch)
     }
 
-    internal suspend fun saveQuickSearch(item: QuickSearch, previous: QuickSearch?): Long? =
-        db.useWriterConnection { connection ->
-            connection.immediateTransaction {
-                val dao = db.quickSearchDao()
-                val current = dao.list()
-                if (previous == null) {
-                    dao.insert(item.copy(id = null, position = (current.lastOrNull()?.position ?: -1) + 1))
-                } else if (previous in current) {
-                    dao.update(listOf(item.copy(id = previous.id, position = previous.position)))
-                    previous.id
-                } else {
-                    null
-                }
+    internal suspend fun saveQuickSearch(item: QuickSearch, previous: QuickSearch?): Long? = db.useWriterConnection { connection ->
+        connection.immediateTransaction {
+            val dao = db.quickSearchDao()
+            val current = dao.list()
+            if (previous == null) {
+                dao.insert(item.copy(id = null, position = (current.lastOrNull()?.position ?: -1) + 1))
+            } else if (previous in current) {
+                dao.update(listOf(item.copy(id = previous.id, position = previous.position)))
+                previous.id
+            } else {
+                null
             }
         }
+    }
 
     suspend fun deleteQuickSearch(quickSearch: QuickSearch) {
         val dao = db.quickSearchDao()

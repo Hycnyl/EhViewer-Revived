@@ -32,11 +32,9 @@ import com.hippo.ehviewer.ui.tools.DialogState
 import com.hippo.ehviewer.ui.tools.dialog
 import kotlin.coroutines.resume
 
-internal fun TagIdentity.displayName(translate: Boolean) =
-    if (translate) EhTagDatabase.translation(this) ?: name else name
+internal fun TagIdentity.displayName(translate: Boolean) = if (translate) EhTagDatabase.translation(this) ?: name else name
 
-internal fun namespaceDisplayName(namespace: String, translate: Boolean) =
-    if (translate) EhTagDatabase.getTranslation(tag = namespace) ?: namespace else namespace
+internal fun namespaceDisplayName(namespace: String, translate: Boolean) = if (translate) EhTagDatabase.getTranslation(tag = namespace) ?: namespace else namespace
 
 internal fun SearchTerm.displayLabel(context: Context, translate: Boolean): String {
     val localized = if (translate) tag?.let(EhTagDatabase::translation) else null
@@ -45,15 +43,14 @@ internal fun SearchTerm.displayLabel(context: Context, translate: Boolean): Stri
     return if (match.weak) context.getString(R.string.combined_weak_label, label) else label
 }
 
-internal fun SearchExpression.describe(context: Context, translate: Boolean): String =
-    describe(
-        joiner = " · ",
-        describeTerm = { it.displayLabel(context, translate) },
-        alternatives = {
-            context.getString(R.string.combined_any_summary, it.joinToString(" " + context.getString(R.string.combined_or_joiner).trim() + " "))
-        },
-        exclusion = { context.getString(R.string.combined_excluded_summary, it) },
-    )
+internal fun SearchExpression.describe(context: Context, translate: Boolean): String = describe(
+    joiner = " · ",
+    describeTerm = { it.displayLabel(context, translate) },
+    alternatives = {
+        context.getString(R.string.combined_any_summary, it.joinToString(" " + context.getString(R.string.combined_or_joiner).trim() + " "))
+    },
+    exclusion = { context.getString(R.string.combined_excluded_summary, it) },
+)
 
 internal fun QuickSearch.expressionForDisplay() = ListUrlBuilder(this).expression().text.ifBlank { keyword.orEmpty() }
 

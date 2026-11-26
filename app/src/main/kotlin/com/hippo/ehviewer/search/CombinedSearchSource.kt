@@ -87,18 +87,16 @@ private fun SearchExpression.comparableTerms() = terms.map { term ->
     canonical.lowercase(Locale.ROOT)
 }
 
-internal fun QuickSearch.sameSearch(other: QuickSearch): Boolean =
-    mode == other.mode &&
-        category == other.category &&
-        advanceSearch.coerceAtLeast(0) == other.advanceSearch.coerceAtLeast(0) &&
-        minRating.coerceAtLeast(0) == other.minRating.coerceAtLeast(0) &&
-        pageFrom.coerceAtLeast(0) == other.pageFrom.coerceAtLeast(0) &&
-        pageTo.coerceAtLeast(0) == other.pageTo.coerceAtLeast(0) &&
-        if (mode == MODE_NORMAL || mode == MODE_SUBSCRIPTION) {
-            SearchExpression.parse(keyword.orEmpty()).comparableTerms() == SearchExpression.parse(other.keyword.orEmpty()).comparableTerms()
-        } else {
-            keyword.orEmpty() == other.keyword.orEmpty()
-        }
+internal fun QuickSearch.sameSearch(other: QuickSearch): Boolean = mode == other.mode &&
+    category == other.category &&
+    advanceSearch.coerceAtLeast(0) == other.advanceSearch.coerceAtLeast(0) &&
+    minRating.coerceAtLeast(0) == other.minRating.coerceAtLeast(0) &&
+    pageFrom.coerceAtLeast(0) == other.pageFrom.coerceAtLeast(0) &&
+    pageTo.coerceAtLeast(0) == other.pageTo.coerceAtLeast(0) &&
+    if (mode == MODE_NORMAL || mode == MODE_SUBSCRIPTION) {
+        SearchExpression.parse(keyword.orEmpty()).comparableTerms() == SearchExpression.parse(other.keyword.orEmpty()).comparableTerms()
+    } else {
+        keyword.orEmpty() == other.keyword.orEmpty()
+    }
 
-internal fun QuickSearch.sameRecord(other: QuickSearch): Boolean =
-    sameSearch(other) && SearchName.of(this) == SearchName.of(other)
+internal fun QuickSearch.sameRecord(other: QuickSearch): Boolean = sameSearch(other) && SearchName.of(this) == SearchName.of(other)

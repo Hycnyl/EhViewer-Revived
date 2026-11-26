@@ -131,7 +131,7 @@ internal data class SearchExpression(val terms: List<SearchTerm> = emptyList()) 
     val text: String get() = terms.joinToString(" ") { it.raw }
 
     fun validate(allowFavoriteNotes: Boolean = false): List<SearchProblem> = buildList {
-        if (text.codePointCount(0, text.length) > MaxSearchCharacters) add(SearchProblem.TooLong)
+        if (text.codePointCount(0, text.length) > MAX_SEARCH_CHARACTERS) add(SearchProblem.TooLong)
         if (terms.any { it.hasUnclosedQuote }) add(SearchProblem.UnclosedQuotes)
         if (terms.any { it.hasEmptyPayload }) add(SearchProblem.EmptyTerm)
         if (terms.any { it.hasInvalidOperator }) add(SearchProblem.InvalidOperators)
@@ -182,7 +182,7 @@ internal data class SearchExpression(val terms: List<SearchTerm> = emptyList()) 
     }
 
     companion object {
-        const val MaxSearchCharacters = 200
+        const val MAX_SEARCH_CHARACTERS = 200
         private val noteQualifiers = setOf("comment", "favnote")
         private val uncountedQualifiers = noteQualifiers + setOf("uploader", "uploaduid", "gid")
 

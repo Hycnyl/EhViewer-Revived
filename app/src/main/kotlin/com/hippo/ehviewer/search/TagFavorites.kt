@@ -14,8 +14,8 @@ internal data class FavoriteTag(val tag: TagIdentity, val addedAtMillis: Long)
 
 @Serializable
 private data class TagFavoriteBackup(
-    val format: String = FavoriteTagFile.Format,
-    val version: Int = FavoriteTagFile.Version,
+    val format: String = FavoriteTagFile.FORMAT,
+    val version: Int = FavoriteTagFile.VERSION,
     val tags: List<FavoriteTag>,
     val complete: Boolean = true,
 )
@@ -23,15 +23,15 @@ private data class TagFavoriteBackup(
 internal data class TagImportResult(val added: Int, val existing: Int, val invalid: Int)
 
 internal object FavoriteTagFile {
-    const val Format = "ehviewer-revived-tag-favorites"
-    const val Version = 1
+    const val FORMAT = "ehviewer-revived-tag-favorites"
+    const val VERSION = 1
     private val json = Json { encodeDefaults = true }
 
     fun encode(tags: List<FavoriteTag>): String = json.encodeToString(TagFavoriteBackup(tags = tags))
 
     fun decode(text: String): Pair<List<FavoriteTag>, Int> {
         val root = json.parseToJsonElement(text) as? JsonObject ?: error("Expected tag favorites object")
-        require(root["format"] == JsonPrimitive(Format) && root["version"] == JsonPrimitive(Version) && root["complete"] == JsonPrimitive(true))
+        require(root["format"] == JsonPrimitive(FORMAT) && root["version"] == JsonPrimitive(VERSION) && root["complete"] == JsonPrimitive(true))
         val records = root["tags"] as? JsonArray ?: error("Expected tag favorites array")
         val valid = records.mapNotNull { element ->
             runCatching {
