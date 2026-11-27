@@ -109,3 +109,4 @@ UI 模块保留 `allWarningsAsErrors`，仅用 `-Xwarning-level=DEPRECATION:warn
 - 已完成 [Android 组合搜索与备份验收](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/45932521961)。覆盖两个构建器入口、编辑/另存保留旧筛选、相同组合定位、剪贴板、词库及跨重启收藏、DocumentsUI 的 JSON 导入/导出和重复/异常数量、以及 1.17.27 ↔ 1.17.28 实际 SQLite 双向互导。应用内两站 URL 与订阅转换校验通过，E-Hentai 访客请求 HTTP 200；ExHentai 访客请求遇到 302 循环，登录态结果未测。发布源码固定为 `b984be9adec9a5b1089e0a0ef19cc101e8a68179`，等待正式构建完成后签名。
 - 正式构建中的 Baseline/Startup Profile 已从本次源码重新生成，通过 Pager 和 Webtoon 覆盖检查。正在构建五个 ABI 包，取得精确 Artifact ID 与摘要后签名。
 - [正式五包构建](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/45929650809) 已通过。未签名 Artifact ID 为 `15169732344`，摘要已固定，交由仓库 Secrets 签名并启动标准发布验证。
+- [五包签名](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/45934531015) 已通过，正式证书与 V2/V3 已核对。草稿已交给 [正式发布流程](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/45934650007)，正验证三种 API 的安装、覆盖升级与公开下载字节。
