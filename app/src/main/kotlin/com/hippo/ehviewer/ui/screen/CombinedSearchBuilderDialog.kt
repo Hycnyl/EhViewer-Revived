@@ -52,7 +52,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
@@ -211,15 +210,6 @@ internal fun CombinedSearchBuilderDialog(
         properties = DialogProperties(usePlatformDefaultWidth = false, decorFitsSystemWindows = false),
     ) {
         val focusManager = LocalFocusManager.current
-        val pinExpression = LocalConfiguration.current.screenHeightDp >= 540 && LocalDensity.current.fontScale <= 1.4f
-        val expressionEditor: @Composable () -> Unit = {
-            SearchExpressionEditor(
-                raw = raw,
-                onChange = { raw = it },
-                expression = query.text,
-                problem = problem,
-            )
-        }
         BoxWithConstraints(Modifier.safeDrawingPadding().padding(horizontal = 16.dp, vertical = 12.dp)) {
             val availableHeight = maxHeight
             Surface(
@@ -228,7 +218,12 @@ internal fun CombinedSearchBuilderDialog(
                 color = MaterialTheme.colorScheme.surfaceContainerHigh,
             ) {
                 Column {
-                    if (pinExpression) expressionEditor()
+                    SearchExpressionEditor(
+                        raw = raw,
+                        onChange = { raw = it },
+                        expression = query.text,
+                        problem = problem,
+                    )
                     CompactTagPicker(
                         favorites = favorites,
                         selected = selectedTags,
@@ -242,7 +237,6 @@ internal fun CombinedSearchBuilderDialog(
                         },
                         modifier = Modifier.weight(1f).fillMaxWidth(),
                     ) {
-                        if (!pinExpression) item("expression") { expressionEditor() }
                         item("filters") {
                             with(dialogs) {
                                 with(scope) {
@@ -328,9 +322,10 @@ internal fun CombinedSearchBuilderDialog(
 context(_: Context)
 private fun SearchExpressionEditor(raw: String, onChange: (String) -> Unit, expression: String, @StringRes problem: Int?) {
     val context = LocalContext.current
-    Column(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)) {
+    val compact = LocalConfiguration.current.screenHeightDp < 540
+    val title = stringResource(R.string.combined_expression)
+    val actions: @Composable () -> Unit = {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Text(stringResource(R.string.combined_expression), Modifier.weight(1f), style = MaterialTheme.typography.titleSmall)
             val copy = stringResource(R.string.combined_copy_expression)
             IconTooltip(copy) {
                 IconButton(onClick = { addTextToClipboard(expression) }, enabled = expression.isNotBlank(), shapes = IconButtonDefaults.shapes()) {
@@ -350,12 +345,22 @@ private fun SearchExpressionEditor(raw: String, onChange: (String) -> Unit, expr
                 }
             }
         }
+    }
+    Column(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = if (compact) 4.dp else 8.dp)) {
+        if (!compact) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(title, Modifier.weight(1f), style = MaterialTheme.typography.titleSmall)
+                actions()
+            }
+        }
         OutlinedTextField(
             value = raw,
             onValueChange = onChange,
+            label = if (compact) ({ Text(title) }) else null,
             placeholder = { Text(stringResource(R.string.combined_expression_hint)) },
+            trailingIcon = actions.takeIf { compact },
             modifier = Modifier.fillMaxWidth(),
-            maxLines = 3,
+            maxLines = if (compact) 2 else 3,
             keyboardOptions = KeyboardOptions(autoCorrectEnabled = false),
             isError = problem != null,
         )
