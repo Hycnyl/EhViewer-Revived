@@ -25,6 +25,7 @@ import com.hippo.ehviewer.search.SearchExpression
 import com.hippo.ehviewer.search.SearchName
 import com.hippo.ehviewer.search.SearchTerm
 import com.hippo.ehviewer.search.TagIdentity
+import com.hippo.ehviewer.search.automaticallyNamed
 import com.hippo.ehviewer.search.expression
 import com.hippo.ehviewer.ui.main.AdvanceTable
 import com.hippo.ehviewer.ui.main.searchCategoryOptions
@@ -54,7 +55,14 @@ internal fun SearchExpression.describe(context: Context, translate: Boolean): St
 
 internal fun QuickSearch.expressionForDisplay() = ListUrlBuilder(this).expression().text.ifBlank { keyword.orEmpty() }
 
-internal fun QuickSearch.displayBaseName(context: Context) = SearchName.of(this).label.ifBlank { context.getString(R.string.combined_all_galleries) }
+internal fun QuickSearch.displayBaseName(context: Context): String {
+    val label = SearchName.of(this).label
+    return if (label.isBlank() || (keyword.isNullOrBlank() && automaticallyNamed)) {
+        context.getString(R.string.combined_all_galleries)
+    } else {
+        label
+    }
+}
 
 @Composable
 internal fun searchParametersLabel(item: QuickSearch, showDefaults: Boolean = false): String {
