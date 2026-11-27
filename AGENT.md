@@ -108,3 +108,5 @@ UI 模块保留 `allWarningsAsErrors`，仅用 `-Xwarning-level=DEPRECATION:warn
 - [首次横屏交互](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/45948307192) 确认条件保留，但表达式会被滚动位置隐藏。修正为横竖屏持续置顶，短屏把复制、粘贴收进输入框。按修正后的源码重新验证和构建。
 - 修正后的 [源码专项检查](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/45948736362) 和 [Android 界面验证](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/45948766388) 通过。覆盖打开前后入口、全选类别、横屏固定表达式、条件按钮与紧凑标签、重名提示、保存、另存、快捷重命名保留旧筛选和位置。
 - 最终发布源码固定为 `aee36d96720f197ce48cd8353510100c355ba7d5`。等待 [五包标准构建](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/45948736448) 完成。
+- 最终五包构建已通过。本版重新生成的 Baseline Profile 通过 Pager 与 Webtoon 覆盖检查。构建产物 `15178191068` 的来源与摘要已核对。
+- 补测使用同一候选 APK，覆盖点「快速搜索」后的导航和简中标签显示。已补齐模拟器的游客入口，等待结果后签名。
