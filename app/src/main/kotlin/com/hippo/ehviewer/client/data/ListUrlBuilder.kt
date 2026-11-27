@@ -23,6 +23,7 @@ import com.hippo.ehviewer.client.EhUtils
 import com.hippo.ehviewer.client.addQueryParameter
 import com.hippo.ehviewer.client.addQueryParameterIfNotBlank
 import com.hippo.ehviewer.client.ehUrl
+import com.hippo.ehviewer.search.SearchName
 import com.hippo.ehviewer.ui.main.AdvanceTable
 import io.ktor.http.Parameters
 import kotlinx.serialization.Serializable
@@ -83,7 +84,7 @@ data class ListUrlBuilder(
         minRating = q.minRating,
         pageFrom = q.pageFrom,
         pageTo = q.pageTo,
-        next = q.name.substringAfterLast('@', "").ifEmpty { null },
+        next = SearchName.of(q).afterGid?.toString(),
     )
 
     fun toQuickSearch(name: String) = QuickSearch(

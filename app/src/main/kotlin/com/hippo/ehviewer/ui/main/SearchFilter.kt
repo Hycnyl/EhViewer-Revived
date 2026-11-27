@@ -47,7 +47,7 @@ import com.hippo.ehviewer.ui.tools.DialogState
 import com.hippo.ehviewer.ui.tools.awaitResult
 import kotlinx.coroutines.CoroutineScope
 
-private val categoryTable = arrayOf(
+internal val searchCategoryOptions = arrayOf(
     EhUtils.DOUJINSHI to R.string.doujinshi,
     EhUtils.MANGA to R.string.manga,
     EhUtils.ARTIST_CG to R.string.artist_cg,
@@ -73,7 +73,7 @@ fun SearchFilter(
 ) = Column(modifier) {
     val animateItems by Settings.animateItems.collectAsState()
     fun isCategoryChecked(bit: Int) = category and bit != 0
-    val categories = remember(category) { categoryTable.sortedBy { !isCategoryChecked(it.first) } }
+    val categories = remember(category) { searchCategoryOptions.sortedBy { !isCategoryChecked(it.first) } }
     LazyRow(
         contentPadding = PaddingValues(start = 8.dp, top = 8.dp, end = 16.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -96,8 +96,9 @@ fun SearchFilter(
     ) {
         val any = stringResource(id = R.string.any)
         val languageStr = stringResource(id = R.string.key_language)
-        val languages = remember {
-            val translatable = EhTagDatabase.initialized && EhTagDatabase.translatable
+        val translate by Settings.showTagTranslations.collectAsState()
+        val translatable = translate && EhTagDatabase.initialized && EhTagDatabase.translatable
+        val languages = remember(any, translatable, EhTagDatabase.revision) {
             List(S_LANG_TAGS.size + 1) { i ->
                 if (i == 0) {
                     any
@@ -155,7 +156,8 @@ fun SearchFilter(
                         invalidator = { (min, max) ->
                             if (max != 0) {
                                 if (min != 0) {
-                                    ensure(min <= (max / 2).coerceAtMost(max - 20)) { pageErr2 }
+                                    ensure(max >= 10) { pageErr1 }
+                                    ensure(min * 5 <= max * 4 && max - min >= 20) { pageErr2 }
                                 } else {
                                     ensure(max >= 10) { pageErr1 }
                                 }

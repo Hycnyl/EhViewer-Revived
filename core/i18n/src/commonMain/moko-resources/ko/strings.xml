@@ -436,4 +436,13 @@
     <string name="tooltip_more_actions">작업 더보기</string>
     <string name="tooltip_close_actions">작업 접기</string>
     <string name="tag_action_search">검색</string>
+
+    <string name="combined_search">조합 검색</string>
+    <string name="combined_builder">검색 조합 만들기</string>
+    <string name="combined_saved">저장한 검색 조합</string>
+    <string name="combined_favorite_tags">즐겨찾는 태그</string>
+    <string name="combined_save">조합 저장</string>
+    <string name="combined_run">빠른 검색</string>
+    <string name="combined_edit">검색 조합 편집</string>
+    <string name="combined_find_tags">태그 검색</string>
 </resources>

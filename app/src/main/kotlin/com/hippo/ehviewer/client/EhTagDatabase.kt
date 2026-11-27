@@ -17,6 +17,7 @@ package com.hippo.ehviewer.client
 
 import android.content.Context
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import arrow.core.Either
@@ -27,6 +28,9 @@ import com.ehviewer.core.model.TagNamespace
 import com.ehviewer.core.util.logcat
 import com.hippo.ehviewer.EhApplication.Companion.ktorClient
 import com.hippo.ehviewer.R
+import com.hippo.ehviewer.search.TagCatalogQuery
+import com.hippo.ehviewer.search.TagIdentity
+import com.hippo.ehviewer.search.searchNamespace
 import com.hippo.ehviewer.util.AppConfig
 import com.hippo.ehviewer.util.bodyAsUtf8Text
 import com.hippo.ehviewer.util.ensureSuccess
@@ -59,11 +63,42 @@ object EhTagDatabase : CoroutineScope {
         "tag:",
         "weak:",
     )
-    private lateinit var tagGroups: Map<String, Map<String, String>>
+    private var tagGroups by mutableStateOf(emptyMap<String, Map<String, String>>())
     private val updateLock = Mutex()
     var initialized by mutableStateOf(false)
+        private set
+    var revision by mutableIntStateOf(0)
+        private set
 
     fun getTranslation(prefix: String? = NAMESPACE_PREFIX, tag: String?): String? = tagGroups[prefix]?.get(tag)?.trim()?.ifEmpty { null }
+
+    internal fun translation(tag: TagIdentity): String? = getTranslation(searchNamespace(tag.namespace)?.prefix, tag.name)
+
+    internal fun catalogQuery(rawQuery: String): TagCatalogQuery {
+        val query = rawQuery.trim().replace('_', ' ')
+        val head = query.substringBefore(':').trim()
+        val namespace = searchNamespace(head)
+            ?: tagGroups[NAMESPACE_PREFIX]?.entries?.firstOrNull { it.value.trim().equals(head, ignoreCase = true) }
+                ?.let { searchNamespace(it.key) }
+        return if (namespace != null && (':' in query || head.length > 2 || head.any { it.code > 127 })) {
+            TagCatalogQuery(namespace, query.substringAfter(':', "").trim())
+        } else {
+            TagCatalogQuery(null, query)
+        }
+    }
+
+    internal fun catalogMatches(filter: TagCatalogQuery, limit: Int): List<TagIdentity> = tagGroups.asSequence().filter { (prefix, _) ->
+        prefix != NAMESPACE_PREFIX && (filter.namespace == null || prefix == filter.namespace.prefix)
+    }.flatMap { (prefix, tags) ->
+        val candidates = if (filter.text.isEmpty()) {
+            tags.keys.asSequence().map { Tag(it, null, 0f) }
+        } else {
+            lookup(tags, filter.text, translate = true)
+        }
+        candidates.mapNotNull { result ->
+            TagIdentity.from(prefix, result.tag)?.let { it to (result.score / (nsScore[prefix] ?: 1f)) }
+        }
+    }.sortedBy { it.second }.map { it.first }.distinct().take(limit).toList()
 
     // Copied from https://github.com/EhTagTranslation/EhSyringe/blob/c0cf88da04081072492829673aca34380b14dae6/src/plugin/suggest.ts#L37
     // TODO: Optimize
@@ -91,7 +126,7 @@ object EhTagDatabase : CoroutineScope {
         val prefix = rawKeyword.dropLast(keyword.length)
         val ns = keyword.substringBefore(':')
         val tag = keyword.drop(ns.length + 1)
-        val nsPrefix = TagNamespace.from(ns)?.prefix ?: ns
+        val nsPrefix = searchNamespace(ns)?.prefix ?: ns
         val tags = tagGroups[nsPrefix.takeIf { tag.isNotEmpty() && it != NAMESPACE_PREFIX }]
         return if (tags != null) {
             lookup(tags, tag, translate).map { it.copy(tag = "$prefix$nsPrefix:${it.tag}") }
@@ -169,6 +204,7 @@ object EhTagDatabase : CoroutineScope {
             Either.catch {
                 tagGroups = dataFile.read(Source::parseAs)
                 initialized = true
+                revision++
 
                 // Perform only one automatic update (on app startup) per day
                 val lastModified = Instant.fromEpochMilliseconds(dataFile.metadataOrNull()!!.lastModifiedAtMillis!!)
@@ -194,6 +230,7 @@ object EhTagDatabase : CoroutineScope {
             prefix to data["data"]!!.jsonObject.mapValues { it.value.jsonObject["name"]!!.jsonPrimitive.content }
         }
         initialized = true
+        revision++
         sha1File.write { writeString(newSha1) }
         dataFile.write { json.encodeToSink(tagGroups, this) }
     }

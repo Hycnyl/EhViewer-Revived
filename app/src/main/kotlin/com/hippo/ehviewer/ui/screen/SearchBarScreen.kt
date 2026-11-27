@@ -119,6 +119,7 @@ fun SearchBarScreen(
     localSearch: Boolean = true,
     searchBarOffsetY: () -> Int = { 0 },
     trailingIcon: @Composable () -> Unit = {},
+    searchActions: @Composable () -> Unit = {},
     filter: @Composable (() -> Unit)? = null,
     floatingActionButton: @Composable () -> Unit = {},
     content: @Composable (PaddingValues) -> Unit,
@@ -266,25 +267,27 @@ fun SearchBarScreen(
                         }
                     },
                     trailingIcon = {
-                        if (expanded) {
-                            AnimatedContent(targetState = searchFieldState.text.isNotEmpty()) { hasText ->
-                                if (hasText) {
-                                    IconTooltip(stringResource(R.string.tooltip_clear)) {
-                                        IconButton(onClick = { searchFieldState.clearText() }, shapes = IconButtonDefaults.shapes()) {
-                                            Icon(Icons.Default.Close, contentDescription = stringResource(R.string.tooltip_clear))
+                        Row {
+                            if (expanded) {
+                                searchActions()
+                                AnimatedContent(targetState = searchFieldState.text.isNotEmpty()) { hasText ->
+                                    if (hasText) {
+                                        IconTooltip(stringResource(R.string.tooltip_clear)) {
+                                            IconButton(onClick = { searchFieldState.clearText() }, shapes = IconButtonDefaults.shapes()) {
+                                                Icon(Icons.Default.Close, contentDescription = stringResource(R.string.tooltip_clear))
+                                            }
                                         }
-                                    }
-                                } else {
-                                    IconTooltip(stringResource(R.string.search_image)) {
-                                        IconButton(onClick = { navigate(ImageSearchScreenDestination) }, shapes = IconButtonDefaults.shapes()) {
-                                            Icon(Icons.Default.ImageSearch, contentDescription = stringResource(R.string.search_image))
+                                    } else {
+                                        IconTooltip(stringResource(R.string.search_image)) {
+                                            IconButton(onClick = { navigate(ImageSearchScreenDestination) }, shapes = IconButtonDefaults.shapes()) {
+                                                Icon(Icons.Default.ImageSearch, contentDescription = stringResource(R.string.search_image))
+                                            }
                                         }
                                     }
                                 }
-                            }
-                        } else {
-                            Row {
+                            } else {
                                 trailingIcon()
+                                searchActions()
                             }
                         }
                     },

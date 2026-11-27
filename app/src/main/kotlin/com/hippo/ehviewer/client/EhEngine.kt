@@ -15,6 +15,7 @@
  */
 package com.hippo.ehviewer.client
 
+import android.os.SystemClock
 import arrow.core.Either
 import arrow.core.left
 import arrow.core.partially2
@@ -106,6 +107,9 @@ private const val MAX_SEQUENTIAL_REQUESTS = 5
 private const val REQUEST_INTERVAL = 5000L
 
 private val versionMetadataMutex = Mutex()
+private val gallerySearchMutex = Mutex()
+private var nextGallerySearchAt = 0L
+private val gallerySearchParameters = setOf("f_search", "f_cats", "advsearch")
 private var versionMetadataRequests = 0
 private var versionMetadataLastRequest: Long? = null
 
@@ -271,7 +275,18 @@ object EhEngine {
         return ehRequest(url, referer).fetchUsingAsText(GalleryPageParser::parse)
     }
 
-    suspend fun getGalleryList(url: String) = ehRequest(url, EhUrl.referer).fetchUsingAsByteBuffer(GalleryListParser::parse)
+    suspend fun getGalleryList(url: String) = run {
+        val target = Url(url)
+        val section = target.segments.firstOrNull { it.isNotEmpty() }
+        if (target.parameters.names().any { it in gallerySearchParameters } || section == "tag" || section == "uploader") {
+            gallerySearchMutex.withLock {
+                val wait = nextGallerySearchAt - SystemClock.elapsedRealtime()
+                if (wait > 0) delay(wait)
+                nextGallerySearchAt = SystemClock.elapsedRealtime() + 3_000
+            }
+        }
+        ehRequest(url, EhUrl.referer).fetchUsingAsByteBuffer(GalleryListParser::parse)
+    }
         .apply { galleryInfoList.fillInfo(url, true) }
         .takeUnless { it.galleryInfoList.isEmpty() } ?: GalleryListParser.emptyResult
 

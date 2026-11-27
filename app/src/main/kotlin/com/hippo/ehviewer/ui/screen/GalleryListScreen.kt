@@ -4,31 +4,20 @@ import android.content.Context
 import android.view.ViewConfiguration
 import androidx.activity.compose.ReportDrawnWhen
 import androidx.compose.animation.AnimatedVisibilityScope
-import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.WindowInsetsSides
-import androidx.compose.foundation.layout.asPaddingValues
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
-import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
 import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.foundation.text.input.setTextAndPlaceCursorAtEnd
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.Help
 import androidx.compose.material.icons.automirrored.filled.LastPage
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.FormatListNumbered
 import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material.icons.filled.Reorder
 import androidx.compose.material.icons.filled.Shuffle
+import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material.icons.outlined.Bookmarks
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -36,23 +25,19 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.SwipeToDismissBoxDefaults
-import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.fork.SwipeToDismissBox
-import androidx.compose.material3.fork.SwipeToDismissBoxState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Stable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
@@ -63,39 +48,32 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.util.fastForEach
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
 import arrow.core.raise.ensure
 import arrow.core.raise.ensureNotNull
-import com.ehviewer.core.database.model.QuickSearch
 import com.ehviewer.core.i18n.R
 import com.ehviewer.core.ui.component.FAB_ANIMATE_TIME
 import com.ehviewer.core.ui.component.FabLayout
-import com.ehviewer.core.ui.component.FastScrollLazyColumn
 import com.ehviewer.core.ui.component.IconTooltip
 import com.ehviewer.core.ui.component.LocalSideSheetState
 import com.ehviewer.core.ui.component.ProvideSideSheetContent
 import com.ehviewer.core.ui.icons.EhIcons
 import com.ehviewer.core.ui.icons.filled.GoTo
-import com.ehviewer.core.ui.util.Await
-import com.ehviewer.core.ui.util.HapticFeedbackType
 import com.ehviewer.core.ui.util.asyncState
-import com.ehviewer.core.ui.util.rememberHapticFeedback
-import com.ehviewer.core.ui.util.thenIf
 import com.ehviewer.core.util.launch
 import com.ehviewer.core.util.launchIO
 import com.ehviewer.core.util.onEachLatest
 import com.ehviewer.core.util.withUIContext
-import com.hippo.ehviewer.EhDB
 import com.hippo.ehviewer.Settings
 import com.hippo.ehviewer.asMutableState
 import com.hippo.ehviewer.client.EhTagDatabase
 import com.hippo.ehviewer.client.EhUtils
 import com.hippo.ehviewer.client.data.ListUrlBuilder
-import com.hippo.ehviewer.client.data.ListUrlBuilder.Companion.MODE_IMAGE_SEARCH
 import com.hippo.ehviewer.client.data.ListUrlBuilder.Companion.MODE_NORMAL
 import com.hippo.ehviewer.client.data.ListUrlBuilder.Companion.MODE_SUBSCRIPTION
 import com.hippo.ehviewer.client.data.ListUrlBuilder.Companion.MODE_TAG
@@ -105,9 +83,12 @@ import com.hippo.ehviewer.client.data.ListUrlBuilder.Companion.MODE_WHATS_HOT
 import com.hippo.ehviewer.client.parser.GalleryDetailUrlParser
 import com.hippo.ehviewer.client.parser.GalleryPageUrlParser
 import com.hippo.ehviewer.collectAsState
+import com.hippo.ehviewer.search.CombinedSearchSource
+import com.hippo.ehviewer.search.automaticallyNamed
 import com.hippo.ehviewer.ui.DrawerHandle
 import com.hippo.ehviewer.ui.Screen
 import com.hippo.ehviewer.ui.awaitSelectDate
+import com.hippo.ehviewer.ui.destinations.CombinedSearchBuilderScreenDestination
 import com.hippo.ehviewer.ui.destinations.ProgressScreenDestination
 import com.hippo.ehviewer.ui.doGalleryInfoAction
 import com.hippo.ehviewer.ui.main.AdvancedSearchOption
@@ -117,10 +98,7 @@ import com.hippo.ehviewer.ui.main.GalleryInfoListItem
 import com.hippo.ehviewer.ui.main.GalleryList
 import com.hippo.ehviewer.ui.main.GalleryViewToggle
 import com.hippo.ehviewer.ui.main.SearchFilter
-import com.hippo.ehviewer.ui.tools.DialogState
-import com.hippo.ehviewer.ui.tools.awaitConfirmationOrCancel
 import com.hippo.ehviewer.ui.tools.awaitInputText
-import com.hippo.ehviewer.ui.tools.awaitInputTextWithCheckBox
 import com.hippo.ehviewer.ui.tools.rememberMutableStateInDataStore
 import com.hippo.ehviewer.util.FavouriteStatusRouter
 import com.ramcosta.composedestinations.annotation.Destination
@@ -131,10 +109,7 @@ import kotlin.math.roundToInt
 import kotlin.random.Random
 import kotlinx.coroutines.delay
 import moe.tarsin.navigate
-import moe.tarsin.snackbar
 import moe.tarsin.string
-import sh.calvin.reorderable.ReorderableItem
-import sh.calvin.reorderable.rememberReorderableLazyListState
 
 @Destination<RootGraph>
 @Composable
@@ -199,14 +174,49 @@ fun AnimatedVisibilityScope.GalleryListScreen(
     val entries = stringArrayResource(id = com.hippo.ehviewer.R.array.toplist_entries)
     val values = stringArrayResource(id = com.hippo.ehviewer.R.array.toplist_values)
     val toplists = remember { entries zip values }
-    val quickSearchName = getSuitableTitleForUrlBuilder(urlBuilder, false)
-    var saveProgress by Settings.qSSaveProgress.asMutableState()
     var languageFilter by Settings.languageFilter.asMutableState()
 
     fun getFirstVisibleItemIndex() = if (listMode == 0) {
         listState.firstVisibleItemIndex
     } else {
         gridState.firstVisibleItemIndex
+    }
+
+    fun firstVisibleGid(): Long? {
+        val index = getFirstVisibleItemIndex()
+        return if (index in 0 until data.itemCount) data.peek(index)?.gid else null
+    }
+
+    fun combinedSearchSource(): CombinedSearchSource {
+        val current = urlBuilder.copy()
+        val filters = if (searchBarExpanded) {
+            ListUrlBuilder(
+                mode = if (current.mode == MODE_SUBSCRIPTION) MODE_SUBSCRIPTION else MODE_NORMAL,
+                category = category,
+                mKeyword = searchFieldState.text.toString(),
+                language = languageFilter,
+                advanceSearch = advancedSearchOption.advanceSearch,
+                minRating = advancedSearchOption.minRating,
+                pageFrom = advancedSearchOption.fromPage,
+                pageTo = advancedSearchOption.toPage,
+            )
+        } else {
+            current.copy()
+        }
+        return CombinedSearchSource(filters, current, firstVisibleGid())
+    }
+
+    val combinedTarget by combinedSearchFocus.collectAsState()
+    val lifecycle by LocalLifecycleOwner.current.lifecycle.currentStateFlow.collectAsState()
+    val sideSheet = LocalSideSheetState.current
+    LaunchedEffect(combinedTarget, lifecycle) {
+        if (combinedTarget != null && lifecycle == Lifecycle.State.RESUMED) {
+            if (isTopList) {
+                navigate(ListUrlBuilder().asDst())
+            } else {
+                sideSheet.open()
+            }
+        }
     }
 
     if (isTopList) {
@@ -234,204 +244,38 @@ fun AnimatedVisibilityScope.GalleryListScreen(
         }
     } else {
         ProvideSideSheetContent { sheetState ->
-            val quickSearchList = remember { mutableStateListOf<QuickSearch>() }
-            LaunchedEffect(Unit) {
-                val list = EhDB.getAllQuickSearch()
-                quickSearchList.addAll(list)
-            }
-            TopAppBar(
-                title = { Text(text = stringResource(id = R.string.quick_search)) },
-                colors = topBarOnDrawerColor(),
-                actions = {
-                    IconTooltip(stringResource(R.string.tooltip_help)) {
-                        IconButton(
-                            onClick = {
-                                launch {
-                                    awaitConfirmationOrCancel(title = R.string.quick_search, showCancelButton = false) {
-                                        Text(text = stringResource(id = R.string.add_quick_search_tip))
-                                    }
-                                }
-                            },
-                            shapes = IconButtonDefaults.shapes(),
-                        ) {
-                            Icon(
-                                imageVector = Icons.AutoMirrored.Default.Help,
-                                contentDescription = stringResource(R.string.tooltip_help),
-                            )
-                        }
-                    }
-                    val invalidImageQuickSearch = stringResource(R.string.image_search_not_quick_search)
-                    val nameEmpty = stringResource(R.string.name_is_empty)
-                    val dupName = stringResource(R.string.duplicate_name)
-                    IconTooltip(stringResource(R.string.add_quick_search_dialog_title)) {
-                        IconButton(
-                            onClick = {
-                                launch {
-                                    if (urlBuilder.mode == MODE_IMAGE_SEARCH) {
-                                        snackbar(invalidImageQuickSearch)
-                                    } else {
-                                        // itemCount == 0 is treated as error, so no need to check here
-                                        val firstItem = data.itemSnapshotList.items[getFirstVisibleItemIndex()]
-                                        val next = firstItem.gid + 1
-                                        quickSearchList.fastForEach { q ->
-                                            if (urlBuilder.equalsQuickSearch(q)) {
-                                                val nextStr = q.name.substringAfterLast('@', "")
-                                                if (nextStr.toLongOrNull() == next) {
-                                                    snackbar(string(R.string.duplicate_quick_search, q.name))
-                                                    return@launch
-                                                }
-                                            }
-                                        }
-                                        awaitInputTextWithCheckBox(
-                                            initial = quickSearchName ?: urlBuilder.keyword.orEmpty(),
-                                            title = R.string.add_quick_search_dialog_title,
-                                            hint = R.string.quick_search,
-                                            checked = saveProgress,
-                                            checkBoxText = R.string.save_progress,
-                                        ) { input, checked ->
-                                            var text = input.trim()
-                                            ensure(text.isNotBlank()) { nameEmpty }
-                                            if (checked) text += "@$next"
-                                            ensure(quickSearchList.none { it.name == text }) { dupName }
-                                            val quickSearch = urlBuilder.toQuickSearch(text)
-                                            quickSearch.position = quickSearchList.size
-                                            // Insert to DB first to update the id
-                                            EhDB.insertQuickSearch(quickSearch)
-                                            quickSearchList.add(quickSearch)
-                                            saveProgress = checked
-                                        }
-                                    }
-                                }
-                            },
-                            shapes = IconButtonDefaults.shapes(),
-                            enabled = data.loadState.isIdle,
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Add,
-                                contentDescription = stringResource(R.string.add_quick_search_dialog_title),
-                            )
-                        }
+            CombinedSearchSheet(
+                current = ::combinedSearchSource,
+                onOpenBuilder = { source ->
+                    launch {
+                        sheetState.close()
+                        navigate(CombinedSearchBuilderScreenDestination(source))
                     }
                 },
-                windowInsets = WindowInsets(),
+                editingSource = { item ->
+                    CombinedSearchSource(
+                        filters = ListUrlBuilder(item).apply {
+                            if (!item.automaticallyNamed) language = languageFilter
+                        },
+                        currentResult = urlBuilder.copy(),
+                        firstVisibleGid = firstVisibleGid(),
+                        savedId = item.id,
+                    )
+                },
+                onRun = { item ->
+                    val builder = ListUrlBuilder(item).apply {
+                        if (!item.automaticallyNamed) language = languageFilter
+                    }
+                    if (urlBuilder.mode == MODE_WHATS_HOT) {
+                        navigate(builder.asDst())
+                    } else {
+                        urlBuilder = builder
+                        data.refresh()
+                        fabHidden = false
+                    }
+                    launch { sheetState.close() }
+                },
             )
-            Box(modifier = Modifier.fillMaxSize()) {
-                val dialogState by rememberUpdatedState(contextOf<DialogState>())
-                val quickSearchListState = rememberLazyListState()
-                val hapticFeedback = rememberHapticFeedback()
-                val reorderableLazyListState = rememberReorderableLazyListState(quickSearchListState) { from, to ->
-                    quickSearchList.apply { add(to.index, removeAt(from.index)) }
-                    hapticFeedback.performHapticFeedback(HapticFeedbackType.MOVE)
-                }
-                var fromIndex by remember { mutableIntStateOf(-1) }
-                FastScrollLazyColumn(
-                    modifier = Modifier.fillMaxSize().padding(horizontal = 4.dp),
-                    state = quickSearchListState,
-                    contentPadding = WindowInsets.systemBars.only(WindowInsetsSides.Bottom).asPaddingValues(),
-                ) {
-                    itemsIndexed(quickSearchList, key = { _, item -> item.id!! }) { itemIndex, item ->
-                        val index by rememberUpdatedState(itemIndex)
-                        ReorderableItem(
-                            reorderableLazyListState,
-                            item.id!!,
-                            animateItemModifier = Modifier.thenIf(animateItems) { animateItem() },
-                        ) { isDragging ->
-                            // Not using rememberSwipeToDismissBoxState to prevent LazyColumn from reusing it
-                            // SQLite may reuse ROWIDs from previously deleted rows so they'll have the same key
-                            val dismissState = remember { SwipeToDismissBoxState(SwipeToDismissBoxValue.Settled, positionalThreshold) }
-                            SwipeToDismissBox(
-                                state = dismissState,
-                                backgroundContent = {},
-                                enableDismissFromStartToEnd = false,
-                                onDismiss = {
-                                    dialogState.runCatching {
-                                        awaitConfirmationOrCancel(confirmText = R.string.delete) {
-                                            Text(text = stringResource(R.string.delete_quick_search, item.name))
-                                        }
-                                    }.onSuccess {
-                                        EhDB.deleteQuickSearch(item)
-                                        with(quickSearchList) {
-                                            subList(index + 1, size).forEach {
-                                                it.position--
-                                            }
-                                            removeAt(index)
-                                        }
-                                    }.onFailure {
-                                        dismissState.reset()
-                                    }
-                                },
-                            ) {
-                                val elevation by animateDpAsState(
-                                    if (isDragging) {
-                                        8.dp // md.sys.elevation.level4
-                                    } else {
-                                        1.dp // md.sys.elevation.level1
-                                    },
-                                    label = "elevation",
-                                )
-                                ListItem(
-                                    modifier = Modifier.clip(CardDefaults.shape).clickable {
-                                        if (urlBuilder.mode == MODE_WHATS_HOT) {
-                                            val builder = ListUrlBuilder(item).apply {
-                                                language = languageFilter
-                                            }
-                                            navigate(builder.asDst())
-                                        } else {
-                                            urlBuilder = ListUrlBuilder(item).apply {
-                                                language = languageFilter
-                                            }
-                                            data.refresh()
-                                            fabHidden = false
-                                        }
-                                        launch { sheetState.close() }
-                                    },
-                                    shadowElevation = elevation,
-                                    headlineContent = {
-                                        Text(text = item.name)
-                                    },
-                                    trailingContent = {
-                                        IconTooltip(stringResource(R.string.tooltip_reorder)) {
-                                            IconButton(
-                                                onClick = {},
-                                                shapes = IconButtonDefaults.shapes(),
-                                                modifier = Modifier.draggableHandle(
-                                                    onDragStarted = {
-                                                        hapticFeedback.performHapticFeedback(HapticFeedbackType.START)
-                                                        fromIndex = index
-                                                    },
-                                                    onDragStopped = {
-                                                        hapticFeedback.performHapticFeedback(HapticFeedbackType.END)
-                                                        if (fromIndex != -1) {
-                                                            if (fromIndex != index) {
-                                                                val range = if (fromIndex < index) fromIndex..index else index..fromIndex
-                                                                val toUpdate = quickSearchList.slice(range)
-                                                                toUpdate.zip(range).forEach { it.first.position = it.second }
-                                                                launchIO { EhDB.updateQuickSearch(toUpdate) }
-                                                            }
-                                                            fromIndex = -1
-                                                        }
-                                                    },
-                                                ),
-                                            ) {
-                                                Icon(imageVector = Icons.Default.Reorder, contentDescription = stringResource(R.string.tooltip_reorder))
-                                            }
-                                        }
-                                    },
-                                    colors = listItemOnDrawerColor(false),
-                                )
-                            }
-                        }
-                    }
-                }
-                Await({ delay(200) }) {
-                    if (quickSearchList.isEmpty()) {
-                        Text(
-                            text = stringResource(id = R.string.quick_search_tip),
-                            modifier = Modifier.align(Alignment.Center),
-                        )
-                    }
-                }
-            }
         }
     }
 
@@ -495,6 +339,15 @@ fun AnimatedVisibilityScope.GalleryListScreen(
             }.orEmpty()
         },
         localSearch = false,
+        searchActions = {
+            val label = stringResource(R.string.combined_builder)
+            IconTooltip(label) {
+                IconButton(
+                    onClick = { navigate(CombinedSearchBuilderScreenDestination(combinedSearchSource())) },
+                    shapes = IconButtonDefaults.shapes(),
+                ) { Icon(Icons.Default.Tune, contentDescription = label) }
+            }
+        },
         searchBarOffsetY = { searchBarOffsetY },
         trailingIcon = {
             GalleryViewToggle(listMode != 0, onToggle = { listMode = if (it) 1 else 0 })
@@ -504,7 +357,7 @@ fun AnimatedVisibilityScope.GalleryListScreen(
                     id = if (isTopList) {
                         R.string.toplist
                     } else {
-                        R.string.quick_search
+                        R.string.combined_search
                     },
                 ),
             ) {
@@ -519,7 +372,7 @@ fun AnimatedVisibilityScope.GalleryListScreen(
                             id = if (isTopList) {
                                 R.string.toplist
                             } else {
-                                R.string.quick_search
+                                R.string.combined_search
                             },
                         ),
                     )

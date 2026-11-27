@@ -35,12 +35,17 @@ import com.ehviewer.core.database.model.LocalFavoriteInfo
 import com.ehviewer.core.database.model.ProgressInfo
 import com.ehviewer.core.database.model.QuickSearch
 import com.ehviewer.core.database.roomDb
-import com.ehviewer.core.files.delete
 import com.ehviewer.core.files.sendTo
 import com.ehviewer.core.model.GalleryInfo
 import com.hippo.ehviewer.download.DownloadManager
+import com.hippo.ehviewer.search.QuickSearchConflict
+import com.hippo.ehviewer.search.QuickSearchConflictChoice
+import com.hippo.ehviewer.search.mergeSearchBackups
+import com.hippo.ehviewer.search.sameRecord
+import java.util.UUID
 import kotlinx.coroutines.flow.Flow
 import okio.Path
+import splitties.init.appCtx
 
 object EhDB {
     private const val DB_NAME = "eh.db"
@@ -204,20 +209,38 @@ object EhDB {
 
     suspend fun getAllQuickSearch() = db.quickSearchDao().list()
 
+    val quickSearches get() = db.quickSearchDao().observe()
+
     suspend fun insertQuickSearch(quickSearch: QuickSearch) {
         val dao = db.quickSearchDao()
         quickSearch.id = dao.insert(quickSearch)
     }
 
-    private suspend fun importQuickSearch(quickSearchList: List<QuickSearch>) {
-        val dao = db.quickSearchDao()
-        dao.insert(quickSearchList)
+    internal suspend fun saveQuickSearch(item: QuickSearch, previous: QuickSearch?, expected: List<QuickSearch>): Long? = db.useWriterConnection { connection ->
+        connection.immediateTransaction {
+            val dao = db.quickSearchDao()
+            val current = dao.list()
+            if (current != expected) return@immediateTransaction null
+            if (previous == null) {
+                dao.insert(item.copy(id = null, position = (current.lastOrNull()?.position ?: -1) + 1))
+            } else if (previous in current) {
+                dao.update(listOf(item.copy(id = previous.id, position = previous.position)))
+                previous.id
+            } else {
+                null
+            }
+        }
     }
 
     suspend fun deleteQuickSearch(quickSearch: QuickSearch) {
-        val dao = db.quickSearchDao()
-        dao.delete(quickSearch)
-        dao.fill(quickSearch.position)
+        db.useWriterConnection { connection ->
+            connection.immediateTransaction {
+                val dao = db.quickSearchDao()
+                val current = dao.list().firstOrNull { it.id == quickSearch.id && it.sameRecord(quickSearch) } ?: return@immediateTransaction
+                dao.delete(current)
+                dao.fill(current.position)
+            }
+        }
     }
 
     suspend fun updateQuickSearch(quickSearchList: List<QuickSearch>) {
@@ -303,9 +326,13 @@ object EhDB {
         dbFile sendTo file
     }
 
-    suspend fun importDB(file: Path) = resourceScope {
-        val tempDBName = "tmp.db"
+    internal suspend fun importDB(
+        file: Path,
+        resolveSearchConflict: suspend (QuickSearchConflict) -> QuickSearchConflictChoice = { QuickSearchConflictChoice.KeepExisting },
+    ) = resourceScope {
+        val tempDBName = "import-${UUID.randomUUID()}.db"
         val dbFile = getDatabasePath(tempDBName)
+        resource { dbFile } release { appCtx.deleteDatabase(tempDBName) }
         file sendTo dbFile
         val oldDB = resource {
             roomDb<EhDatabase>(tempDBName) {
@@ -313,7 +340,19 @@ object EhDB {
             }
         } release { db ->
             db.close()
-            dbFile.delete()
+        }
+
+        val quickSearchDao = db.quickSearchDao()
+        val currentSearches = quickSearchDao.list()
+        val mergedSearches = mergeSearchBackups(currentSearches, oldDB.quickSearchDao().list(), resolveSearchConflict)
+        db.useWriterConnection { connection ->
+            connection.immediateTransaction {
+                check(quickSearchDao.list() == currentSearches)
+                val replaced = mergedSearches.filter { it.id != null && it !in currentSearches }
+                val added = mergedSearches.filter { it.id == null }
+                if (replaced.isNotEmpty()) quickSearchDao.update(replaced)
+                if (added.isNotEmpty()) quickSearchDao.insert(added)
+            }
         }
 
         db.galleryDao().insertOrIgnore(oldDB.galleryDao().list())
@@ -331,17 +370,6 @@ object EhDB {
 
         val historyInfoList = oldDB.historyDao().list()
         importHistoryInfo(historyInfoList)
-
-        val quickSearchList = oldDB.quickSearchDao().list()
-        val currentQuickSearchList = db.quickSearchDao().list()
-        val offset = currentQuickSearchList.size
-        val importList = quickSearchList.filter { newQS ->
-            currentQuickSearchList.none { it.name == newQS.name }
-        }.onEachIndexed { index, q ->
-            q.id = null
-            q.position = index + offset
-        }
-        importQuickSearch(importList)
 
         oldDB.localFavoritesDao().list().let {
             importLocalFavorites(it)

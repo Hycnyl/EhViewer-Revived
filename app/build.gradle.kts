@@ -44,8 +44,8 @@ android {
     defaultConfig {
         applicationId = "moe.hycnyl.ehviewer"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        versionCode = 180102
-        versionName = "1.17.27"
+        versionCode = 180103
+        versionName = "1.17.28"
         // versionNameSuffix = "-SNAPSHOT"
         buildConfigField("String", "RAW_VERSION_NAME", "\"$versionName${versionNameSuffix.orEmpty()}\"")
         buildConfigField("String", "COMMIT_SHA", "\"$commitSha\"")
