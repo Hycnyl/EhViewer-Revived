@@ -106,3 +106,5 @@ UI 模块保留 `allWarningsAsErrors`，仅用 `-Xwarning-level=DEPRECATION:warn
 - 发布源码固定为 `c8decc8e98b9893635b15367d93420c6fd91dd17`。[正式五包构建](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/45946902199) 已生成本次发行任务。
 - [真实画廊标签菜单](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/45948335068) 通过定位、动作顺序、动态标签预览和收藏状态验证。
 - [首次横屏交互](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/45948307192) 确认条件保留，但表达式会被滚动位置隐藏。修正为横竖屏持续置顶，短屏把复制、粘贴收进输入框。按修正后的源码重新验证和构建。
+- 修正后的 [源码专项检查](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/45948736362) 和 [Android 界面验证](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/45948766388) 通过。覆盖打开前后入口、全选类别、横屏固定表达式、条件按钮与紧凑标签、重名提示、保存、另存、快捷重命名保留旧筛选和位置。
+- 最终发布源码固定为 `aee36d96720f197ce48cd8353510100c355ba7d5`。等待 [五包标准构建](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/45948736448) 完成。
