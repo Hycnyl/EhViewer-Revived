@@ -102,3 +102,5 @@ UI 模块保留 `allWarningsAsErrors`，仅用 `-Xwarning-level=DEPRECATION:warn
 - 构建器改为屏内弹窗，表达式直接编辑、基础分类与筛选常显，默认全选分类。条件区域共享紧凑标签选择器。保存及快捷重命名共用名称校验，保留旧组合的筛选、浏览位置与语言行为。候选源码进入 Actions 编译和定向验证。
 - [候选检查](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/45946448111) 已完成应用编译，格式检查无改动，组合语法和名称测试均通过。既有 Robolectric 检查的依赖下载失败。常设检查继续覆盖搜索表达式、组合名称与长标签预览，并指定 Maven Central 下载入口。
 - [设备验证](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/45946448180) 已开始，将覆盖搜索栏入口、锚定菜单、横屏、分类默认值、标签布局、重名与快捷重命名等交互。发布使用标准五包构建。
+- [正式源码专项校验](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/45946902206) 已通过，覆盖命名、语言、长标签预览、格式及数据库结构。候选 APK 已编译。设备测试改复用既有 APK，等模拟器完整启动后再执行。
+- 发布源码固定为 `c8decc8e98b9893635b15367d93420c6fd91dd17`。[正式五包构建](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/45946902199) 已生成本次发行任务。
