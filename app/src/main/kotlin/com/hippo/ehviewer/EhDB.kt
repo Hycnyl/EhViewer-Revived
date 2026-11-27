@@ -38,10 +38,10 @@ import com.ehviewer.core.database.roomDb
 import com.ehviewer.core.files.sendTo
 import com.ehviewer.core.model.GalleryInfo
 import com.hippo.ehviewer.download.DownloadManager
-import com.hippo.ehviewer.search.SearchName
-import com.hippo.ehviewer.search.hasSearchName
 import com.hippo.ehviewer.search.QuickSearchConflict
 import com.hippo.ehviewer.search.QuickSearchConflictChoice
+import com.hippo.ehviewer.search.SearchName
+import com.hippo.ehviewer.search.hasSearchName
 import com.hippo.ehviewer.search.mergeSearchBackups
 import com.hippo.ehviewer.search.sameRecord
 import java.util.UUID

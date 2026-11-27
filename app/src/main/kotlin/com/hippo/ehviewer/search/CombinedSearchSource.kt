@@ -47,8 +47,7 @@ internal val SearchExpression.filterLanguage: Int
         return term.tag?.let(filterLanguageTags::indexOf) ?: -1
     }
 
-internal fun SearchExpression.replaceFilterLanguage(language: Int): SearchExpression =
-    SearchExpression(terms.filterNot { it.namespace?.value == "language" }).withLanguage(language)
+internal fun SearchExpression.replaceFilterLanguage(language: Int): SearchExpression = SearchExpression(terms.filterNot { it.namespace?.value == "language" }).withLanguage(language)
 
 internal val ListUrlBuilder.combinedCategory
     get() = category.takeIf { it > 0 } ?: EhUtils.ALL_CATEGORY
@@ -120,15 +119,13 @@ internal val QuickSearch.automaticallyNamed: Boolean
 internal val QuickSearch.usesSavedLanguage: Boolean
     get() = SearchName.of(this).usesSavedLanguage ?: automaticallyNamed
 
-internal fun QuickSearch.renameSearch(label: String): QuickSearch =
-    copy(name = SearchName.of(this).copy(label = label, usesSavedLanguage = usesSavedLanguage).stored())
+internal fun QuickSearch.renameSearch(label: String): QuickSearch = copy(name = SearchName.of(this).copy(label = label, usesSavedLanguage = usesSavedLanguage).stored())
 
 internal fun QuickSearch.toListUrlBuilder(defaultLanguage: Int): ListUrlBuilder = ListUrlBuilder(this).apply {
     if (!usesSavedLanguage) language = defaultLanguage
 }
 
-internal fun List<QuickSearch>.hasSearchName(label: String, exceptId: Long?): Boolean =
-    any { (exceptId == null || it.id != exceptId) && SearchName.of(it).label.equals(label, ignoreCase = true) }
+internal fun List<QuickSearch>.hasSearchName(label: String, exceptId: Long?): Boolean = any { (exceptId == null || it.id != exceptId) && SearchName.of(it).label.equals(label, ignoreCase = true) }
 
 private fun SearchExpression.comparableTerms() = terms.map { term ->
     val canonical = term.tag?.let { SearchTerm.forTag(it, term.placement, term.match).raw } ?: term.raw

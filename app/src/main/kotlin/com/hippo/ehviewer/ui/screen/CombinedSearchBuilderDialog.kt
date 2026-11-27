@@ -325,6 +325,7 @@ internal fun CombinedSearchBuilderDialog(
 }
 
 @Composable
+context(_: Context)
 private fun SearchExpressionEditor(raw: String, onChange: (String) -> Unit, expression: String, @StringRes problem: Int?) {
     val context = LocalContext.current
     Column(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)) {

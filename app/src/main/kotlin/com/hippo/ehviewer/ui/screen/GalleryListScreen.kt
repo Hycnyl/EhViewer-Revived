@@ -129,12 +129,12 @@ fun AnimatedVisibilityScope.WhatshotScreen(navigator: DestinationsNavigator) = G
 @Composable
 fun AnimatedVisibilityScope.ToplistScreen(navigator: DestinationsNavigator) = GalleryListScreen(ListUrlBuilder(MODE_TOPLIST, mKeyword = Settings.recentToplist), navigator)
 
-@Destination<RootGraph>
 private val combinedSearchDraftSaver = Saver<CombinedSearchSource?, String>(
     save = { it?.let { source -> Json.encodeToString(source) } },
     restore = { Json.decodeFromString<CombinedSearchSource>(it) },
 )
 
+@Destination<RootGraph>
 @Composable
 fun AnimatedVisibilityScope.GalleryListScreen(
     lub: ListUrlBuilder,
