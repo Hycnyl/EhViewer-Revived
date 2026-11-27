@@ -101,3 +101,4 @@ UI 模块保留 `allWarningsAsErrors`，仅用 `-Xwarning-level=DEPRECATION:warn
 - 开发分支 `feature/combined-search-1.17.28` 已完成数据与界面联动接入，候选提交 `3d5b2f5266382812d97bbf76d46da9b81161df30`。正在跑编译与语法检查，下一步用 Android 验证组合操作和旧版真实备份互导。
 - [表达式及组合数据测试](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/45883186734) 通过，1.17.27 已在设备上生成 SQLite 备份。首次设备验证在换装测试 APK 时发现旧测试包残留，将先卸载两版测试包再进行双向互导和交互验证。
 - [完整候选编译与语法检查](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/45929172086) 通过，格式检查无改动。当前候选 `86f605054ad075b4fc27e126c7737a03779888c0` 已进入 [Android 主流程与双向备份](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/45929172120) 和 [真实画廊收藏入口](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/45929483330) 验证，开始正式五包构建。
+- 已让侧栏在实际展开后才处理定位请求，避免返回动画期间关闭状态下提前清空请求。正式构建将以此修正后的源码为准。

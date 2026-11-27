@@ -245,6 +245,7 @@ fun AnimatedVisibilityScope.GalleryListScreen(
     } else {
         ProvideSideSheetContent { sheetState ->
             CombinedSearchSheet(
+                drawerOpen = sheetState.isOpen,
                 current = ::combinedSearchSource,
                 onOpenBuilder = { source ->
                     launch {

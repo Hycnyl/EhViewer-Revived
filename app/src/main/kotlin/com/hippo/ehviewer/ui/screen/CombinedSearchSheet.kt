@@ -105,6 +105,7 @@ import sh.calvin.reorderable.rememberReorderableLazyListState
 @Composable
 context(_: Context, _: CoroutineScope, _: DialogState, _: SnackbarHostState)
 internal fun CombinedSearchSheet(
+    drawerOpen: Boolean,
     current: () -> CombinedSearchSource,
     onOpenBuilder: (CombinedSearchSource) -> Unit,
     editingSource: (QuickSearch) -> CombinedSearchSource,
@@ -162,7 +163,7 @@ internal fun CombinedSearchSheet(
         }
         if (tab == 0) {
             SavedCombinations(
-                focus = focus,
+                focus = focus.takeIf { drawerOpen },
                 onEdit = { onOpenBuilder(editingSource(it)) },
                 onRun = onRun,
             )
