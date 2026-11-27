@@ -111,3 +111,4 @@ UI 模块保留 `allWarningsAsErrors`，仅用 `-Xwarning-level=DEPRECATION:warn
 - 最终五包构建已通过。本版重新生成的 Baseline Profile 通过 Pager 与 Webtoon 覆盖检查。构建产物 `15178191068` 的来源与摘要已核对。
 - 补测使用同一候选 APK，覆盖点「快速搜索」后的导航和简中标签显示。已补齐模拟器的游客入口，等待结果后签名。
 - [简中标签与快速搜索](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/45993909703) 验证通过。点击后跳转并执行查询，紧凑收藏标签仅呈现译名，生成的表达式使用英文限定标签。已提交签名流程。
+- [正式证书签名](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/45994441873) 已通过，五种 APK 的 V2/V3 已复核。[正式发布](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/45994557965) 已接收产物，开始安装、覆盖升级和下载完整性检查。
