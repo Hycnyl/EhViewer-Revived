@@ -287,7 +287,6 @@ fun SearchBarScreen(
                                 }
                             } else {
                                 trailingIcon()
-                                searchActions()
                             }
                         }
                     },

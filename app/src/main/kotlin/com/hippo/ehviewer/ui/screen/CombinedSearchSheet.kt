@@ -94,7 +94,6 @@ import com.hippo.ehviewer.ui.search.expressionForDisplay
 import com.hippo.ehviewer.ui.search.searchParametersLabel
 import com.hippo.ehviewer.ui.tools.DialogState
 import com.hippo.ehviewer.ui.tools.awaitConfirmationOrCancel
-import com.hippo.ehviewer.ui.tools.awaitSelectItem
 import com.hippo.ehviewer.util.addTextToClipboard
 import kotlinx.coroutines.CoroutineScope
 import moe.tarsin.coroutines.runSuspendCatching
@@ -139,18 +138,30 @@ internal fun CombinedSearchSheet(
                             shapes = IconButtonDefaults.shapes(),
                         ) { Icon(Icons.AutoMirrored.Default.Help, contentDescription = help) }
                     }
-                    IconTooltip(add) {
-                        IconButton(
-                            onClick = {
-                                launch {
-                                    val source = current()
-                                    val choice = awaitSelectItem(listOf(currentLabel, blank), title = R.string.combined_new)
-                                    val mode = if (source.filters.mode == ListUrlBuilder.MODE_SUBSCRIPTION) source.filters.mode else ListUrlBuilder.MODE_NORMAL
-                                    onOpenBuilder(if (choice == 0) source else CombinedSearchSource(ListUrlBuilder(mode)))
-                                }
-                            },
-                            shapes = IconButtonDefaults.shapes(),
-                        ) { Icon(Icons.Default.Add, contentDescription = add) }
+                    Box {
+                        var addMenu by remember { mutableStateOf(false) }
+                        IconTooltip(add) {
+                            IconButton(onClick = { addMenu = true }, shapes = IconButtonDefaults.shapes()) {
+                                Icon(Icons.Default.Add, contentDescription = add)
+                            }
+                        }
+                        DropdownMenu(expanded = addMenu, onDismissRequest = { addMenu = false }) {
+                            DropdownMenuItem(
+                                text = { Text(currentLabel) },
+                                onClick = {
+                                    addMenu = false
+                                    onOpenBuilder(current())
+                                },
+                            )
+                            DropdownMenuItem(
+                                text = { Text(blank) },
+                                onClick = {
+                                    addMenu = false
+                                    val mode = if (current().filters.mode == ListUrlBuilder.MODE_SUBSCRIPTION) ListUrlBuilder.MODE_SUBSCRIPTION else ListUrlBuilder.MODE_NORMAL
+                                    onOpenBuilder(CombinedSearchSource(ListUrlBuilder(mode)))
+                                },
+                            )
+                        }
                     }
                 } else {
                     TagLibraryMenu()

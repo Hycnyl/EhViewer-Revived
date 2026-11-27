@@ -745,10 +745,6 @@ fun BelowHeader(galleryDetail: GalleryDetail, voteTag: VoteTag) {
                         onSelect({ TagActionLabel(searchLabel, tag) }) {
                             withUIContext { search(tag) }
                         }
-                        TagIdentity.from(tag)?.let { identity ->
-                            val label = if (favorites.any { it.tag == identity }) unfavoriteLabel else favoriteLabel
-                            onSelect(label) { toggleFavoriteTag(ctx, identity) }
-                        }
                         onSelect({ TagActionLabel(copy, tag) }) {
                             addTextToClipboard(tag)
                         }
@@ -756,6 +752,11 @@ fun BelowHeader(galleryDetail: GalleryDetail, voteTag: VoteTag) {
                             onSelect({ TagActionLabel(copyTrans, translation) }) {
                                 addTextToClipboard(translation)
                             }
+                        }
+                        TagIdentity.from(tag)?.let { identity ->
+                            val label = if (favorites.any { it.tag == identity }) unfavoriteLabel else favoriteLabel
+                            val value = if (rawValue != translation) translation else tag
+                            onSelect({ TagActionLabel(label, value) }) { toggleFavoriteTag(ctx, identity) }
                         }
                         onSelect(showDefine) {
                             openBrowser(EhUrl.getTagDefinitionUrl(rawValue))
