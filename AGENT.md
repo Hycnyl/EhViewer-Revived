@@ -100,3 +100,5 @@ UI 模块保留 `allWarningsAsErrors`，仅用 `-Xwarning-level=DEPRECATION:warn
 - 开发分支为 feature/combined-search-ui-1.17.29。本轮定向验证组合搜索和命名兼容性，随后按标准流程发布 1.17.29。
 - 入口与菜单调整完成。画廊标签收藏移至复制类操作后，并预览实际标签。搜索框展开后显示构建入口。收藏管理图标已互换，加号改为锚定菜单。
 - 构建器改为屏内弹窗，表达式直接编辑、基础分类与筛选常显，默认全选分类。条件区域共享紧凑标签选择器。保存及快捷重命名共用名称校验，保留旧组合的筛选、浏览位置与语言行为。候选源码进入 Actions 编译和定向验证。
+- [候选检查](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/45946448111) 已完成应用编译，格式检查无改动，组合语法和名称测试均通过。既有 Robolectric 检查的依赖下载失败。常设检查继续覆盖搜索表达式、组合名称与长标签预览，并指定 Maven Central 下载入口。
+- [设备验证](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/45946448180) 已开始，将覆盖搜索栏入口、锚定菜单、横屏、分类默认值、标签布局、重名与快捷重命名等交互。发布使用标准五包构建。

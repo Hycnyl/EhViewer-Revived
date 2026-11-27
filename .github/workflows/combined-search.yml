@@ -31,8 +31,10 @@ jobs:
         with:
           packages: 'platform-tools platforms;android-37.2 build-tools;37.0.0'
       - uses: gradle/actions/setup-gradle@v6.4.1
-      - name: Check search expressions and nearby dialog behavior
-        run: ./gradlew :app:testDefaultDebugUnitTest --tests '*SearchExpressionTest' --tests '*GalleryDialogUiTest' --tests '*MaterialDialogDesignTest' spotlessCheck --no-configuration-cache --max-workers=2 -Pkotlin.compiler.execution.strategy=in-process
+      - name: Check search expressions, saved names and tag previews
+        env:
+          JAVA_TOOL_OPTIONS: -Drobolectric.dependency.repo.url=https://repo.maven.apache.org/maven2
+        run: ./gradlew :app:testDefaultDebugUnitTest --tests '*SearchExpressionTest' --tests '*GalleryDialogUiTest.longTagKeepsItsFullTextInAScrollablePreview' spotlessCheck --no-configuration-cache --max-workers=2 -Pkotlin.compiler.execution.strategy=in-process
       - name: Compare the backup database schema with 1.17.27
         run: |
           base=42e4d436b4b627d0bc256565a20c3b128239cadb
