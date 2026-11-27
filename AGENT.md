@@ -12,7 +12,7 @@
 ## 基线与发布
 
 - 功能源自 `Hycnyl/EhViewer` 的 `v1.17.8`，对应清理后的提交 `92923877ef671e33aa56f69688daa46af6e59ec6`；新仓库独立起始，不继承旧 Git 历史。四种语言 README 继承旧仓库最新的用户文档与完整素材引用，保留 LICENSE、NOTICE 和源码版权说明。
-- 应用名保持 `EhViewer`，正式包名保持 `moe.hycnyl.ehviewer`。本轮源码版本为 `1.17.28` / `180103`，最新正式版为 `1.17.27` / `180102`，接续旧版 `1.17.8` / `180083` 和 `1.17.9` / `180084`。后续沿用版本体系，版本码递增。
+- 应用名保持 `EhViewer`，正式包名保持 `moe.hycnyl.ehviewer`。当前正式版本为 `1.17.28` / `180103`，上个正式版为 `1.17.27` / `180102`，接续旧版 `1.17.8` / `180083` 和 `1.17.9` / `180084`。后续沿用版本体系，版本码递增。
 - 任何实际影响用户的改动完成后，除非维护者明确禁止，都须提升 versionName/versionCode，使用 GitHub Actions 发布正式 Release；提供 universal、arm64-v8a、armeabi-v7a、x86_64、x86 五种 APK，并附简短变更说明与 SHA-256 校验和。不得使用 `[skip ci]` 绕过这条规则。
 - README 保持简洁，变更通常只在“变更”章节简要记录；允许修正仓库链接、安装要求和迁移说明。不得随意重写其余内容或丢失截图、素材和致谢。
 - 单轮只改一个目标不是硬性限制。缓存导出、下载恢复和归档格式继承 1.17.8 的当前行为，维护者没有将其固化为不可修改的长期规则。
@@ -93,20 +93,3 @@ UI 模块保留 `allWarningsAsErrors`，仅用 `-Xwarning-level=DEPRECATION:warn
 发布验证按本轮改动选择场景。UI、签名和构建默认使用 API 26、33、36；Target 37 的候选将现代设备检查切换至 API 37.2。使用包含 WebView 的 google_apis 镜像，现代设备使用 google_apis_ps16k 并检查真实页大小；每次新建 AVD，分配 4096M RAM / 512M heap。验证设备端 APK SHA-256、文件式 universal/匹配 ABI 安装、上个正式版本覆盖安装和启动。UI 按改动选用 archive-ui、interaction-ui、reading-cache 或 combined-search 工作流渲染实际组件，支持指定 APK 源码与更新验证夹具，避免测试修正触发重复原生构建。只有涉及相关业务功能的改动，才增加离线 CBZ、设置迁移等对应检查。临时数据不进入源码或 Release。
 
 本托管环境先执行 `source /workspace/.ehviewer-env/activate.sh`，其中设置已固定的 JDK、SDK、Gradle/Cargo 缓存与本地 GNU m4 1.4.20。m4 是 Nettle 汇编的构建依赖；CI 检查并安装它。本地无 sudo，m4 安装于私有工具目录。Nettle 的源码包含预生成文件，CMake 必须保留其解包时间戳（DOWNLOAD_EXTRACT_TIMESTAMP TRUE）。
-
-## 本轮临时进度
-
-- 组合搜索改造以 1.17.27 为基线。已取得维护者提供的完整文字规范，核对站点的运算符、200 字符上限、条件分类计数、弱标签限制和 3 秒搜索间隔。
-- 保持 QuickSearch 及 Room 备份格式，新增独立版本化标签收藏文件。先实现表达式、收藏和数据冲突处理，再接入侧栏、详情页与构建器，最后验证旧版备份和搜索入口。
-- 开发分支 `feature/combined-search-1.17.28` 已完成数据与界面联动接入，候选提交 `3d5b2f5266382812d97bbf76d46da9b81161df30`。正在跑编译与语法检查，下一步用 Android 验证组合操作和旧版真实备份互导。
-- [表达式及组合数据测试](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/45883186734) 通过，1.17.27 已在设备上生成 SQLite 备份。首次设备验证在换装测试 APK 时发现旧测试包残留，将先卸载两版测试包再进行双向互导和交互验证。
-- [完整候选编译与语法检查](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/45929172086) 通过，格式检查无改动。当前候选 `86f605054ad075b4fc27e126c7737a03779888c0` 已进入 [Android 主流程与双向备份](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/45929172120) 和 [真实画廊收藏入口](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/45929483330) 验证，开始正式五包构建。
-- 已让侧栏在实际展开后才处理定位请求，避免返回动画期间关闭状态下提前清空请求。正式构建将以此修正后的源码为准。
-- 正式源码 `b984be9adec9a5b1089e0a0ef19cc101e8a68179` 已通过 [搜索表达式、数据库结构对照与相关对话框检查](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/45929650781)。Android 已确认 1.17.27 自身导出的 SQLite 文件可由新版导入、同名差异可更新、重复内容可去重。实际界面回归需先处理干净模拟器的下载目录提示，仍在验证全流程、反向互导及 JSON 文件选择器。
-- [正式五包构建](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/45929650809) 已启动，将通过当前源码生成 Baseline Profile 并在验证通过后签名发布。
-- [Android 真实画廊详情页](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/45930893622) 已通过实际长按收藏和取消收藏，已观察同一标签的持久状态两次变化。确定性离线词库验证已通过中文匹配、命名空间筛选和旧版备份导入；[当前设备流程](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/45931429853) 继续验证正向组合、新旧互导和 JSON 选择器。
-- [Android 组合搜索主流程](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/45931821575) 已验证搜索框与侧栏两处新建、复制粘贴、重复定位、旧高级筛选、另存、收藏组合及重启恢复。系统文件选择器已导出有效 JSON。下一次设备运行将使用系统已经索引的文件验证导入，以及新备份回旧版和双站请求。
-- 已完成 [Android 组合搜索与备份验收](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/45932521961)。覆盖两个构建器入口、编辑/另存保留旧筛选、相同组合定位、剪贴板、词库及跨重启收藏、DocumentsUI 的 JSON 导入/导出和重复/异常数量、以及 1.17.27 ↔ 1.17.28 实际 SQLite 双向互导。应用内两站 URL 与订阅转换校验通过，E-Hentai 访客请求 HTTP 200；ExHentai 访客请求遇到 302 循环，登录态结果未测。发布源码固定为 `b984be9adec9a5b1089e0a0ef19cc101e8a68179`，等待正式构建完成后签名。
-- 正式构建中的 Baseline/Startup Profile 已从本次源码重新生成，通过 Pager 和 Webtoon 覆盖检查。正在构建五个 ABI 包，取得精确 Artifact ID 与摘要后签名。
-- [正式五包构建](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/45929650809) 已通过。未签名 Artifact ID 为 `15169732344`，摘要已固定，交由仓库 Secrets 签名并启动标准发布验证。
-- [五包签名](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/45934531015) 已通过，正式证书与 V2/V3 已核对。草稿已交给 [正式发布流程](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/45934650007)，正验证三种 API 的安装、覆盖升级与公开下载字节。
