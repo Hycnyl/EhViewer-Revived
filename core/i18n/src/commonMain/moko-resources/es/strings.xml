@@ -449,6 +449,12 @@
     <string name="combined_favorite_tags">Etiquetas favoritas</string>
     <string name="combined_save">Guardar combinación</string>
     <string name="combined_run">Buscar ahora</string>
+    <string name="combined_expression_hint">Palabras clave o expresión de búsqueda en inglés</string>
+    <string name="combined_select_category">Selecciona al menos una categoría de galería.</string>
+    <string name="combined_name">Nombre</string>
+    <string name="combined_name_required">Introduce un nombre para la combinación.</string>
+    <string name="combined_name_taken">Este nombre ya está en uso. Elige otro.</string>
+    <string name="combined_rename">Cambiar nombre</string>
     <string name="combined_edit">Editar combinación</string>
     <string name="combined_find_tags">Buscar etiquetas</string>
 </resources>

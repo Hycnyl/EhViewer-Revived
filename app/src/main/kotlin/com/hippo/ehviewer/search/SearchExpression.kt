@@ -81,8 +81,6 @@ internal data class SearchTerm(val raw: String) {
             !identity.name.contains(',') || payload.contains('"')
         }
 
-    val isKeyword: Boolean
-        get() = !weak && (qualifier.isEmpty() || qualifier == "title") && !exact
     val hasUnclosedQuote: Boolean get() = raw.count { it == '"' } % 2 != 0
     val hasInvalidOperator: Boolean get() = body.startsWith('-') || body.startsWith('~')
     val hasEmptyPayload: Boolean get() = unquoted.all { it.isWhitespace() || it == ',' }
@@ -98,7 +96,6 @@ internal data class SearchTerm(val raw: String) {
         }
 
     fun inPlacement(placement: SearchPlacement) = SearchTerm(placement.operator + body)
-    fun asTitleKeyword() = if (isKeyword && qualifier.isEmpty()) SearchTerm(placement.operator + "title:" + body) else this
 
     companion object {
         fun forTag(tag: TagIdentity, placement: SearchPlacement, match: TagMatch): SearchTerm {

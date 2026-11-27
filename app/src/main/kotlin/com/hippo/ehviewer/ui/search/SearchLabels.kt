@@ -2,6 +2,7 @@
 package com.hippo.ehviewer.ui.search
 
 import android.content.Context
+import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.rememberScrollState
@@ -14,8 +15,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import arrow.core.raise.ensure
 import com.ehviewer.core.database.model.QuickSearch
 import com.ehviewer.core.i18n.R
+import com.hippo.ehviewer.EhDB
 import com.hippo.ehviewer.client.EhTagDatabase
 import com.hippo.ehviewer.client.EhUtils
 import com.hippo.ehviewer.client.data.ListUrlBuilder
@@ -27,9 +30,11 @@ import com.hippo.ehviewer.search.SearchTerm
 import com.hippo.ehviewer.search.TagIdentity
 import com.hippo.ehviewer.search.automaticallyNamed
 import com.hippo.ehviewer.search.expression
+import com.hippo.ehviewer.search.hasSearchName
 import com.hippo.ehviewer.ui.main.AdvanceTable
 import com.hippo.ehviewer.ui.main.searchCategoryOptions
 import com.hippo.ehviewer.ui.tools.DialogState
+import com.hippo.ehviewer.ui.tools.awaitInputText
 import com.hippo.ehviewer.ui.tools.dialog
 import kotlin.coroutines.resume
 
@@ -123,3 +128,15 @@ internal suspend fun resolveCombinedSearchConflict(conflict: QuickSearchConflict
         },
     )
 }
+
+context(_: DialogState)
+internal suspend fun awaitCombinationName(context: Context, @StringRes title: Int, initial: String, exceptId: Long?): String = awaitInputText(
+    initial = initial,
+    title = context.getString(title),
+    hint = context.getString(R.string.combined_name),
+    invalidator = { input ->
+        val name = input.trim()
+        ensure(name.isNotEmpty()) { context.getString(R.string.combined_name_required) }
+        ensure(!EhDB.getAllQuickSearch().hasSearchName(name, exceptId)) { context.getString(R.string.combined_name_taken) }
+    },
+).trim()

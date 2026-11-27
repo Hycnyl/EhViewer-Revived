@@ -38,6 +38,8 @@ import com.ehviewer.core.database.roomDb
 import com.ehviewer.core.files.sendTo
 import com.ehviewer.core.model.GalleryInfo
 import com.hippo.ehviewer.download.DownloadManager
+import com.hippo.ehviewer.search.SearchName
+import com.hippo.ehviewer.search.hasSearchName
 import com.hippo.ehviewer.search.QuickSearchConflict
 import com.hippo.ehviewer.search.QuickSearchConflictChoice
 import com.hippo.ehviewer.search.mergeSearchBackups
@@ -220,7 +222,7 @@ object EhDB {
         connection.immediateTransaction {
             val dao = db.quickSearchDao()
             val current = dao.list()
-            if (current != expected) return@immediateTransaction null
+            if (current != expected || current.hasSearchName(SearchName.of(item).label, previous?.id)) return@immediateTransaction null
             if (previous == null) {
                 dao.insert(item.copy(id = null, position = (current.lastOrNull()?.position ?: -1) + 1))
             } else if (previous in current) {

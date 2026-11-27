@@ -36,6 +36,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -45,6 +46,7 @@ import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -84,11 +86,10 @@ import com.hippo.ehviewer.client.parser.GalleryDetailUrlParser
 import com.hippo.ehviewer.client.parser.GalleryPageUrlParser
 import com.hippo.ehviewer.collectAsState
 import com.hippo.ehviewer.search.CombinedSearchSource
-import com.hippo.ehviewer.search.automaticallyNamed
+import com.hippo.ehviewer.search.toListUrlBuilder
 import com.hippo.ehviewer.ui.DrawerHandle
 import com.hippo.ehviewer.ui.Screen
 import com.hippo.ehviewer.ui.awaitSelectDate
-import com.hippo.ehviewer.ui.destinations.CombinedSearchBuilderScreenDestination
 import com.hippo.ehviewer.ui.destinations.ProgressScreenDestination
 import com.hippo.ehviewer.ui.doGalleryInfoAction
 import com.hippo.ehviewer.ui.main.AdvancedSearchOption
@@ -108,6 +109,7 @@ import com.ramcosta.composedestinations.spec.Direction
 import kotlin.math.roundToInt
 import kotlin.random.Random
 import kotlinx.coroutines.delay
+import kotlinx.serialization.json.Json
 import moe.tarsin.navigate
 import moe.tarsin.string
 
@@ -128,6 +130,11 @@ fun AnimatedVisibilityScope.WhatshotScreen(navigator: DestinationsNavigator) = G
 fun AnimatedVisibilityScope.ToplistScreen(navigator: DestinationsNavigator) = GalleryListScreen(ListUrlBuilder(MODE_TOPLIST, mKeyword = Settings.recentToplist), navigator)
 
 @Destination<RootGraph>
+private val combinedSearchDraftSaver = Saver<CombinedSearchSource?, String>(
+    save = { it?.let { source -> Json.encodeToString(source) } },
+    restore = { Json.decodeFromString<CombinedSearchSource>(it) },
+)
+
 @Composable
 fun AnimatedVisibilityScope.GalleryListScreen(
     lub: ListUrlBuilder,
@@ -137,6 +144,8 @@ fun AnimatedVisibilityScope.GalleryListScreen(
     val searchFieldState = rememberTextFieldState()
     var urlBuilder by viewModel.urlBuilder
     var searchBarExpanded by rememberSaveable { mutableStateOf(false) }
+    var combinedDraft by rememberSaveable(stateSaver = combinedSearchDraftSaver) { mutableStateOf<CombinedSearchSource?>(null) }
+    val searchFocus = LocalFocusManager.current
     var searchBarOffsetY by remember { mutableIntStateOf(0) }
     var fabExpanded by remember { mutableStateOf(false) }
     var fabHidden by remember { mutableStateOf(false) }
@@ -206,6 +215,17 @@ fun AnimatedVisibilityScope.GalleryListScreen(
         return CombinedSearchSource(filters, current, firstVisibleGid())
     }
 
+    fun openBuilder(source: CombinedSearchSource) {
+        searchFocus.clearFocus()
+        combinedDraft = source
+    }
+
+    fun finishBuilder() {
+        combinedDraft = null
+        searchBarExpanded = false
+        fabHidden = false
+    }
+
     val combinedTarget by combinedSearchFocus.collectAsState()
     val lifecycle by LocalLifecycleOwner.current.lifecycle.currentStateFlow.collectAsState()
     val sideSheet = LocalSideSheetState.current
@@ -250,23 +270,19 @@ fun AnimatedVisibilityScope.GalleryListScreen(
                 onOpenBuilder = { source ->
                     launch {
                         sheetState.close()
-                        navigate(CombinedSearchBuilderScreenDestination(source))
+                        openBuilder(source)
                     }
                 },
                 editingSource = { item ->
                     CombinedSearchSource(
-                        filters = ListUrlBuilder(item).apply {
-                            if (!item.automaticallyNamed) language = languageFilter
-                        },
+                        filters = item.toListUrlBuilder(languageFilter),
                         currentResult = urlBuilder.copy(),
                         firstVisibleGid = firstVisibleGid(),
                         savedId = item.id,
                     )
                 },
                 onRun = { item ->
-                    val builder = ListUrlBuilder(item).apply {
-                        if (!item.automaticallyNamed) language = languageFilter
-                    }
+                    val builder = item.toListUrlBuilder(languageFilter)
                     if (urlBuilder.mode == MODE_WHATS_HOT) {
                         navigate(builder.asDst())
                     } else {
@@ -322,6 +338,21 @@ fun AnimatedVisibilityScope.GalleryListScreen(
         }
     }
 
+    combinedDraft?.let { source ->
+        CombinedSearchBuilderDialog(
+            source,
+            onDismiss = { combinedDraft = null },
+            onRun = { builder ->
+                finishBuilder()
+                navigate(builder.asDst())
+            },
+            onSaved = { id ->
+                finishBuilder()
+                combinedSearchFocus.value = id
+            },
+        )
+    }
+
     SearchBarScreen(
         onApplySearch = ::onApplySearch,
         expanded = searchBarExpanded,
@@ -344,7 +375,7 @@ fun AnimatedVisibilityScope.GalleryListScreen(
             val label = stringResource(R.string.combined_builder)
             IconTooltip(label) {
                 IconButton(
-                    onClick = { navigate(CombinedSearchBuilderScreenDestination(combinedSearchSource())) },
+                    onClick = { openBuilder(combinedSearchSource()) },
                     shapes = IconButtonDefaults.shapes(),
                 ) { Icon(Icons.Default.Tune, contentDescription = label) }
             }

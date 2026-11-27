@@ -26,6 +26,7 @@ import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Reorder
+import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -58,7 +59,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
@@ -86,12 +86,13 @@ import com.hippo.ehviewer.search.TagFavorites
 import com.hippo.ehviewer.search.TagIdentity
 import com.hippo.ehviewer.search.TagMatch
 import com.hippo.ehviewer.search.automaticallyNamed
+import com.hippo.ehviewer.search.renameSearch
 import com.hippo.ehviewer.ui.search.TagCatalogPane
 import com.hippo.ehviewer.ui.search.TagLibraryMenu
+import com.hippo.ehviewer.ui.search.awaitCombinationName
 import com.hippo.ehviewer.ui.search.describe
 import com.hippo.ehviewer.ui.search.displayBaseName
 import com.hippo.ehviewer.ui.search.expressionForDisplay
-import com.hippo.ehviewer.ui.search.searchParametersLabel
 import com.hippo.ehviewer.ui.tools.DialogState
 import com.hippo.ehviewer.ui.tools.awaitConfirmationOrCancel
 import com.hippo.ehviewer.util.addTextToClipboard
@@ -203,7 +204,6 @@ private fun SavedCombinations(focus: Long?, onEdit: (QuickSearch) -> Unit, onRun
     val positionalThreshold = SwipeToDismissBoxDefaults.positionalThreshold
     val translateSetting by Settings.showTagTranslations.collectAsState()
     val translate = translateSetting && EhTagDatabase.translatable
-    val chinese = LocalConfiguration.current.locales[0].language == "zh"
     LaunchedEffect(savedRows, dragging) {
         if (!dragging) {
             items.clear()
@@ -261,9 +261,8 @@ private fun SavedCombinations(focus: Long?, onEdit: (QuickSearch) -> Unit, onRun
                     },
                 ) {
                     val expression = item.expressionForDisplay()
-                    val description = SearchExpression.parse(expression).describe(context, translate)
                     val primary = if (item.automaticallyNamed) {
-                        description.ifBlank { item.displayBaseName(context) }
+                        SearchExpression.parse(expression).describe(context, translate).ifBlank { item.displayBaseName(context) }
                     } else {
                         item.displayBaseName(context)
                     }
@@ -271,22 +270,7 @@ private fun SavedCombinations(focus: Long?, onEdit: (QuickSearch) -> Unit, onRun
                     ListItem(
                         modifier = Modifier.clip(CardDefaults.shape).clickable { onRun(item) },
                         shadowElevation = elevation,
-                        headlineContent = { Text(primary, maxLines = 2, overflow = TextOverflow.Ellipsis) },
-                        supportingContent = {
-                            Column {
-                                if (!item.automaticallyNamed && description.isNotBlank() && description != primary) {
-                                    Text(description, maxLines = 2, overflow = TextOverflow.Ellipsis)
-                                }
-                                if (expression.isNotBlank() && expression != primary && (chinese || expression != description || !item.automaticallyNamed)) {
-                                    Text(expression, maxLines = 2, overflow = TextOverflow.Ellipsis, style = MaterialTheme.typography.bodySmall)
-                                }
-                                val parameters = searchParametersLabel(item)
-                                if (parameters.isNotBlank()) Text(parameters, style = MaterialTheme.typography.bodySmall)
-                                SearchName.of(item).afterGid?.let {
-                                    Text(stringResource(R.string.combined_resume_summary, it), style = MaterialTheme.typography.bodySmall)
-                                }
-                            }
-                        },
+                        headlineContent = { Text(primary, maxLines = 1, overflow = TextOverflow.Ellipsis) },
                         trailingContent = {
                             Row {
                                 Box {
@@ -299,10 +283,32 @@ private fun SavedCombinations(focus: Long?, onEdit: (QuickSearch) -> Unit, onRun
                                     DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
                                         DropdownMenuItem(
                                             text = { Text(stringResource(R.string.combined_edit)) },
-                                            leadingIcon = { Icon(Icons.Default.Edit, contentDescription = null) },
+                                            leadingIcon = { Icon(Icons.Default.Tune, contentDescription = null) },
                                             onClick = {
                                                 expanded = false
                                                 onEdit(item)
+                                            },
+                                        )
+                                        DropdownMenuItem(
+                                            text = { Text(stringResource(R.string.combined_rename)) },
+                                            leadingIcon = { Icon(Icons.Default.Edit, contentDescription = null) },
+                                            onClick = {
+                                                expanded = false
+                                                launch {
+                                                    val rows = EhDB.getAllQuickSearch()
+                                                    val original = rows.firstOrNull { it.id == item.id }
+                                                    if (original == null) {
+                                                        snackbar(context.getString(R.string.combined_save_conflict))
+                                                        return@launch
+                                                    }
+                                                    val initial = SearchName.of(original).label
+                                                    val label = awaitCombinationName(context, R.string.combined_rename, initial, original.id)
+                                                    if (label == initial) return@launch
+                                                    val saved = runSuspendCatching {
+                                                        EhDB.saveQuickSearch(original.renameSearch(label), original, rows)
+                                                    }.onFailure { logcat(it) }.getOrNull()
+                                                    if (saved == null) snackbar(context.getString(R.string.combined_save_conflict))
+                                                }
                                             },
                                         )
                                         DropdownMenuItem(

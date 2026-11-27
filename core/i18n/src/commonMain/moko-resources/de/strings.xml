@@ -401,6 +401,12 @@
     <string name="combined_favorite_tags">Favorisierte Tags</string>
     <string name="combined_save">Kombination speichern</string>
     <string name="combined_run">Jetzt suchen</string>
+    <string name="combined_expression_hint">Suchbegriffe oder englischer Suchausdruck</string>
+    <string name="combined_select_category">Wähle mindestens eine Galeriekategorie.</string>
+    <string name="combined_name">Name</string>
+    <string name="combined_name_required">Gib einen Namen für die Kombination ein.</string>
+    <string name="combined_name_taken">Dieser Name wird bereits verwendet. Wähle einen anderen.</string>
+    <string name="combined_rename">Umbenennen</string>
     <string name="combined_edit">Kombination bearbeiten</string>
     <string name="combined_find_tags">Tags suchen</string>
 </resources>

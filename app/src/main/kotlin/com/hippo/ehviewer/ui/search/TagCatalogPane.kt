@@ -10,6 +10,8 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
@@ -19,6 +21,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBars
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -99,58 +103,19 @@ internal fun TagCatalogPane(
     val scope = rememberCoroutineScope()
     val translateSetting by Settings.showTagTranslations.collectAsState()
     val translate = translateSetting && with(context) { EhTagDatabase.translatable }
-    val revision = EhTagDatabase.revision
     var query by rememberSaveable { mutableStateOf("") }
     var catalogLimit by remember(query) { mutableIntStateOf(80) }
-    val favoriteKeys = remember(favorites) { favorites.mapTo(hashSetOf()) { it.tag } }
     val groups = remember(favorites) { favorites.groupBy { it.tag.namespace }.toSortedMap() }
-    val matches by produceState<SearchMatches?>(null, query, favorites, revision, catalogLimit) {
-        value = null
-        if (query.isNotBlank()) {
-            delay(150)
-            value = withContext(Dispatchers.Default) {
-                val filter = EhTagDatabase.catalogQuery(query)
-                val saved = favorites.asSequence().map { it.tag }.filter { filter.matches(it, EhTagDatabase.translation(it)) }.toList()
-                val catalog = EhTagDatabase.catalogMatches(filter, catalogLimit + saved.size + 1).filterNot { it in favoriteKeys }
-                SearchMatches(saved, catalog.take(catalogLimit), catalog.size > catalogLimit)
-            }
-        }
-    }
-    var loadingDictionary by remember { mutableStateOf(false) }
+    val matches = rememberTagMatches(query, favorites, catalogLimit)
 
     Column(modifier, verticalArrangement = Arrangement.spacedBy(4.dp)) {
-        OutlinedTextField(
-            value = query,
-            onValueChange = { query = it },
-            label = { Text(stringResource(R.string.combined_find_tags)) },
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp),
-            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
-            singleLine = true,
-        )
+        TagQueryField(query, onQueryChange = { query = it })
         FastScrollLazyColumn(
             modifier = Modifier.fillMaxSize(),
             contentPadding = WindowInsets.systemBars.only(WindowInsetsSides.Bottom).asPaddingValues(),
         ) {
             if (!EhTagDatabase.initialized) {
-                item("dictionary") {
-                    Column(Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
-                        Text(stringResource(R.string.combined_catalog_unavailable), style = MaterialTheme.typography.bodySmall)
-                        TextButton(
-                            onClick = {
-                                scope.launch {
-                                    loadingDictionary = true
-                                    try {
-                                        EhTagDatabase.launchUpdate().join()
-                                        if (!EhTagDatabase.initialized) snackbar(context.getString(R.string.combined_catalog_unavailable))
-                                    } finally {
-                                        loadingDictionary = false
-                                    }
-                                }
-                            },
-                            enabled = !loadingDictionary,
-                        ) { Text(stringResource(R.string.action_retry)) }
-                    }
-                }
+                item("dictionary") { TagDictionaryStatus() }
             }
             if (query.isBlank()) {
                 if (groups.isEmpty()) {
@@ -195,6 +160,142 @@ internal fun TagCatalogPane(
                 }
             }
         }
+    }
+}
+
+@Composable
+context(_: SnackbarHostState)
+internal fun CompactTagPicker(
+    favorites: List<FavoriteTag>,
+    selected: Set<TagIdentity>,
+    onChoose: (TagIdentity) -> Unit,
+    modifier: Modifier = Modifier,
+    header: LazyListScope.() -> Unit,
+) {
+    val context = LocalContext.current
+    val translateSetting by Settings.showTagTranslations.collectAsState()
+    val translate = translateSetting && with(context) { EhTagDatabase.translatable }
+    var query by rememberSaveable { mutableStateOf("") }
+    var catalogLimit by remember(query) { mutableIntStateOf(80) }
+    val groups = remember(favorites) { favorites.groupBy { it.tag.namespace }.toSortedMap() }
+    val matches = rememberTagMatches(query, favorites, catalogLimit)
+    val dictionaryReady = EhTagDatabase.initialized
+
+    LazyColumn(modifier, contentPadding = PaddingValues(bottom = 8.dp)) {
+        header()
+        item("tag-query") { TagQueryField(query, onQueryChange = { query = it }) }
+        if (!dictionaryReady) item("dictionary") { TagDictionaryStatus() }
+        if (query.isBlank()) {
+            if (groups.isEmpty()) {
+                item("empty") { Text(stringResource(R.string.combined_favorite_empty), Modifier.padding(16.dp)) }
+            }
+            for ((namespace, tags) in groups) {
+                item("group-$namespace") { TagCatalogHeading(namespaceDisplayName(namespace, translate)) }
+                compactTagItems(namespace, tags.map(FavoriteTag::tag), selected, translate, onChoose)
+            }
+        } else {
+            when {
+                matches == null -> item("loading") { CircularWavyProgressIndicator(Modifier.padding(16.dp)) }
+                matches.saved.isEmpty() && matches.catalog.isEmpty() ->
+                    item("no-results") { Text(stringResource(R.string.combined_no_tag_results), Modifier.padding(16.dp)) }
+                else -> {
+                    if (matches.saved.isNotEmpty()) {
+                        item("saved") { TagCatalogHeading(stringResource(R.string.combined_favorite_tags)) }
+                        compactTagItems("saved", matches.saved, selected, translate, onChoose)
+                    }
+                    if (matches.catalog.isNotEmpty()) {
+                        item("catalog") { TagCatalogHeading(stringResource(R.string.combined_dictionary)) }
+                        compactTagItems("catalog", matches.catalog, selected, translate, onChoose)
+                    }
+                    if (matches.hasMore) {
+                        item("more") {
+                            TextButton(onClick = { catalogLimit += 80 }, modifier = Modifier.padding(horizontal = 12.dp)) {
+                                Text(stringResource(R.string.combined_more_tags))
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+private fun LazyListScope.compactTagItems(
+    key: String,
+    tags: List<TagIdentity>,
+    selected: Set<TagIdentity>,
+    translate: Boolean,
+    onChoose: (TagIdentity) -> Unit,
+) {
+    tags.chunked(32).forEachIndexed { page, block ->
+        item("compact-$key-$page") {
+            FlowRow(Modifier.fillMaxWidth().padding(horizontal = 16.dp), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                for (tag in block) {
+                    FilterChip(
+                        selected = tag in selected,
+                        onClick = { onChoose(tag) },
+                        enabled = tag.searchable,
+                        label = { Text(tag.displayName(translate)) },
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun TagQueryField(query: String, onQueryChange: (String) -> Unit) {
+    OutlinedTextField(
+        value = query,
+        onValueChange = onQueryChange,
+        label = { Text(stringResource(R.string.combined_find_tags)) },
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp),
+        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+        singleLine = true,
+    )
+}
+
+@Composable
+private fun rememberTagMatches(query: String, favorites: List<FavoriteTag>, catalogLimit: Int): SearchMatches? {
+    val revision = EhTagDatabase.revision
+    val favoriteKeys = remember(favorites) { favorites.mapTo(hashSetOf()) { it.tag } }
+    val matches by produceState<SearchMatches?>(null, query, favorites, revision, catalogLimit) {
+        value = null
+        if (query.isNotBlank()) {
+            delay(150)
+            value = withContext(Dispatchers.Default) {
+                val filter = EhTagDatabase.catalogQuery(query)
+                val saved = favorites.asSequence().map(FavoriteTag::tag).filter { filter.matches(it, EhTagDatabase.translation(it)) }.toList()
+                val catalog = EhTagDatabase.catalogMatches(filter, catalogLimit + saved.size + 1).filterNot { it in favoriteKeys }
+                SearchMatches(saved, catalog.take(catalogLimit), catalog.size > catalogLimit)
+            }
+        }
+    }
+    return matches
+}
+
+@Composable
+context(_: SnackbarHostState)
+private fun TagDictionaryStatus() {
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    var loading by remember { mutableStateOf(false) }
+    Column(Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
+        Text(stringResource(R.string.combined_catalog_unavailable), style = MaterialTheme.typography.bodySmall)
+        TextButton(
+            onClick = {
+                scope.launch {
+                    loading = true
+                    try {
+                        EhTagDatabase.launchUpdate().join()
+                        if (!EhTagDatabase.initialized) snackbar(context.getString(R.string.combined_catalog_unavailable))
+                    } finally {
+                        loading = false
+                    }
+                }
+            },
+            enabled = !loading,
+        ) { Text(stringResource(R.string.action_retry)) }
     }
 }
 

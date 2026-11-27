@@ -473,6 +473,12 @@
     <string name="combined_favorite_tags">Tags favoris</string>
     <string name="combined_save">Enregistrer la combinaison</string>
     <string name="combined_run">Rechercher</string>
+    <string name="combined_expression_hint">Mots-clés ou expression de recherche en anglais</string>
+    <string name="combined_select_category">Sélectionnez au moins une catégorie de galerie.</string>
+    <string name="combined_name">Nom</string>
+    <string name="combined_name_required">Saisissez un nom pour la combinaison.</string>
+    <string name="combined_name_taken">Ce nom est déjà utilisé. Choisissez-en un autre.</string>
+    <string name="combined_rename">Renommer</string>
     <string name="combined_edit">Modifier la combinaison</string>
     <string name="combined_find_tags">Trouver des tags</string>
 </resources>

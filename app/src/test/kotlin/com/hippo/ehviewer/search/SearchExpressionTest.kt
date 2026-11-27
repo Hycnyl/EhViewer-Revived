@@ -2,6 +2,7 @@
 package com.hippo.ehviewer.search
 
 import com.ehviewer.core.database.model.QuickSearch
+import com.hippo.ehviewer.client.EhUtils
 import com.hippo.ehviewer.client.data.ListUrlBuilder
 import com.hippo.ehviewer.client.data.ListUrlBuilder.Companion.MODE_NORMAL
 import com.hippo.ehviewer.client.data.ListUrlBuilder.Companion.MODE_SUBSCRIPTION
@@ -95,6 +96,38 @@ class SearchExpressionTest {
         val literal = SearchName("title:user@42", null)
         assertEquals("title:user@42@", literal.stored())
         assertEquals(literal, SearchName.of(QuickSearch(name = literal.stored(), keyword = literal.label)))
+    }
+
+    @Test
+    fun builderCategoriesAndLanguageMatchTheEditableExpression() {
+        assertEquals(EhUtils.ALL_CATEGORY, ListUrlBuilder().combinedCategory)
+        assertEquals(EhUtils.ALL_CATEGORY, ListUrlBuilder(category = 0).combinedCategory)
+        assertEquals(EhUtils.MANGA, ListUrlBuilder(category = EhUtils.MANGA).combinedCategory)
+        val query = SearchExpression.parse("scenery l:chinese$ -other:sample$")
+        assertEquals(1, query.filterLanguage)
+        val noLanguage = query.replaceFilterLanguage(-1)
+        assertEquals("scenery -other:sample$", noLanguage.text)
+        assertEquals(-1, noLanguage.filterLanguage)
+        assertEquals(query.replaceFilterLanguage(1).text, noLanguage.replaceFilterLanguage(1).text)
+        assertEquals(-1, SearchExpression.parse("~l:chinese$ ~l:japanese$").filterLanguage)
+    }
+
+    @Test
+    fun renamingKeepsTheCursorAndWhetherTheSearchInheritsLanguage() {
+        val fixed = QuickSearch(id = 21, name = "scenery@54", keyword = "scenery", category = EhUtils.MANGA, position = 4)
+        val renamed = fixed.renameSearch("Sketches @ home")
+        assertEquals(SearchName("Sketches @ home", 54, true), SearchName.of(renamed))
+        assertEquals("54", renamed.name.substringAfterLast('@'))
+        assertEquals(fixed, renamed.copy(name = fixed.name))
+        assertEquals(-1, renamed.toListUrlBuilder(1).language)
+        assertFalse(renamed.automaticallyNamed)
+
+        val legacy = fixed.copy(id = 22, name = "Old search@43")
+        val renamedLegacy = legacy.renameSearch("scenery")
+        assertEquals(SearchName("scenery", 43, false), SearchName.of(renamedLegacy))
+        assertEquals(1, renamedLegacy.toListUrlBuilder(1).language)
+        assertTrue(listOf(renamed, renamedLegacy).hasSearchName("sketches @ home", exceptId = legacy.id))
+        assertFalse(listOf(renamed, renamedLegacy).hasSearchName("sketches @ home", exceptId = fixed.id))
     }
 
     @Test

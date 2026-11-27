@@ -3,6 +3,7 @@ package com.hippo.ehviewer.search
 
 import com.ehviewer.core.database.model.QuickSearch
 import com.ehviewer.core.model.GalleryInfo.Companion.S_LANG_TAGS
+import com.hippo.ehviewer.client.EhUtils
 import com.hippo.ehviewer.client.data.ListUrlBuilder
 import com.hippo.ehviewer.client.data.ListUrlBuilder.Companion.MODE_NORMAL
 import com.hippo.ehviewer.client.data.ListUrlBuilder.Companion.MODE_SUBSCRIPTION
@@ -33,9 +34,24 @@ internal fun ListUrlBuilder.expression(): SearchExpression = when (mode) {
 
 internal fun SearchExpression.withLanguage(language: Int): SearchExpression {
     if (terms.any { it.namespace?.value == "language" || it.qualifier == "gid" }) return this
-    val tag = S_LANG_TAGS.getOrNull(language)?.let(TagIdentity::from) ?: return this
+    val tag = filterLanguageTags.getOrNull(language) ?: return this
     return copy(terms = listOf(SearchTerm.forTag(tag, SearchPlacement.Required, TagMatch.Exact)) + terms)
 }
+
+private val filterLanguageTags = S_LANG_TAGS.map(TagIdentity::from)
+
+internal val SearchExpression.filterLanguage: Int
+    get() {
+        val term = terms.singleOrNull { it.namespace?.value == "language" } ?: return -1
+        if (term.placement != SearchPlacement.Required || term.match != TagMatch.Exact) return -1
+        return term.tag?.let(filterLanguageTags::indexOf) ?: -1
+    }
+
+internal fun SearchExpression.replaceFilterLanguage(language: Int): SearchExpression =
+    SearchExpression(terms.filterNot { it.namespace?.value == "language" }).withLanguage(language)
+
+internal val ListUrlBuilder.combinedCategory
+    get() = category.takeIf { it > 0 } ?: EhUtils.ALL_CATEGORY
 
 internal fun combinedSearchUrl(
     mode: Int,
@@ -56,13 +72,24 @@ internal fun combinedSearchUrl(
     pageTo = pageTo.coerceAtLeast(0),
 )
 
-internal data class SearchName(val label: String, val afterGid: Long?) {
-    // Old readers use the last '@' as the cursor separator. An empty suffix
-    // disambiguates a literal '@' in a newly generated name on those readers.
-    fun stored() = when {
-        afterGid != null -> "$label@$afterGid"
-        '@' in label -> "$label@"
-        else -> label
+// The markers belong to the existing name/cursor field. Older versions display
+// the same title and still read the decimal cursor after the final '@'.
+private const val SAVED_LANGUAGE_MARKER = '\u2063'
+private const val DEFAULT_LANGUAGE_MARKER = '\u2060'
+
+internal data class SearchName(val label: String, val afterGid: Long?, val usesSavedLanguage: Boolean? = null) {
+    fun stored(): String {
+        val marker = when (usesSavedLanguage) {
+            true -> SAVED_LANGUAGE_MARKER.toString()
+            false -> DEFAULT_LANGUAGE_MARKER.toString()
+            null -> ""
+        }
+        val name = label + marker
+        return when {
+            afterGid != null -> "$name@$afterGid"
+            '@' in label || marker.isNotEmpty() -> "$name@"
+            else -> name
+        }
     }
 
     companion object {
@@ -70,10 +97,12 @@ internal data class SearchName(val label: String, val afterGid: Long?) {
             val name = item.name
             if (name == item.keyword) return SearchName(name, null)
             val cursor = name.substringAfterLast('@', "").toLongOrNull()?.takeIf { it > 0 }
-            return when {
-                cursor != null -> SearchName(name.substringBeforeLast('@'), cursor)
-                name.endsWith('@') -> SearchName(name.dropLast(1), null)
-                else -> SearchName(name, null)
+            if (cursor == null && !name.endsWith('@')) return SearchName(name, null)
+            val label = name.substringBeforeLast('@')
+            return when (label.lastOrNull()) {
+                SAVED_LANGUAGE_MARKER -> SearchName(label.dropLast(1), cursor, true)
+                DEFAULT_LANGUAGE_MARKER -> SearchName(label.dropLast(1), cursor, false)
+                else -> SearchName(label, cursor)
             }
         }
     }
@@ -82,7 +111,24 @@ internal data class SearchName(val label: String, val afterGid: Long?) {
 internal const val EMPTY_SEARCH_NAME = "All galleries"
 
 internal val QuickSearch.automaticallyNamed: Boolean
-    get() = mode in setOf(MODE_NORMAL, MODE_SUBSCRIPTION) && SearchName.of(this).label.let { it == keyword.orEmpty() || (keyword.isNullOrBlank() && it == EMPTY_SEARCH_NAME) }
+    get() {
+        if (mode != MODE_NORMAL && mode != MODE_SUBSCRIPTION) return false
+        val name = SearchName.of(this)
+        return name.usesSavedLanguage == null && (name.label == keyword.orEmpty() || (keyword.isNullOrBlank() && name.label == EMPTY_SEARCH_NAME))
+    }
+
+internal val QuickSearch.usesSavedLanguage: Boolean
+    get() = SearchName.of(this).usesSavedLanguage ?: automaticallyNamed
+
+internal fun QuickSearch.renameSearch(label: String): QuickSearch =
+    copy(name = SearchName.of(this).copy(label = label, usesSavedLanguage = usesSavedLanguage).stored())
+
+internal fun QuickSearch.toListUrlBuilder(defaultLanguage: Int): ListUrlBuilder = ListUrlBuilder(this).apply {
+    if (!usesSavedLanguage) language = defaultLanguage
+}
+
+internal fun List<QuickSearch>.hasSearchName(label: String, exceptId: Long?): Boolean =
+    any { (exceptId == null || it.id != exceptId) && SearchName.of(it).label.equals(label, ignoreCase = true) }
 
 private fun SearchExpression.comparableTerms() = terms.map { term ->
     val canonical = term.tag?.let { SearchTerm.forTag(it, term.placement, term.match).raw } ?: term.raw

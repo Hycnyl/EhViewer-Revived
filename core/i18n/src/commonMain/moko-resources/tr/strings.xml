@@ -169,6 +169,12 @@
     <string name="combined_favorite_tags">Favori etiketler</string>
     <string name="combined_save">Birleşimi kaydet</string>
     <string name="combined_run">Şimdi ara</string>
+    <string name="combined_expression_hint">Anahtar kelimeler veya İngilizce arama ifadesi</string>
+    <string name="combined_select_category">En az bir galeri kategorisi seçin.</string>
+    <string name="combined_name">Ad</string>
+    <string name="combined_name_required">Arama birleşimi için bir ad girin.</string>
+    <string name="combined_name_taken">Bu ad zaten kullanılıyor. Başka bir ad seçin.</string>
+    <string name="combined_rename">Yeniden adlandır</string>
     <string name="combined_edit">Birleşimi düzenle</string>
     <string name="combined_find_tags">Etiket ara</string>
 </resources>

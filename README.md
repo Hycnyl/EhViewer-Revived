@@ -55,9 +55,9 @@
 
 ### Combined search and favorite tags
 
-- Open the builder from the search bar, or tap **+** in the **Combined search** side panel to start with the current search or an empty draft. Choose **Match all**, **Match any**, or **Exclude these** before adding a tag. The builder also accepts title keywords, advanced filters and copied search expressions. **Search now** runs the draft and **Save combination** adds it to the side panel.
+- Tap the search bar to reveal **Build a search**, or use **+** in the **Combined search** side panel. Enter keywords or paste an English search expression at the top. Choose **Match all**, **Match any**, or **Exclude these** to add tags. **Search now** runs the draft. **Save combination** asks for a name.
 - Long-press a tag in gallery details to favorite it, or look it up in the **Favorite tags** tab. That tab has its own JSON import and export. Saved searches travel with the regular database backup.
-- Tap a saved search to run it. Its action menu edits or copies the expression. Editing also offers **Save as new**. [E-Hentai search syntax](https://ehwiki.org/wiki/Gallery_Searching)
+- Tap a saved search to run it. Its menu lets you edit the conditions, rename the combination, or copy its expression. The editor also offers **Save as new**. [E-Hentai search syntax](https://ehwiki.org/wiki/Gallery_Searching)
 
 ### Export cached pages
 

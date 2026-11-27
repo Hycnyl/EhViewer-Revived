@@ -454,6 +454,12 @@
     <string name="combined_favorite_tags">แท็กโปรด</string>
     <string name="combined_save">บันทึกชุดการค้นหา</string>
     <string name="combined_run">ค้นหาทันที</string>
+    <string name="combined_expression_hint">คำค้นหาหรือนิพจน์การค้นหาภาษาอังกฤษ</string>
+    <string name="combined_select_category">เลือกหมวดหมู่แกลเลอรีอย่างน้อยหนึ่งหมวดหมู่</string>
+    <string name="combined_name">ชื่อ</string>
+    <string name="combined_name_required">ป้อนชื่อชุดการค้นหา</string>
+    <string name="combined_name_taken">ชื่อนี้ถูกใช้แล้ว โปรดเลือกชื่ออื่น</string>
+    <string name="combined_rename">เปลี่ยนชื่อ</string>
     <string name="combined_edit">แก้ไขชุดการค้นหา</string>
     <string name="combined_find_tags">ค้นหาแท็ก</string>
 </resources>

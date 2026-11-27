@@ -273,6 +273,12 @@
     <string name="combined_favorite_tags">Favorittmerker</string>
     <string name="combined_save">Lagre kombinasjon</string>
     <string name="combined_run">Søk nå</string>
+    <string name="combined_expression_hint">Søkeord eller et engelsk søkeuttrykk</string>
+    <string name="combined_select_category">Velg minst én gallerikategori.</string>
+    <string name="combined_name">Navn</string>
+    <string name="combined_name_required">Skriv inn et navn på kombinasjonen.</string>
+    <string name="combined_name_taken">Navnet er allerede i bruk. Velg et annet.</string>
+    <string name="combined_rename">Gi nytt navn</string>
     <string name="combined_edit">Rediger kombinasjon</string>
     <string name="combined_find_tags">Finn merker</string>
 </resources>
