@@ -105,3 +105,4 @@ UI 模块保留 `allWarningsAsErrors`，仅用 `-Xwarning-level=DEPRECATION:warn
 - 正式源码 `b984be9adec9a5b1089e0a0ef19cc101e8a68179` 已通过 [搜索表达式、数据库结构对照与相关对话框检查](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/45929650781)。Android 已确认 1.17.27 自身导出的 SQLite 文件可由新版导入、同名差异可更新、重复内容可去重。实际界面回归需先处理干净模拟器的下载目录提示，仍在验证全流程、反向互导及 JSON 文件选择器。
 - [正式五包构建](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/45929650809) 已启动，将通过当前源码生成 Baseline Profile 并在验证通过后签名发布。
 - [Android 真实画廊详情页](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/45930893622) 已通过实际长按收藏和取消收藏，已观察同一标签的持久状态两次变化。确定性离线词库验证已通过中文匹配、命名空间筛选和旧版备份导入；[当前设备流程](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/45931429853) 继续验证正向组合、新旧互导和 JSON 选择器。
+- [Android 组合搜索主流程](https://github.com/Hycnyl/EhViewer-Revived/actions/runs/45931821575) 已验证搜索框与侧栏两处新建、复制粘贴、重复定位、旧高级筛选、另存、收藏组合及重启恢复。系统文件选择器已导出有效 JSON。下一次设备运行将使用系统已经索引的文件验证导入，以及新备份回旧版和双站请求。
